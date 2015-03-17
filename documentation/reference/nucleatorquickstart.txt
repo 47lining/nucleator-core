@@ -19,12 +19,12 @@ STEP 0 - PREREQUISITES
 ----------------------
 
 You will need to install on your local machine:
-- Python 2.7x
-- Python setup tools (pip)
-- Python developer tools (required for Ansible pre-requisites)
-- Git
+* Python 2.7x
+* Python setup tools (pip)
+* Python developer tools (required for Ansible pre-requisites)
+* Git
 
-To install these base toos do:
+To install:
 
 [source,txt]
 sudo apt-get install python2.7 python-pip python-dev git
@@ -38,8 +38,9 @@ Do this:
 ----
 git clone --recursive --depth 1 -b nucleator_distribution https://github.com/47lining/ansible.git && cd ansible && sudo python setup.py install
 
-pip install --upgrade git+ssh://github.com/47lining/nucleator-core.git
-# (If your python installation requires root access, be sure to add a sudo to the beginning of the above command)
+sudo pip install --upgrade git+ssh://github.com/47lining/nucleator-core.git
+
+# (If your python installation does not requires root access to install, remove sudo from above commands)
 
 nucleator init
 ----
@@ -104,7 +105,7 @@ Using the AWS Console, perform the following minimal steps within your AWS Accou
 
 a. Create a new IAM User in the new AWS Account.  Name the user: `NucleatorUser`
 +
-Note: This Use is used as a Prinicipal in trust policies estabished by Nucleator.
+Note: This user is used as a Prinicipal in trust policies estabished by Nucleator.
 It needs to be spelled correctly for the role provisioning process described later
 to succeed.
 +
@@ -115,7 +116,7 @@ b. During the creation of the user, generate an Access Key for the user and be
    You will not be able to reaccess this Access Key information later.
 c. Add a User Policy to NucleatorUser by expanding the "Inline Policies" section
    of the user description screen.  Select a custom policy and copy and paste
-   the policy listed below; name the policy `NucleatorUser` and apply it.
+   the policy listed below; name the policy `NucleatorUserPolicy` and apply it.
 +
 [source,txt]
     {
@@ -143,19 +144,23 @@ c. Add a User Policy to NucleatorUser by expanding the "Inline Policies" section
 STEP 6 - CREATE INITIAL CONFIG FOR CUSTOMER, ACCOUNT AND CAGE
 -------------------------------------------------------------
 
-You can either perform this step manually or use the link:Use-the-Nucleator-Siteconfig-Wizard-to-Create-an-Initial-Siteconfig_22053489.html[Siteconfig Wizard].
+You can either perform this step manually or use the link:Use-the-Nucleator-Setup-Wizard-to-Create-an-Initial-Siteconfig_22053489.html[Nucleator Setup Wizard].
 
 We recommend starting with the wizard, as it produces files that will help you to understand the structure of the config files described below. 
 
-To run the wizard run: 
+To use the wizard
+~~~~~~~~~~~~~~~~~
 
 a. In your local clone of your personal fork of `nucleator-core-siteconfig`,
-nucleator setup wizard navigate to directory `ansible/roles/siteconfig/vars/`.
+   navigate to directory `ansible/roles/siteconfig/vars/`.
 
-b. nucleator setup wizard
+b. invoke the wizard:
++
+[source,txt]
+nucleator setup wizard
 
-
-To perform steps manually:
+To perform steps manually
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 a. In your local clone of your personal fork of `nucleator-core-siteconfig`,
    navigate to directory `ansible/roles/siteconfig/vars/`, and copy the `{customer}.yml` customer configuration templates
@@ -179,26 +184,38 @@ c. Copy the `{customer}-{cage}.yml` file for each Cage specified in your custome
 d. In your `~/.nucleator` directory, copy the `{customer}-credentials.yml` to use your Customer name
 e. Open the file and fill in the `aws_access_key_id` and `aws_secret_access_key` for each account in the specified customer. These values are the saved values that were presented  when `NucleatorUser` was created
 
-IMPORTANT NOTE:
-Due to an AWS API call issue  on account that pre-date VPCs it is possible that the setup wizard may record incorrect availability zones (AZ) in the {customer}.yml siteconfig file.  If this occurs Nucleator cage provision will fail.  Please reference troubleshooting tips for methods for detection and resolution.
+NOTE:
+On Accounts that pre-date AWS' introduction of VPCs it is possible that the setup wizard may choose availability zones (AZ) in the {customer}.yml siteconfig file that are not VPC-capable.  If this occurs Nucleator cage provision will fail.  Please reference the link:Troubleshooting-Tips_22052899.html[Troubleshooting Tips] for more details on this issue and how to address it.
 
-STEP 7 - NUCLEATOR UPDATE
+STEP 7 - COMMIT YOUR SITECONFIG UPDATES
+---------------------------------------
+
+Whenever siteconfig files are generated and/or updated, you must commit them to your github repository so that Nucleator will be able to use them.  While still in you local clone you can review the config file changes that the wizard has made, or that you have manually made:
+
+[source,txt]
+git status
+git diff
+
+Add, commit and push your updated configuration:
+
+[source,txt]
+git add --all :/
+git commit -m "updated config with customer a, account b and cage c"
+git push
+
+STEP 8 - NUCLEATOR UPDATE
 -------------------------
 
 Do this:
-Once the siteconfig files are updated they will need to be commited to your github repo.  To do this do (while still in the `ansible/roles/siteconfig/vars/ directory under your fork of `nucleator-core-siteconfig`): 
-
-[source,txt]
-----
-git add customer.yml customer-cage.yml customer-cage.crt
-git commit -m "message like first siteconfig files"
-git push
-----
-
-Next run nucleator update to install all config files. Do this by running:
 
 [source,txt]
 nucleator update
+
+Nucleator update pulls current copies of all Stacksets that you have chosen to be part of your Nucleator installation.  You should run `nucleator update` whenever:
+* you add Stacksets to your selected sources
+* you change the version of a Stackset you are using
+* you modify a Stackset without changing the Stackset version, and you want Nucleator to see those changes
+
 
 STEP 8 - PROVISION NUCLEATOR ROLES IN YOUR ACCOUNT
 --------------------------------------------------
@@ -207,10 +224,10 @@ Nucleator needs to establish some attributes in your account like iam roles in o
 
 [source,txt]
 ----
-    nucleator account rolespec provision --customer yourcustomername --account youraccountname
+    nucleator account rolespec provision --customer <yourcustomername> --account <youraccountname>
 
     # to ensure all the roles were created successfully
-    nucleator account rolespec validate --customer yourcustomername --account youraccountname
+    nucleator account rolespec validate --customer <yourcustomername> --account <youraccountname>
 ----
 
 STEP 9 - ACCOUNT SETUP
@@ -219,7 +236,7 @@ STEP 9 - ACCOUNT SETUP
 Next Nucleator needs to set up specific account resources for proper operation such as creating s3 buckets.  To do this run:
 
 [source,txt]
-    nucleator account setup --customer yourcustomername --account youraccountname
+    PYTHONUNBUFFERED=1 nucleator account setup --customer <yourcustomername> --account <youraccountname> | tee /tmp/account_setup.out
 
 STEP 10 - DNS SETUP
 -------------------
@@ -232,22 +249,27 @@ a. In the AWS console go to Route53 -> Hosted Zones and select the hosted zone c
 
 b. Copy the Name Servers of the Hosted Zone by selecting its single `NS` record, and selecting and copying the four nameservers from the pane on the right.
 
-c. Go to the system that you use to maintain authoritative `NS` records for the customer_domain that you specified during step 6.
+c. Go to the system that you use to maintain authoritative `NS` records for the `customer_domain` that you specified during step 6.
 +
 ** Add a single `NS` record with the name of the current Cage and a value that specifies the four nameservers copied above.
 +
 For example, for customer_domain `somedepartment.mycompany.com` and Cage `build`, you will create an NS record `build.somedepartment.mycompany.com` with a value that specifies the four nameservers copied above.
 
+d. Verify that the DNS updates have propagated
++
+[source,txt]
+dig +short NS build.somedepartment.mycompany.com
+
 STEP 11 - PROVISION AND CONFIGURE CAGE
 --------------------------------------
 
-The first major creation by Nucleator is the creation of a cage.  Run:
+You can now provision and configure your first Nucleator Cage:
 
 [source,txt]
 PYTHONUNBUFFERED=1 nucleator cage provision --customer <yourcustomername> --cage build | tee /tmp/cage_provision.out
 PYTHONUNBUFFERED=1 nucleator cage configure --customer <yourcustomername> --cage build | tee /tmp/cage_configure.out
 
-Note that it can take some time for cage resources to be provisioned and 
+Note that it can take a few minutes for cage resources to be provisioned and 
 become available. You can use the CloudFormation AWS console to see the 
 current status and progress of provisioning while these commands are running.
 
