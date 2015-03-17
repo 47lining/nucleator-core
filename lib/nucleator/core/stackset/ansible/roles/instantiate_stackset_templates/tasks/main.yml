@@ -1,0 +1,43 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- name: "Create directory for stackset's instantiated cloudformation templates"
+  file:
+    path="{{ cloudformation_template_instantiation_dir }}/{{ customer_name }}/{{ cage_name }}/stackset/{{ stackset_name }}/"
+    state=directory
+
+- name: log stackset and cage_name
+  debug: msg="stackset_name = '{{stackset_name}}', stackset_instance_name = '{{stackset_instance_name}}', cage_name = '{{cage_name}}'"
+
+- fail: msg="Stack name '{{ stackset_instance_name }}{{ stackset_name }}' is too long (must be < 128 characters)"
+  when: stackset_instance_name|length + stackset_name|length > 128
+
+- fail: msg="Stack name '{{ stackset_instance_name }}{{ stackset_name }}' contains illegal characters"
+  when: not stackset_instance_name | match("^[a-zA-Z0-9-]*$")
+
+- fail: msg="Stack name '{{ stackset_instance_name }}{{ stackset_name }}' contains illegal characters"
+  when: not stackset_name | match("^[a-zA-Z0-9-]*$")
+
+- name: Include stackset-specific vars
+  include_vars: "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/stackset_templates/vars/{{stackset_name}}.yml"
+
+- name: Instantiate stackset templates
+  template:
+    src={{ item }}
+    dest="{{ cloudformation_template_instantiation_dir | expanduser }}/{{ customer_name }}/{{ cage_name }}/stackset/{{ stackset_name }}/{{stackset_instance_name}}{{ item|basename|regex_replace('\\.j2$', '.json') }}"
+    mode=0755
+  with_fileglob:
+    - "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/stackset_templates/templates/*.j2"
+

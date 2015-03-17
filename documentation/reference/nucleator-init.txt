@@ -1,0 +1,45 @@
+nucleator-init(1)
+=================
+
+NAME
+----
+nucleator-init - Initialize nucleator local configuration files
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator init'
+
+
+DESCRIPTION
+-----------
+
+This command creates a `~/.nucleator` nucleator local configuration
+directory and deposits initial and template configuration files that
+affect nucleator's behavior.
+
+Running `nucleator init` multiple times is safe.  If you have made local
+changes to initial or template file contents, `nucleator init`
+will not overwrite them.  See also <<FILES>>.
+
+[[FILES]]
+FILES
+-----
+
+~/.nucleator/::
+	Configuration directory for local nucleator configuration.
+
+~/.nucleator/sources.yml::
+	Source specification for Nucleator Stacksets that should be installed
+	by `nucleator update`.
+
+~/.nucleator/distkeys.yml::
+	Distibution keys that should be used while accessing private repository(ies)
+	used in `sources.yml`.
+
+
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

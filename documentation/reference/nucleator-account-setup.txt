@@ -1,0 +1,40 @@
+nucleator-account-setup(1)
+==========================
+
+NAME
+----
+nucleator-account-setup - set up AWS account with minimal best-practice AWS Resources
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator account setup'
+	--customer <customer>
+	--account <account>
+
+DESCRIPTION
+-----------
+
+Creates minimal AWS Resources within an AWS Account to support creation of
+Nucleator Cages and Stacksets, as well as best-practice AWS service usage.
+
+Creates and/or Enables:
+* S3 Bucket and Bucket Policy suitable for use with detailed billing.
+
+* CloudTrail API call logging, with supporting S3 Bucket and Bucket Policy.
+
+* S3 Bucket used for storage of generated CloudFormation Templates used within
+  Nucleator Cage and Stackset provisioning.
+
+* A Route53 Hosted Zone for each Nucleator Cage defined in `<customer>`'s
+  site configuration.
+
+CLOUDFORMATION STACKS
+---------------------
+
+'account setup' results in the creation of a single Cloudformation Stack with naming convention: `setup-<account_name>-<customer_name>`, within which all of the resources described above are managed.
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

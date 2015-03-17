@@ -1,0 +1,116 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- name: ensure nucleator_template_bucketname_persistfile exists
+  command: touch {{nucleator_template_bucketname_persistfile}} creates={{nucleator_template_bucketname_persistfile}}
+
+- name: include vars that depend on file lookup
+  include_vars: lookup_vars.yml
+
+- name: log stackset_name
+  debug: msg="{{stackset_name}}"
+
+- name: log stackset_instance_name
+  debug: msg="{{stackset_instance_name}}"
+
+- name: log nucleator_template_bucketname_specification
+  debug: var=nucleator_template_bucketname_specification
+
+- name: log nucleator_cloudtrail_bucketname_specification
+  debug: var=nucleator_cloudtrail_bucketname_specification
+
+- name: "persist bucketname used in stack creation"
+  lineinfile:
+    dest={{ nucleator_template_bucketname_persistfile }}
+    state=present
+    create=yes
+    insertbefore=BOF
+    regexp='^{{nucleator_template_bucketname_specification}}$'
+    line={{nucleator_template_bucketname_specification}}
+
+- name: Create directory for instantiated cloudformation templates
+  file:
+    path="{{ cloudformation_template_instantiation_dir }}/{{ customer_name }}/bootstrap/"
+    state=directory
+
+- name: Instantiate account bootstrap templates
+  template:
+    src={{ item }}
+    dest="{{ cloudformation_template_instantiation_dir }}/{{ customer_name }}/bootstrap/{{ item|basename|regex_replace('\\.j2$', '.json') }}"
+    mode=0755
+  with_fileglob:
+        - "../templates/bootstrap/*.j2"
+
+- name: "set stack name"
+  set_fact:
+    setup_stack_name: "setup-{{account_name}}-{{customer_name}}"
+
+- name: log aws_environment_with_rolenames
+  debug: msg='aws_environment_with_rolenames {{aws_environment_with_rolenames | to_json }}'
+  when: debug_credentials
+
+- name: Set credentials variable to desired role
+  set_fact:
+    role_credentials: "{{item.NucleatorAccountProvisioner}}"
+  with_items:
+    - "{{aws_environment_with_rolenames}}"
+  no_log: True
+
+- name: log credentials variable
+  debug: var=role_credentials
+  when: debug_credentials
+
+- name: "bootstrap new account for customer"
+  connection: local
+  cloudformation:
+    stack_name="{{ setup_stack_name }}"
+    state=present
+    region="{{aws_accounts[account_name]["bootstrap_region"]}}"
+    disable_rollback=yes
+    template="{{ cloudformation_template_instantiation_dir | expanduser }}/{{customer_name}}/bootstrap/bootstrap_account.json"
+  # TODO how will this work with tmp creds?  Does it need to? (I think it does)
+  environment: role_credentials
+  register: "account_setup_stack"
+
+- name: show all cloudformation output
+  action: debug msg="{{account_setup_stack}}"
+
+- name: show cloudformation output parameters
+  action: debug msg="{{account_setup_stack['stack_outputs']}}"
+
+## Once account is initialized and roles for cross-account access are in place, use IAM Role temporary credentials
+#
+#- name: log aws_environment_with_rolenames
+#  debug: msg='aws_environment_with_rolenames {{aws_environment_with_rolenames | to_json}}'
+#
+#- name: Use IAM Roles to obtain temporary credentials in target aws account
+#  cross_account_credentials:
+#    account_name: "{{ account_name }}"
+#    customer_name: "{{ customer_name }}"
+#  environment: aws_environment_with_rolenames # TODO - move to role-specific environment - explicit choice about Principal to act as
+#  no_log: True
+#  register: credentials
+#
+##- name: update credentials used for downstream tasks from obtained temporary IAM Role credentials
+##  set_fact:
+##    aws_environment_with_rolenames_builder:
+##      AWS_ACCESS_KEY_ID: "{{credentials['aws_access_key_id']}}"
+##      AWS_SECRET_ACCESS_KEY: "{{credentials['aws_secret_access_key']}}"
+##      AWS_SECURITY_TOKEN: "{{credentials['aws_security_token']}}"
+#
+##  no_log: True
+#
+#- name: using AWS_ACCESS_KEY_ID
+#  debug: var=aws_access_key_id

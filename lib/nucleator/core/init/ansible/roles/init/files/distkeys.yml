@@ -1,0 +1,64 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+#
+# Nucleator private repository distribution keys and known hosts
+#
+
+# Distribution Keys enable Nucleator to read from private git repos.
+# Nucleator can draw from multiple private repositories, and supports
+# multiple distinct distribution keys for different repos served by the
+# same host (e.g. private repositories at github)
+
+# Each distribution key specified here will be made available in ~/.ssh/
+# on the Nucleator instance within the builder Stackset, and in
+# [TODO - describe how/where each distribution key is made available on Jenkins]
+# on the Jenkins instance within the builder Stackset.
+
+# Each specified distribution key includes the following key/value pairs:
+#
+# hostname - the hostname of the server that has provided the
+#     distribution key.
+#
+# ssh_config_host - the host specified in ssh config, through
+#     which hostname can be accessed
+#
+# distribution_keyfile - the name of the file containing the private
+#     key to be used when accessing hostname via ssh_config_host.
+#     Nucleator expects each such file to reside in ~/.nucleator/distkeys/ 
+
+distribution_keys:
+
+  # Private Enterprise Repository
+#  - hostname: stash.mycompany.com # name of host to access
+#    ssh_config_host: stash.mycompany.com # accessed via this name in ssh config
+#    private_keyfile: mycompany.distkey.stash.mycompany.com.id_rsa # private distribution key
+
+  # Customer Private GitHub Repository1
+#  - hostname: github.com
+#    ssh_config_host: github-repo1
+#    private_keyfile: 47lining.distkey.repo1.github.com.id_rsa
+
+  # Customer Private GitHub Repository2
+#  - hostname: github.com
+#    ssh_config_host: github-repo2
+#    private_keyfile: 47lining.distkey.repo2.github.com.id_rsa
+
+# All specified known hosts are added to ~/.ssh/known_hosts on the Nucleator
+# and Jenkins instances, to provide secure ssh connections without requiring
+# user validation of the fingerprint of the target server's private key.
+# TODO use ssk-keyscan instead.  See roles/jenkins/tasks/ssh_setup.yml
+
+known_hosts:
+  "github.com": '|1|Lx5Iv3vYeHWPC8Jfm0GETrsa5Bg=|nOZBHiuMqeA9T24WylPcTsBZ3Tk= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='

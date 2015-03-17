@@ -1,0 +1,82 @@
+nucleator-account(1)
+====================
+
+NAME
+----
+nucleator-account - implement AWS Account setup best practices
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator account setup [options]'
+
+[verse]
+'nucleator account rolespec list' [options]
+'nucleator account rolespec provision' [options]
+'nucleator account rolespec validate' [options]
+
+
+DESCRIPTION
+-----------
+
+Implements AWS Account setup best practices by providing Nucleator commands that:
+
+* enable Account-level best practices by establishing pre-requisite AWS
+  resources for Nucleator usage and recommended Account-level AWS
+  Services such as CloudTrail, detailed billing and (future) AWS Config;
+
+* consistently use IAM Roles to establish minimally permissive access
+  policies, together with required trust policies, that enable devops
+  automation to span multiple AWS Accounts;
+
+* provide consistent mechanisms to concisely and transparently specify required
+  IAM Roles within Nucleator Stacksets;
+
+* conveniently provision specified IAM Roles within an AWS Account, and
+  validate that cross-account delegation via IAM Roles is functioning
+  as expected.
+
+
+SUBCOMMANDS
+-----------
+
+Subcommands provide for Account-level setup and role maintenance
+activities that result in the creation of IAM Roles required for
+proper functioning of Nucleator Stacksets.
+
+ACCOUNT SETUP
+~~~~~~~~~~~~~
+
+`nucleator account setup` conveniently adds resources to the specified AWS Account that
+enable best-practice usage of account-level AWS Services and that are
+required to suppor Nucleator's use of AWS CloudFormation.
+
+For usage details, refer to linknucleator:nucleator-account-setup[1]
+
+IAM ROLE SPECIFICATION AND MAINTENANCE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`nucleator account rolespec` can be used to:
+
+* list the specifications of IAM Roles and their associated access and trust
+  policies that are required for usage of all installed Nucleator Stacksets,
+  or a specified Nucleator Stackset.
+* provision the IAM Roles required by all installed Nucleator Stacksets,
+  or a specified Nucleator Stackset, into the specified AWS Account.
+* validate that provisioned IAM Roles can be assumed and that temporary
+  credentials can be obtained from the AWS Secure Token Service as required
+  for Nucleator to operate across AWS Account boundaries in a secure manner,
+  without requiring cross-account sharing of IAM User credentials.
+
+For usage details, refer to linknucleator:nucleator-account-rolespec[1]
+
+
+SEE ALSO
+--------
+linknucleator:nucleator-account-setup[1],
+linknucleator:nucleator-account-rolespec[1],
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

@@ -1,0 +1,80 @@
+nucleator-builder(1)
+====================
+
+NAME
+----
+nucleator-builder - Install the builder stackset which includes the Nucleator and the Nucleator UI in a secure manner within a Nucleator build Cage.
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator builder' <cmd> [options]
+
+DESCRIPTION
+-----------
+
+The `builder` command and its subcommands provide a Stackset that includes Nucleator, Nucleator's User Interface and Artifactory.
+
+The Nucleator resource is installed in a secure manner within a Nucleator `build` Cage.  This resource is used to execute Nucleator operations in much the same way you do from your own command-line/shell.
+
+The Nucleator User Interface provides a Jenkins-based interface and job history for Nucleator-related actions.  It relies on the Nucleator resource for executing Nucleator operations.
+
+The Artifactory instance provides a repository which will store binary artifacts.  These may be retrieved and deployed to beanstalk stacksets.
+
+SUBCOMMANDS
+-----------
+
+BUILDER PROVISION
+~~~~~~~~~~~~~~~~~~~
+
+'nucleator builder provision'::
+	--customer <customer_name>
+	--cage <cage_name>
+
+This subcommand creates the necessary AWS resources via CloudFormation templates.  During and after execution of this subcommand, one may watch the progress on the AWS Management Console in the CloudFormation section.
+
+BUILDER CONFIGURE
+~~~~~~~~~~~~~~~~~~~
+
+'nucleator builder configure'::
+	--customer <customer_name>
+	--cage <cage_name>
+
+This subcommand installs and configures the required software on each of the AWS resources (Nucleator, Artifactory, Nucleator UI).
+
+BUILDER DELETE
+~~~~~~~~~~~~~~
+
+'nucleator builder delete'::
+	--customer <customer_name>
+	--cage <cage_name>
+
+This subcommand deletes previously provisioned builder resources in AWS.
+
+
+OPTIONS
+-------
+
+--customer <customer_name>::
+	The name of the Customer for whom the specified Cage was provisioned.
+
+--cage <cage_name>::
+	The name of the Cage in which to provision and maintain the beanstalk.
+
+-h::
+--help::
+	Show help for this command.
+              
+
+[[FILES]]
+FILES
+-----
+
+~/.nucleator/<customer_name>-credentials.yml::
+	This file with the password you would like to use for the Nucleator
+	UI and the Artifactory repository.
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

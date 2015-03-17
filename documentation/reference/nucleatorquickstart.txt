@@ -1,0 +1,282 @@
+nucleatorquickstart(7)
+======================
+
+NAME
+----
+nucleatorquickstart - A quick start introduction to installing Nucleator
+
+DESCRIPTION
+-----------
+
+This quick start introduction provides a walk-through of minimal
+steps to take to create your first Nucleator Cage and Stackset
+in a new AWS Account.
+
+See link:20545561.html[Nucleator User's Guide] for a more
+in-depth introductions and link:nucleator.html[Nucleator CLI Reference] for command usage.
+
+STEP 0 - PREREQUISITES
+----------------------
+
+You will need to install on your local machine:
+- Python 2.7x
+- Python setup tools (pip)
+- Python developer tools (required for Ansible pre-requisites)
+- Git
+
+To install these base toos do:
+
+[source,txt]
+sudo apt-get install python2.7 python-pip python-dev git
+
+STEP 1 - INSTALL NUCLEATOR
+--------------------------
+
+Do this:
+
+[source,txt]
+----
+git clone --recursive --depth 1 -b nucleator_distribution https://github.com/47lining/ansible.git && cd ansible && sudo python setup.py install
+
+pip install --upgrade git+ssh://github.com/47lining/nucleator-core.git
+# (If your python installation requires root access, be sure to add a sudo to the beginning of the above command)
+
+nucleator init
+----
+
+STEP 2 - FORK THE PUBLIC nucleator-core-siteconfig GITHUB REPOSITORY
+--------------------------------------------------------------------
+
+For your first use of Nucleator, this quickstart recommends that you use a public siteconfig.  Once you've seen how Nucleator Cages and Stacksets work, you can create a private siteconfig repository and provide Nucleator with a distribution key to access it.  (If more information on setting up a github account see https://help.github.com/articles/set-up-git/ )
+
+a. log into github and navigate to `https://github.com/47lining/nucleator-core-siteconfig`
+b. Fork your own copy of this repository into your github account by clicking the "fork" button in the upper right
+c. Note the clone https URL for your personal siteconfig repository
+d. create a local clone:
++
+[source,txt]
+cd <place_where_you_create_git_clones>
+git clone <clone_url_noted_above>
+
+STEP 3 - UPDATE STACKSET SOURCES TO USE YOUR PERSONAL SITECONFIG
+----------------------------------------------------------------
+
+Edit the Stackset sources list in `~/.nucleator/sources.yml` and change
+the siteconfig stanza to include the `<clone_url_noted_above>`.
+Use the `git://` protocol so authentication is not required (just replace
+the `https://` in the https clone url with `git://`).  After an initial
+pass through the quickstart, you can read the User's Guide to learn more
+about how to specify a private repository in `soures.yml`.
+
+Do this:
+
+[source,txt]
+cd ~/.nucleator
+nano sources.yml # modify to include siteconfig below
+    
+[source,txt]
+# siteconfig - Nucleator customer- and cage- specific configuration
+- src: git+git://github.com/<your_github_account>/nucleator-core-siteconfig.git
+  version: master
+  name: siteconfig
+    
+STEP 4 - SIGN UP FOR NEW AWS ACCOUNT
+------------------------------------
+
+You may be able to use an existing AWS Account with Nucleator, but we suggest creating a new one.  Nucleator makes it easy to manage AWS Resources across AWS Account boundaries, and AWS Accounts serve as very useful containers and boundaries for AWS Resources
+
+a. To create a new AWS Account, visit the AWS Console: `https://console.aws.amazon.com/`
+b. Choose "I am a new user" to create a new AWS Account
+c. If you are visiting the console using your AWS Console shortcut link for
+   an existing account, you will need to choose the small link "Sign-in using
+   root account credentials" beneath the Sign In button to get to the "Sign In
+   or Create an AWS Account" Page
+d. Complete the Account Signup process using the conventions described below
++
+    Account Name: `<youraccountname>-<yourcustomername>`
+    Account Email: `<youraccountname>.accounts.aws.<yourcustomername>@<customer_domain.com> # recommended convention`
+    Console Shortcut: `https://<youraccountname>-<yourcustomername>.signin.aws.amazon.com/console`
+
+STEP 5 - PERFORM MINIMAL CONFIGURATION IN NEW AWS ACCOUNT
+---------------------------------------------------------
+
+Using the AWS Console, perform the following minimal steps within your AWS Account
+
+a. Create a new IAM User in the new AWS Account.  Name the user: `NucleatorUser`
++
+Note: This Use is used as a Prinicipal in trust policies estabished by Nucleator.
+It needs to be spelled correctly for the role provisioning process described later
+to succeed.
++
+b. During the creation of the user, generate an Access Key for the user and be
+   sure to download this creditional before closing the "successful completion"
+   screen.  Retain the downloaded IAM Credentials for `NucleatorUser`.
+   You will need to use these during the configuration process for Nucleator later.
+   You will not be able to reaccess this Access Key information later.
+c. Add a User Policy to NucleatorUser by expanding the "Inline Policies" section
+   of the user description screen.  Select a custom policy and copy and paste
+   the policy listed below; name the policy `NucleatorUser` and apply it.
++
+[source,txt]
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "NucleatorUserMinimalAccess",
+                "Effect": "Allow",
+                "Action": [
+                    "iam:CreateRole",
+                    "iam:DeleteRolePolicy",
+                    "iam:GetRole",
+                    "iam:GetRolePolicy",
+                    "iam:ListRolePolicies",
+                    "iam:PutRolePolicy",
+                    "iam:UpdateAssumeRolePolicy",
+                    "ec2:DescribeRegions",
+                    "ec2:DescribeAvailabilityZones"
+                ],
+                "Resource": "*"
+            }
+        ]
+    }
+
+STEP 6 - CREATE INITIAL CONFIG FOR CUSTOMER, ACCOUNT AND CAGE
+-------------------------------------------------------------
+
+You can either perform this step manually or use the link:Use-the-Nucleator-Siteconfig-Wizard-to-Create-an-Initial-Siteconfig_22053489.html[Siteconfig Wizard].
+
+We recommend starting with the wizard, as it produces files that will help you to understand the structure of the config files described below. 
+
+To run the wizard run: 
+
+a. In your local clone of your personal fork of `nucleator-core-siteconfig`,
+nucleator setup wizard navigate to directory `ansible/roles/siteconfig/vars/`.
+
+b. nucleator setup wizard
+
+
+To perform steps manually:
+
+a. In your local clone of your personal fork of `nucleator-core-siteconfig`,
+   navigate to directory `ansible/roles/siteconfig/vars/`, and copy the `{customer}.yml` customer configuration templates
+   to a customer configuration file based on your customer name. For example, if your customer name is `quickstart`, then the
+   customer configuration file would be named `quickstart.yml`
+
+b. Open the file and make the following changes:
++
+** Set the customer domain to the desired DNS subdomain that you'd like to use for this customer.  For example `nucle8r.io`, or `somedepartment.mycompany.com`
+** Inside the Cage names section, set the friendly account name, region, and owner of each Cage.
+   Note: There must be one Cage named `build` to work as a starting point for Nucleator
+** Inside the aws_accounts section, set the Account number and Region for each account associated with the customer
+** Nucleator can work with multiple AWS Accounts for each Customer.  These are specified
+   in aws_accounts in the customer config.  Each specified AWS Account includes the following fields
+*** Friendly account_name - this is a name for the Account that is readable by humans.  It is used elsewhere in Nucleator config and in Jenkins pulldowns that are set up by Nucleator, where choices among AWS Accounts must occur
+*** account_number - this is the unique twelve-digit Account number provided by AWS for this AWS Account. The account number can be found by selecting the "Support" | "Support Center" pulldown from your AWS console. Your Account number will appear at the upper right of the Support Center page
+*** bootstrap_region - this is the AWS Region where Nucleator will create Amazon resources within this Account that it needs to support the creation of Cages and Stacksets
+** map_region_plus_redundant_zone_number_to_vpc_valid_az - Region to Availability Zone Mapping that specifies which AZ's are valid for provisioning VPC subnets within the Account. This can be set by going to the AWS console -> VPCs -> Subnets -> Create Subnet -> and grabbing the first two list items of the Availability Zone dropdown. Note: Will need to change the Region in the top right of the AWS console to grab the Availability Zones for the different Regions
+
+c. Copy the `{customer}-{cage}.yml` file for each Cage specified in your customer configuration file. For example, when done there should be a file for each Cage named something like `mycustomer-build.yml`
+d. In your `~/.nucleator` directory, copy the `{customer}-credentials.yml` to use your Customer name
+e. Open the file and fill in the `aws_access_key_id` and `aws_secret_access_key` for each account in the specified customer. These values are the saved values that were presented  when `NucleatorUser` was created
+
+IMPORTANT NOTE:
+Due to an AWS API call issue  on account that pre-date VPCs it is possible that the setup wizard may record incorrect availability zones (AZ) in the {customer}.yml siteconfig file.  If this occurs Nucleator cage provision will fail.  Please reference troubleshooting tips for methods for detection and resolution.
+
+STEP 7 - NUCLEATOR UPDATE
+-------------------------
+
+Do this:
+Once the siteconfig files are updated they will need to be commited to your github repo.  To do this do (while still in the `ansible/roles/siteconfig/vars/ directory under your fork of `nucleator-core-siteconfig`): 
+
+[source,txt]
+----
+git add customer.yml customer-cage.yml customer-cage.crt
+git commit -m "message like first siteconfig files"
+git push
+----
+
+Next run nucleator update to install all config files. Do this by running:
+
+[source,txt]
+nucleator update
+
+STEP 8 - PROVISION NUCLEATOR ROLES IN YOUR ACCOUNT
+--------------------------------------------------
+
+Nucleator needs to establish some attributes in your account like iam roles in order to execute correctly.  To do this run:
+
+[source,txt]
+----
+    nucleator account rolespec provision --customer yourcustomername --account youraccountname
+
+    # to ensure all the roles were created successfully
+    nucleator account rolespec validate --customer yourcustomername --account youraccountname
+----
+
+STEP 9 - ACCOUNT SETUP
+----------------------
+
+Next Nucleator needs to set up specific account resources for proper operation such as creating s3 buckets.  To do this run:
+
+[source,txt]
+    nucleator account setup --customer yourcustomername --account youraccountname
+
+STEP 10 - DNS SETUP
+-------------------
+
+More detailed instructions on DNS set-up are in the User's Guide section entitled link:Prepare-AWS-Account---Set-Up-DNS-for-Cages-Defined-within-your-Account_22053669.html[Prepare AWS Account - Set Up DNS for Cages Defined within your Account] You will need an externally resolvable Subdomain to which you have authority to add Nameserver records.
+
+For each Cage that you have defined for your Customer:
+
+a. In the AWS console go to Route53 -> Hosted Zones and select the hosted zone created by account setup for the current Cage.  "Go to Record Sets".
+
+b. Copy the Name Servers of the Hosted Zone by selecting its single `NS` record, and selecting and copying the four nameservers from the pane on the right.
+
+c. Go to the system that you use to maintain authoritative `NS` records for the customer_domain that you specified during step 6.
++
+** Add a single `NS` record with the name of the current Cage and a value that specifies the four nameservers copied above.
++
+For example, for customer_domain `somedepartment.mycompany.com` and Cage `build`, you will create an NS record `build.somedepartment.mycompany.com` with a value that specifies the four nameservers copied above.
+
+STEP 11 - PROVISION AND CONFIGURE CAGE
+--------------------------------------
+
+The first major creation by Nucleator is the creation of a cage.  Run:
+
+[source,txt]
+PYTHONUNBUFFERED=1 nucleator cage provision --customer <yourcustomername> --cage build | tee /tmp/cage_provision.out
+PYTHONUNBUFFERED=1 nucleator cage configure --customer <yourcustomername> --cage build | tee /tmp/cage_configure.out
+
+Note that it can take some time for cage resources to be provisioned and 
+become available. You can use the CloudFormation AWS console to see the 
+current status and progress of provisioning while these commands are running.
+
+STEP 12 - CREATE A BUILDER STACKSET
+-----------------------------------
+
+Nuceator support several stacksets that can be created within a cage.  The builder stackset provides a user interface for creating additional stacksets.  To do this run:
+
+[source,txt]
+PYTHONUNBUFFERED=1 nucleator builder provision --customer <yourcustomername> --cage build | tee /tmp/builder_provision.out
+PYTHONUNBUFFERED=1 nucleator builder configure --customer <yourcustomername> --cage build | tee /tmp/builder_configure.out
+
+Note that it can take some time for builder resources to be provisioned and 
+become available. You can use the CloudFormation AWS console to see the 
+current status and progress of provisioning while these commands are running.
+
+Once complete the builder user interface can be accessed at https://nucleator-ui.{cage}.{customer-domain} and the login information is configured in ~/.nucleator/{customer}-credential.yml.
+
+SUMMARY
+-------
+
+You should now have a configured Cage and Builder Stackset. To provision other Stacksets such as Beanstalk or Redshift, see the documentation for those specific commands. You can also re-run step 11 with any Cage that has been configured in step 6 to provision more Cages.
+
+SEE ALSO
+--------
+link:20545561.html[The Nucleator User's Guide],
+link:Glossary_22053389.htmlnucleatorglossary[Nucleator Glossary]
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite
+

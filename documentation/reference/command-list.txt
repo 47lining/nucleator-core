@@ -1,0 +1,12 @@
+# List of known nucleator commands.
+# command name				category [deprecated] [common]
+nucleator-init                          core common
+nucleator-update                        core common
+nucleator-setup                         core common
+nucleator-account                       core common
+nucleator-account-setup                 core common
+nucleator-account-rolespec              core common
+nucleator-cage                          core common
+nucleator-builder                       core common
+nucleator-beanstalk                     core common
+nucleator-redshift                      core common

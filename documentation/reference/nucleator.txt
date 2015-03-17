@@ -1,0 +1,89 @@
+nucleator(1)
+============
+
+NAME
+----
+nucleator - create and manage secure, scalable, highly available environments in Amazon Web Services
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator' [--version] [--help] [-v | --verbose | -v[v*]]
+    <command> [<args>]
+
+DESCRIPTION
+-----------
+
+Nucleator is a devops framework that provides for the creation of secure,
+scalable, highly available environments in Amazon Web Services (AWS), 
+into which reusable stacks of components can be deployed to address common
+cloud usage scenarios.  Each Nucleator Stackset implements an AWS Reference
+Architecture, and provides for provisioning, configuration, and operations.
+
+Nucleator makes it easy to partition environments across multiple AWS accounts
+and to leverage a supported and maintained set of CloudFormation stacks that
+work together to allow users to focus on their core problems.  It can be used to
+rapidly implement common scenarios in brand new AWS Accounts so that customers
+new to AWS can get started quickly while leveraging accumulated best practices.
+
+Nucleator provides an extensible model for Stackset contributions from both
+public and private communities.  Git is leveraged extensively for community-oriented
+distributed development, versioning and release management of Stacksets.
+
+See linknucleator:nucleatorquickstart[7] to get started.  The link:20545561.html[Nucleator User's Guide] provides a more in-depth introduction.
+
+OPTIONS
+-------
+--version::
+	Prints the nucleator suite version that the 'nucleator' program came from.
+
+--help::
+	Prints the synopsis and a list of the most commonly used
+	commands. If the option '--all' or '-a' is given then all
+	available commands are printed. If a nucleator command is named this
+	option will bring up the manual page for that command.
++
+Other options are available to control how the manual page is
+displayed. See linkgit:nucleator-help[1] for more information,
+because `nucleator --help ...` is converted internally into `nucleator
+help ...`.
+
+-v::
+--verbose::
+-v[v*]::
+	Increase verbosity used for all commands / subcommands, as well as
+	any invoked provisioning or configuration playbooks.  Multiple `v`'s
+	may be specified for increased levels of verbosity.	
+
+NUCLEATOR COMMANDS
+------------------
+
+include::cmds-core.txt[]
+
+Authors
+-------
+Nucleator was created by 47Lining.  http://www.47lining.com
+
+
+Contributing to Nucleator
+-------------------------
+
+Community contributions and feedback are strongly encouraged.
+
+Nucleator project discussion occurs on the `nucleator-project` google group list.
+
+Development discussion occurs on the `nucleator-dev` google group list.
+
+Report bugs at the 47lining/nucleator-core repository at github, or directly
+against the appropriate Nucleator Stackset repository.
+
+SEE ALSO
+--------
+linknucleator:nucleatorquickstart[7],
+link:Glossary_22053389.html[Nucleator Glossary],
+link:20545561.html[The Nucleator User's Guide]
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

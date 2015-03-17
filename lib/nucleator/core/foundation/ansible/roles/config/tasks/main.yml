@@ -1,0 +1,56 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- name: Include aws service config vars
+  include_vars: aws_service_config.yml
+
+- name: Test existence of nucleator config directory
+  stat: path="{{ nucleator_configuration_dir | expanduser }}"
+  register: check_config
+
+- name: Fail if nucleator config directory not present
+  fail: msg="Nucleator configuration directory {{nucleator_configuration_dir}} not found.  Please run nucleator init."
+  when: check_config.stat.isdir is not defined or not check_config.stat.isdir
+
+- name: Include nucleator config vars
+  include_vars: "{{ nucleator_configuration_dir }}/config.yml"
+
+- name: set cage name to default if not set
+  set_fact:
+    cage_name: "bootstrap"
+  when: cage_name is not defined
+
+- name: log customer_name
+  debug: msg="{{customer_name}}"
+
+- name: log cage_name
+  debug: msg="{{cage_name}}"
+
+- name: Determine if customer-specific credentials vars are present
+  stat: path={{nucleator_configuration_dir}}/{{ customer_name }}-credentials.yml
+  register: iam_credentials
+
+- name: Include customer-specific credentials vars, if present
+  include_vars: "{{nucleator_configuration_dir}}/{{ customer_name }}-credentials.yml"
+  when: iam_credentials.stat.exists
+  no_log: True
+
+- name: Warn user when customer-specific credentials vars are not present
+  debug: msg="{{WARN_MISSING_CREDS | replace("{path}", (nucleator_configuration_dir | osPathJoin(customer_name)) ~ "-credentials.yml")}}"
+  when: not iam_credentials.stat.exists
+
+- name: Include distribution key vars, if present
+  include_vars: "{{nucleator_configuration_dir}}/distkeys.yml"
+

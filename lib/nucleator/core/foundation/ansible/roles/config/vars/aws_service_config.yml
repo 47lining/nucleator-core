@@ -1,0 +1,190 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+source_aws_access_key_id: "{{ aws_account_access_keys[source_account_name]['aws_access_key_id'] if aws_account_access_keys is defined else None}}"
+source_aws_secret_access_key: "{{ aws_account_access_keys[source_account_name]['aws_secret_access_key'] if aws_account_access_keys is defined else None}}"
+
+target_aws_access_key_id: "{{ aws_account_access_keys[account_name]['aws_access_key_id'] if aws_account_access_keys is defined else None}}"
+target_aws_secret_access_key: "{{ aws_account_access_keys[account_name]['aws_secret_access_key'] if aws_account_access_keys is defined else None}}"
+
+aws_access_key_id: "{{ target_aws_access_key_id if (nucleator_use_target_credentials | default(False)) else source_aws_access_key_id}}"
+aws_secret_access_key: "{{ target_aws_secret_access_key if (nucleator_use_target_credentials | default(False)) else source_aws_secret_access_key}}"
+
+aws_environment: # TODO - move to role-specific environments.  This is the "default" environment.
+  AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') | default(aws_access_key_id, true) | default(None) }}"
+  AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') | default(aws_secret_access_key, true) | default (None) }}"
+  AWS_SECURITY_TOKEN: "{{ lookup('env','AWS_SECURITY_TOKEN') | default(aws_security_token, true) | default (None) }}"
+
+supported_regions:
+  - us-east-1
+  - us-west-2
+  - eu-west-1
+
+supported_ec2_instance_types:
+  - c1.medium
+  - c1.xlarge
+  - c3.2xlarge
+  - c3.4xlarge
+  - c3.8xlarge
+  - c3.large
+  - c3.xlarge
+  - cc1.4xlarge
+  - cc2.8xlarge
+  - cg1.4xlarge
+  - g2.2xlarge
+  - hs1.8xlarge
+  - i2.2xlarge
+  - i2.4xlarge
+  - i2.8xlarge
+  - i2.xlarge
+  - m1.large
+  - m1.medium
+  - m1.small
+  - m1.xlarge
+  - m2.2xlarge
+  - m2.4xlarge
+  - m2.xlarge
+  - m3.2xlarge
+  - m3.large
+  - m3.medium
+  - m3.xlarge
+  - r3.2xlarge
+  - r3.4xlarge
+  - r3.8xlarge
+  - r3.large
+  - r3.xlarge
+  - t1.micro
+  - t2.medium
+  - t2.micro
+  - t2.small
+
+default_ec2_instance_type: t2.micro
+
+supported_rds_instance_types:
+  - "db.t1.micro"
+  - "db.t2.micro"
+  - "db.m1.small"
+  - "db.m3.medium"
+  - "db.m3.large"
+  - "db.m3.xlarge"
+  - "db.m3.2xlarge"
+
+default_rds_instance_type: db.t2.micro
+
+map_aws_instance_type_to_architecture:
+  t1.micro:
+    Arch: "q64"
+  t2.micro:
+    Arch: "q64hvm"
+  t2.small:
+    Arch: "q64hvm"
+  t2.medium:
+    Arch: "q64hvm"
+  m1.small:
+    Arch: "q64"
+  m1.medium:
+    Arch: "q64"
+  m1.large:
+    Arch: "q64"
+  m1.xlarge:
+    Arch: "q64"
+  m2.xlarge:
+    Arch: "q64"
+  m2.2xlarge:
+    Arch: "q64"
+  m2.4xlarge:
+    Arch: "q64"
+  m3.medium:
+    Arch: "q64"
+  m3.large:
+    Arch: "q64"
+  m3.xlarge:
+    Arch: "q64"
+  m3.2xlarge:
+    Arch: "q64"
+  c1.medium:
+    Arch: "q64"
+  c1.xlarge:
+    Arch: "q64"
+  c3.large:
+    Arch: "q64"
+  c3.xlarge:
+    Arch: "q64"
+  c3.2xlarge:
+    Arch: "q64"
+  c3.4xlarge:
+    Arch: "q64"
+  c3.8xlarge:
+    Arch: "q64"
+  cc1.4xlarge:
+    Arch: "q64Cluster"
+  cc2.8xlarge:
+    Arch: "q64Cluster"
+  cg1.4xlarge:
+    Arch: "q64GPU"
+  g2.2xlarge:
+    Arch: "q64GPU"
+
+map_aws_region_plus_arch_to_public_bastion_ami:
+  us-east-1:
+    q64: ami-246ed34c
+    q64hvm: ami-b66ed3de
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  us-west-2:
+    q64: ami-55a7ea65
+    q64hvm: ami-b5a7ea85
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  eu-west-1:
+    q64: ami-9c7ad8eb
+    q64hvm: ami-6e7bd919
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+
+map_aws_region_plus_arch_to_public_nat_ami:
+  us-east-1:
+    q64: ami-224dc94a # amzn-ami-vpc-nat-pv-2014.09.1.x86_64-ebs - ami-224dc94a
+    q64hvm: ami-184dc970 # amzn-ami-vpc-nat-hvm-2014.09.1.x86_64-gp2 - ami-184dc970
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  us-west-2:
+    q64: ami-030f4133 # amzn-ami-vpc-nat-pv-2014.09.1.x86_64-ebs - ami-030f4133
+    q64hvm: ami-290f4119 # amzn-ami-vpc-nat-hvm-2014.09.1.x86_64-gp2 - ami-290f4119
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  eu-west-1:
+    q64: ami-30913f47 # amzn-ami-vpc-nat-pv-2014.09.1.x86_64-ebs - ami-30913f47
+    q64hvm: ami-14913f63 # amzn-ami-vpc-nat-hvm-2014.09.1.x86_64-gp2 - ami-14913f63
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+
+map_aws_region_plus_arch_to_worker_ami:
+  us-east-1:
+    q64: ami-246ed34c
+    q64hvm: ami-b66ed3de
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  us-west-2:
+    q64: ami-55a7ea65
+    q64hvm: ami-b5a7ea85
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  eu-west-1:
+    q64: ami-9c7ad8eb
+    q64hvm: ami-6e7bd919
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+

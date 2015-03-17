@@ -1,0 +1,44 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  pre_tasks:
+  - name: estabish playbook args
+    set_fact:
+      account_name: "{{account_name}}"
+      customer_name: "{{customer_name}}"
+      role_names: "{{role_names}}" # contains list of role names
+      role_specification_varsfile: "{{role_specification_varsfile}}" # absolute path to role specification file
+      cage_name: "bootstrap"
+      nucleator_use_target_credentials: True
+  roles:
+    - config
+    - siteconfig  
+  post_tasks:
+    - name: load role specification for this nucleator command
+      include_vars: "{{role_specification_varsfile}}"
+
+    - name: Create IAM Roles for each specified role name
+      environment: aws_environment
+      iam_role: 
+        role_name: "{{item[0].role_name}}"
+        trust_policy: "{{item[0].trust_policy}}"
+        access_policies: "{{item[0].access_policies}}"
+      with_nested: 
+        - "{{role_specification}}"
+        - "{{role_names}}"
+      when: "'{{item[0].role_name}}' == '{{item[1]}}'"

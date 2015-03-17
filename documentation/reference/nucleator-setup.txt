@@ -1,0 +1,93 @@
+nucleator-setup(1)
+==================
+
+NAME
+----
+nucleator-setup - manage the site configuration files
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator setup show'
+'nucleator setup wizard'
+'nucleator setup validate'
+
+DESCRIPTION
+-----------
+
+The Nucleator system relies on a set of files which describe the components
+of your installation.  This is described in the User's Guide on the page titled
+"Nucleator Configuration Process Overview"
+
+SUBCOMMANDS
+-----------
+
+SITECONFIG SHOW
+~~~~~~~~~~~~~~~
+
+'nucleator setup show'::
++
+`nucleator setup show` creates a rudimentary display of the existing
+site configuration set of files.
+
+SITECONFIG WIZARD
+~~~~~~~~~~~~~~~~~
+
+'nucleator setup wizard'::
++
+`nucleator setup wizard` asks you a series of questions enabling you
+to simply create the suite of site configuration files.  Prior to starting
+the wizard you should know what AWS accounts you will be using and for each
+account you will need the account number, access key and secret key.  This
+information can be read from the AWS Management Console.
++
+In the simplest possible case, you can create one cage in one account,
+in the region you select.  By entering the three
+required fields (account number, access key and secret key), and selecting
+default values, all the appropriate configuration files will be created for you.
++
+For ongoing maintenance of the files, a good practice would be to create a Git
+repository to store the files with verions.  This will also enable the Nucleator
+User Interface to have access to the site configuration files.
++
+As you run the wizard, default values, when present, are shown in brackets '[]'.
+Just press enter if you want to use the default value offered.
++
+If you want to create multiple cages, just enter a new cage name when asked, and
+it will ask the questions for that cage.  Similarly, if you have multiple accounts,
+you can enter the number and keys for each account.
+
+SITECONFIG VALIDATE
+~~~~~~~~~~~~~~~~~~~
+
+'nucleator setup validate'::
++
+Attempts to validate the existing site configuration including sources of updates
+and distribution keys.  TO BE IMPLEMENTED.
+
+
+[[FILES]]
+FILES
+-----
+
+~/.nucleator/::
+	Configuration directory for local nucleator configuration.
+
+~/.nucleator/<customer_name>-credentials.yml::
+	File with AWS access key and secret key.
+
+<customer_name>.yml::
+	Customer configuration file, defines Cages supported for customer
+	including mapping each cage to a specified AWS Account and Region.
+
+<customer_name>-<cage_name>.yml::
+	Cage configuration file, allows refinements to network address space
+	used by this cage.  One file is created for each cage you define.
+
+<cage_name>.crt::
+	An SSL certificate that will be used on the nucleator-ui and nucleator machines.
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

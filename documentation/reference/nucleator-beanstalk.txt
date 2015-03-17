@@ -1,0 +1,214 @@
+nucleator-beanstalk(1)
+======================
+
+NAME
+----
+nucleator-beanstalk - Provision, Configure and Invoke Operations on Elastic Beanstalk Applications and Environments in Nucleator Cages
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator beanstalk provision' <args> [options]
+'nucleator beanstalk configure' <args> [options]
+'nucleator beanstalk deploy' <args> [options]
+'nucleator beanstalk delete' <args> [options]
+
+
+DESCRIPTION
+-----------
+
+The `beanstalk` command and its subcommands are used to create and maintain
+Elastic Beanstalk Applications and Environments within Nucleator Cages.
+
+Running `nucleator beanstalk provision` and `nucleator beanstalk
+configure` multiple times is safe, because provisioning and
+configuration operations are idempotent. If no changes have been made
+to the Stackset definition in `~/.nucleator/contrib/beanstalk`, these
+commands will result in no change.  If updates were made to to the
+Stackset definition (via `nucleator update`, for example) that are
+consistent with CloudFormation's "update in place" capabilities, the
+Stackset will be updated in place so that AWS Resources are brought
+into alignment with the new Stackset definition.  This can be useful,
+for example, when modifying security groups to support application
+communication on various ports that the app may require.
+
+The `beanstalk` command provides the ability to easily manage
+provisioning parameters supporting setup and common scaling operations
+via the Nucleator CLI.
+
+SUBCOMMANDS
+-----------
+
+BEANSTALK PROVISION
+~~~~~~~~~~~~~~~~~~~
+
+'nucleator beanstalk provision'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--app_name <beanstalk_application_name>
+	--type <application_type>
+	[--beanstalk_instance_type <ec2_instance_type>]
+	[--database_instance_type <rds_instance_type>]
+	[--database_name <database_name>]
+	[--database_user <database_user>]
+	[--database_password <database_password>]
+	[--minscale <min_value>]
+	[--maxscale <max_value>]
+	[--service_role <iam_role_name>]
+	[--preview] [-h | --help]
++
+`nucleator beanstalk provision` creates an AWS Elastic Beanstalk
+application and environment in the specified Cage for the specified
+Customer.  It can also provision a backing RDS database for
+persistence of application state.
++
+The subcommand provisions an autoscaling environment that spans the two
+availability zones defined in the Cage configuration for the specified
+Cage.  The min, max and desired autoscaling targets can be specified
+using subcommand options.
+
+BEANSTALK CONFIGURE
+~~~~~~~~~~~~~~~~~~~
+
+'nucleator beanstalk configure'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--limit_stackset_instance <beanstalk_application_name>
+	[-h | --help]
++
+`nucleator beanstalk configure` performs post-provisioning configuration of
+all EC2 resources associated with the beanstalk.
++
+By default all hosts associated with any instance of the `beanstalk`
+Stackset within the specified Cage will be configured. The
+`limit_stackset_instance` option can be used to optionally constrain
+the set of configured instances to hosts associated with a specified
+`beanstalk` Stackset instance.
+
+BEANSTALK DEPLOY
+~~~~~~~~~~~~~~~~
+
+'nucleator beanstalk deploy'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--app_name <app_name>
+	--app_version <beanstalk_application_version>
+	--app_url <application_url>
++
+`nucleator beanstalk deploy` deploys the application deployment
+artifact at `<application_url>` (typically drawn from an artifactory)
+to the `beanstalk` Stackset instance specified by `<app_name>`.
+During deployment, a the specified `<beanstalk_application_version>`
+is created within the beanstalk, and deployed to the specified
+`<beanstalk_environment_name>` beanstalk environment.
+
+BEANSTALK DELETE
+~~~~~~~~~~~~~~~~
+
+'nucleator beanstalk delete'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--app_name <beanstalk_application_name>
++
+`nucleator beanstalk delete` attempts to delete the `beanstalk`
+Stackset instance specified by <beanstalk_application_name> from the
+specified Nucleator Cage.
+
+
+OPTIONS
+-------
+
+--customer <customer_name>::
+	The name of the Customer for whom the specified Cage was provisioned.
+
+--cage <cage_name>::
+	The name of the Cage in which to provision and maintain the beanstalk.
+
+--app_name <beanstalk_application_name>::
+	The name of the elastic beanstalk application to provision,
+	configure, deploy or delete. Note that nucleator will extend this 
+	base application name appending "-<cage>-<customer>" to support AWS 
+	naming best practices and ensure uniqueness within the target AWS 
+	account. So for example if "myapp" is passed as app_name, the 
+	provisioned beanstalk will be named "myapp-<cage>-<customer>".
+
+--type <application_type>::
+	The type of application environment to provision. Currently support 
+	application types are "python" and "java".
+
+--beanstalk_instance_type <ec2_instance_type>::
+	The type of ec2 instance to use within the elastic beanstalk.
+	Must be drawn from the list of currently supported ec2
+	instance types in aws_service_config.yml.  Defaults to
+	"t2.micro".  See also <<FILES>>.
+
+--database_instance_type <rds_instance_type>::
+	The type of AWS Relational Database Service (RDS) instance to
+	use within the elastic beanstalk.  Must be drawn from the list
+	of currently supported RDS instance types in
+	aws_service_config.yml.  Use "None" to signify that no RDS
+	instance should be provisioned.  Defaults to "None". See also <<FILES>>.
+
+--database_name <database_name>::
+	The name of the database to provision within the RDS instance
+	provisioned to provide data persistence for the Elastic
+	Beanstalk.  Defaults to "nucleator".  See also <<FILES>>.
+
+--database_user <database_user>::
+	The database user created in the RDS instance
+	provisioned to provide data persistence for the Elastic
+	Beanstalk.  Defaults to "nucleatorAdmin".  See also <<FILES>>.
+
+--database_password <database_password>::
+	The password for the database user created in the RDS instance
+	provisioned to provide data persistence for the Elastic
+	Beanstalk.  Defaults to "DefaultPassword".  See also <<FILES>>.
+
+--limit_stackset_instance <beanstalk_application_name>
+	Limits stackset configuration to hosts associated with `beanstalk`
+	Stackset instance `<beanstalk_application_name>`.
+
+--minscale <min_value>::
+	The minimum number of elastic beanstalk instances in the
+	autoscaling group associated with the elastic beanstalk.
+	Defaults to 1.
+
+--maxscale <max_value>::
+	The maximum number of elastic beanstalk instances in the
+	autoscaling group associated with the elastic beanstalk.
+	Defaults to 4.
+
+--service_role <iam_role_name>::
+	The IAM role to be associated with the instance profile that is associated 
+	with beanstalk EC2 resources. Defaults to NucleatorBeanstalkServiceRunner. 
+	Applications may wish to use an alternate IAM role if extended permissions 
+	to other AWS resources are required by the application.
+
+--preview::
+	When provisioning a beanstalk, rather than provision the beanstalk,
+	print preview information about what will be provisioned if
+	run without the `--preview` opion.  Preview text is intended
+	to be descriptive and may also include links to graphical
+	architecture diagrams.
+
+-h::
+--help::
+	Show help for this command.
+              
+
+[[FILES]]
+FILES
+-----
+
+NUCLEATOR_INSTALL_DIR/nucleator-core/lib/nucleator/core/foundation/ansible/roles/config/vars/aws_service_config.yml::
+	AWS Services config file including dicts for currently supported EC2 and
+	RDS instance types.
+
+~/.nucleator/contrib/beanstalk/ansible/roles/beanstalk_provision/defaults/main.yml::
+	Default values for optional arguments to the `beanstalk` command.
+
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

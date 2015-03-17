@@ -1,0 +1,178 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Create pre-requisite AWS Resources for use with Nucleator in a new AWS Account.  Create an S3 Bucket for publishing Nucleator's customer-specific CloudFormation templates.  Set up Account best-practice hygiene (Create CloudTrail Bucket, Enable CloudTrail, Create S3 Bucket and Bucket Policy for detailed billing)",
+    "Resources": {
+	"TemplateBucket" : {
+	    "Type" : "AWS::S3::Bucket",
+	    "Metadata" : { "DocString" :
+			   "S3 Bucket used by Nucleator to store json templates for consumption by CloudFormation.  These templates are consistently used to provision Nucleator Cages and Stacksets." },
+	    "Properties" : {
+		"BucketName" : "{{nucleator_template_bucketname_specification}}",
+		"Tags": [
+		    { "Key": "Name", "Value": "{{nucleator_billing_bucketname_specification}}" },
+		    { "Key": "NucleatorGroup", "Value": "nucleatorTemplates" },
+		    {{ nucleator_common_tags | to_json_fragment }}
+		]
+	    }
+	},
+	"BillingBucket" : {
+	    "Type" : "AWS::S3::Bucket",
+	    "Metadata" : { "DocString" :
+			   "S3 Bucket created by Nucleator for the purpose of storing detailed billing info for the AWS Account." },
+	    "Properties" : {
+		"BucketName" : "{{nucleator_billing_bucketname_specification}}",
+		"Tags": [
+		    { "Key": "Name", "Value": "{{nucleator_billing_bucketname_specification}}" },
+		    { "Key": "NucleatorGroup", "Value": "billing" },
+		    {{ nucleator_common_tags | to_json_fragment }}
+		]
+	    }
+	},
+	"BillingBucketPolicy" : {
+	    "Type" : "AWS::S3::BucketPolicy",
+	    "Metadata" : { "DocString" :
+			   "Policy that permits AWS to put detailed billing information into the Billing Bucket" },
+	    "Properties" : {
+		"Bucket" : {
+		    "Ref": "BillingBucket"
+		},
+		"PolicyDocument": {
+		    "Version": "2008-10-17",
+		    "Id": "BillingBucketPolicy-{{nucleator_billing_bucketname_specification}}",
+		    "Statement": [
+			{
+			    "Sid": "AwsGet-{{nucleator_billing_bucketname_specification}}",
+			    "Effect": "Allow",
+			    "Principal": {
+				"AWS": "arn:aws:iam::386209384616:root"
+			    },
+			    "Action": [
+				"s3:GetBucketAcl",
+				"s3:GetBucketPolicy"
+			    ],
+			    "Resource": "arn:aws:s3:::{{nucleator_billing_bucketname_specification}}"
+			},
+			{
+			    "Sid": "AwsPut-{{nucleator_billing_bucketname_specification}}",
+			    "Effect": "Allow",
+			    "Principal": {
+				"AWS": "arn:aws:iam::386209384616:root"
+			    },
+			    "Action": [
+				"s3:PutObject"
+			    ],
+			    "Resource": "arn:aws:s3:::{{nucleator_billing_bucketname_specification}}/*"
+			}
+		    ]
+		}
+	    }
+	},
+	"CloudTrailBucket" : {
+	    "Type" : "AWS::S3::Bucket",
+	    "Metadata" : { "DocString" :
+			   "S3 Bucket used by Nucleator to store CloudTrail logs." },
+	    "DeletionPolicy" : "Retain",
+	    "Properties" : {
+		"BucketName" : "{{nucleator_cloudtrail_bucketname_specification}}",
+		"Tags": [
+		    { "Key": "Name", "Value": "{{nucleator_cloudtrail_bucketname_specification}}" },
+		    { "Key": "NucleatorGroup", "Value": "cloudTrail" },
+		    {{ nucleator_common_tags | to_json_fragment }}
+		]
+	    }
+	},
+	"CloudTrailBucketPolicy" : {
+	    "Type" : "AWS::S3::BucketPolicy",
+	    "DeletionPolicy" : "Retain",
+	    "Properties" : {
+		"Bucket" : {
+		    "Ref":"CloudTrailBucket"
+		},
+		"PolicyDocument" : {
+		    "Version": "2012-10-17",
+		    "Statement": [
+			{
+			    "Sid": "AWSCloudTrailAclCheck20131101",
+			    "Effect": "Allow",
+			    "Principal": {
+				"AWS": [
+				    "arn:aws:iam::903692715234:root",
+				    "arn:aws:iam::859597730677:root",
+				    "arn:aws:iam::814480443879:root",
+				    "arn:aws:iam::216624486486:root",
+				    "arn:aws:iam::086441151436:root",
+				    "arn:aws:iam::388731089494:root",
+				    "arn:aws:iam::284668455005:root",
+				    "arn:aws:iam::113285607260:root",
+				    "arn:aws:iam::035351147821:root"
+				]
+			    },
+			    "Action": "s3:GetBucketAcl",
+			    "Resource": "arn:aws:s3:::{{nucleator_cloudtrail_bucketname_specification}}"
+			},
+			{
+			    "Sid": "AWSCloudTrailWrite20131101",
+			    "Effect": "Allow",
+			    "Principal": {
+				"AWS": [
+				    "arn:aws:iam::903692715234:root",
+				    "arn:aws:iam::859597730677:root",
+				    "arn:aws:iam::814480443879:root",
+				    "arn:aws:iam::216624486486:root",
+				    "arn:aws:iam::086441151436:root",
+				    "arn:aws:iam::388731089494:root",
+				    "arn:aws:iam::284668455005:root",
+				    "arn:aws:iam::113285607260:root",
+				    "arn:aws:iam::035351147821:root"
+				]
+			    },
+			    "Action": "s3:PutObject",
+			    "Resource": "arn:aws:s3:::{{nucleator_cloudtrail_bucketname_specification}}/*",
+			    "Condition": { 
+				"StringEquals": { 
+				    "s3:x-amz-acl": "bucket-owner-full-control" 
+				}
+			    }
+			}
+		    ]
+		} 
+
+	    }
+	},
+	"CloudTrailResource": {
+	    "Type" : "AWS::CloudTrail::Trail",
+	    "DependsOn" : "CloudTrailBucketPolicy",
+	    "Properties" : {
+		"IncludeGlobalServiceEvents" : "True",
+		"IsLogging" : "True",
+		"S3BucketName" : {
+		    "Ref":"CloudTrailBucket"
+		}
+	    }
+	}{% for current_cage, current_cage_entries in cage_names.iteritems() if current_cage_entries['account'] == account_name %}
+,
+	"{{current_cage|capitalize}}HostedZone" : {
+	    "Type" : "AWS::Route53::HostedZone",
+	    "Properties" : {
+		"HostedZoneConfig" : {
+		    "Comment": "Hosted Zone for Nucleator Cage Subdomain {{current_cage}}.{{customer_domain}}"
+		},
+		"Name": "{{current_cage}}.{{customer_domain}}"
+	    }
+	}{% endfor %}
+    },
+    "Outputs": {
+        "TemplateBucketName": {
+	    "Description": "Name of the S3 bucket used by Nucleator to stage CloudFormation Templates for consumption by CloudFormation",
+	    "Value": {
+		"Ref": "TemplateBucket"
+	    }
+	},
+        "CloudTrailBucketName": {
+	    "Description": "Name of the S3 bucket used for CloudTrail Logs",
+	    "Value": {
+		"Ref": "CloudTrailBucket"
+	    }
+	}
+    }
+}

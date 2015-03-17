@@ -1,0 +1,165 @@
+nucleator-cage(1)
+=================
+
+NAME
+----
+nucleator-cage - Provision, Configure and Invoke Operations on Nucleator Cages
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator cage provision' --customer <customer_name> --cage <cage_name> [options]
+'nucleator cage configure' --customer <customer_name> --cage <cage_name> [options]
+'nucleator cage delete' --customer <customer_name> --cage <cage_name>
+
+
+DESCRIPTION
+-----------
+
+The `cage` command and its subcommands are used to create and maintain
+Nucleator cages.  A Nucleator Cage provides a functional hosting
+environment with private, public and database subnets, bastion and nat
+functionality, external DNS and ssh config for hosts within the Cage.
+Nucleator Cages provide reasonable default values that can be changed
+easily by modifying the cage configuration file.
+
+Running `nucleator cage provision` and `nucleator cage configure`
+multiple times is safe, because provisioning and configuration
+operations are idempotent. If no changes have been made to the
+Stackset definition in `~/.nucleator/contrib/cage`, these commands
+will result in no change.  If updates were made to to the Stackset
+definition (via `nucleator update`, for example) that are consistent
+with CloudFormation's "update in place" capabilities, the Stackset
+will be updated in place so that AWS Resources are brought into
+alignment with the new Stackset definition.
+
+SUBCOMMANDS
+-----------
+
+CAGE PROVISION
+~~~~~~~~~~~~~~
+
+'nucleator cage provision'::
+	--customer <customer_name> --cage <cage_name>
+	[--preview] [-h | --help]
++
+`nucleator cage provision` creates and connects the AWS resources
+required to create the Cloud resources that comprise the specified
+Nucleator Cage.  It instantiates and launches a CloudFormation stack
+that defines the Cage and its outputs.
+
+CAGE CONFIGURE
+~~~~~~~~~~~~~~
+
+'nucleator cage configure'::
+	--customer <customer_name> --cage <cage_name>
+	[--restart-nat]
+	[--limit-stackset <stackset_name>]
+	[--limit-stackset-instance <stackset_instance_name>]
+	[--recursive] [-h | --help]
++
+`nucleator cage configure` performs post-provisioning configuration of
+all ec2 resources associated with the cage, including optional Stackset
+configuration of ec2 resources provisioned in support of Stacksets
+associated with the Cage.
++
+To support strong and consistent security underpinnings, `cage
+configure` by default configures all hosts associated with the Cage,
+including instances that comprise the Cage as well as instances that
+comprise each Stackset associated with the Cage.  The set of
+configured instances can optionally be constrained to hosts associated
+with a specified Stackset or Stackset instance.
+
+CAGE DELETE
+~~~~~~~~~~~
+
+'nucleator cage delete'::
+	--customer <customer_name> --cage <cage_name>
+	[--recursive] [-h | --help]
++
+Attempts to delete the specified Cage.  Requires that the specified
+Cage already exists.  For expected operation, any dependent AWS
+resources within the Cage must first be deleted.
+
+OPTIONS
+-------
+
+--customer <customer_name>::
+	The name of the customer from which configuration for the Cage should
+	be drawn.  See also <<FILES>>.
+
+--cage <cage_name>::
+	The name of the desired Cage, consistent with a Cage defined in the
+	specified Customer's siteconfig.  See also <<FILES>>.
+
+--preview::
+	When provisioning a Cage, rather than provision the Cage,
+	print preview information about what will be provisioned if
+	run without the `--preview` opion.  Preview text is intended
+	to be descriptive and may also include links to graphical
+	architecture diagrams.
+
+--restart-nat::
+	When configuring a Cage, request that the NAT instance be stopped
+	then restarted.
+
+--limit-stackset <stackset_name>::
+	When configuring a Cage, constrain the configured hosts to
+	only those associated with the provided `<stackset_name>`
+	(e.g. `cage`, `beanstalk`, `builder`).
+
+--limit-stackset-instance <stackset_instance_name>::
+	When configuring a Cage, constrain configuration of hosts to
+	only those associated with the specified
+	`stackset_instance_name` instance of the stackset specified by
+	a prior `--limit-stackset` argument. This limits configuration
+	to only those hosts that comprise the specified stackset
+	instance.  Requires prior specification of `--limit-stackset`.
+	
+--list-hosts::
+	List the hosts that are entailed in configuration, taking into
+	acount any --limit-* options that may be present, rather than
+	performing configuration.
+
+--recursive::
+	When configuring a Cage, recursively invoke Stackset
+	configuration for each Stackset that has been provisioned with
+	the Cage.  THIS OPTION HAS NOT YET BEEN IMPLEMENTED.
++
+When deleting a Cage, recursively invoke the `delete` subcommand on
+each Stackset instance associated with the Cage. THIS OPTION HAS NOT
+YET BEEN IMPLEMENTED.
+
+--delete::
+	When provided as an argument to `cage provision`, deletes an
+	existing Cage rather than updating it.  Requires that the
+	specied Cage already exists.  For expected operation, any
+	dependent AWS resources within the Cage that were not
+	provisioned by Nucleator must first be deleted.  THIS OPTION
+	HAS NOT YET BEEN IMPLEMENTED.
+              
+
+[[FILES]]
+FILES
+-----
+
+~/.nucleator/::
+	Configuration directory for local nucleator configuration.
+
+~/.nucleator/siteconfig/<customer_name>.yml::
+	Customer configuration file, defines Cages supported for customer
+	including mapping each cage to a specified AWS Account and Region.
+
+~/.nucleator/siteconfig/<customer_name>-<cage_name>.yml::
+	Cage configuration file, allows refinements to network address space
+	used by this cage.
+
+~/.nucleator/ssh-config/<customer_name>/<cage_name>::
+	SSH config file, used to easily ssh to instances within this cage
+	via the Cage's bastion server.
+
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

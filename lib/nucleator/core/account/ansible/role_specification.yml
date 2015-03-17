@@ -1,0 +1,98 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+role_specification:
+  - role_name: NucleatorAgent
+    instance_profile: NucleatorAgentInstanceProfile
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorAgentTrustPolicy1
+          Principal :
+            Service : ec2.amazonaws.com
+          Action : sts:AssumeRole
+        - Effect : Allow
+          Sid : NucleatorAgentTrustPolicy2
+          Principal :
+            AWS :
+              - "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:user/NucleatorUser"  # This path used when not yet running in AWS
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorAgentAccessPolicy
+        policy_document:
+          Statement :
+            - Effect : Allow
+              Action : 'sts:AssumeRole'
+              Resource: '*'
+  - role_name: NucleatorAgent
+    instance_profile: NucleatorAgentInstanceProfile
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorAgentTrustPolicy1
+          Principal :
+            Service : ec2.amazonaws.com
+          Action : sts:AssumeRole
+        - Effect : Allow
+          Sid : NucleatorAgentTrustPolicy2
+          Principal :
+            AWS :
+              - "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:user/NucleatorUser"  # This path used when not yet running in AWS
+              - "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent" # This path used when starting with creds from NucleatorAgent Instance Profile
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorAgentAccessPolicy
+        policy_document:
+          Statement :
+            - Effect : Allow
+              Action : 'sts:AssumeRole'
+              Resource: '*'
+  - role_name: NucleatorAccountProvisioner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorAccountProvisionerTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorAccountProvisionerAccessPolicy # Includes ability to provision beanstalks, do everything needed in the "account_setup" playbook...
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action: 
+                - "cloudformation:DescribeStacks"
+                - "cloudformation:CreateStack"
+                - "cloudformation:UpdateStack"
+                - "cloudformation:DescribeStackEvents"
+              Resource: arn:aws:cloudformation:*
+            - Effect: Allow
+              Action:
+                - "route53:CreateHostedZone"
+                - "route53:GetChange"
+                - "route53:DeleteHostedZone"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "s3:CreateBucket"
+                - "s3:PutBucketPolicy"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "cloudtrail:CreateTrail"
+                - "cloudtrail:StartLogging"
+              Resource: '*'

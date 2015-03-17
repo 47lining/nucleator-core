@@ -1,0 +1,145 @@
+nucleator-redshift(1)
+=====================
+
+NAME
+----
+nucleator-redshift - Provision Amazon Redshift clusters in Nucleator Cages
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator redshift provision' <args> [options]
+'nucleator redshift delete' <args> [options]
+
+
+DESCRIPTION
+-----------
+
+The `redshift` command and its subcommands are used to create and maintain
+Amazon Redshift clusters within Nucleator Cages.
+
+Running `nucleator redshift provision` multiple times is safe, because 
+provisioning and configuration operations are idempotent. If no changes 
+have been made to the Stackset definition in `~/.nucleator/contrib/redshift`, 
+these commands will result in no change.  If updates were made to to the 
+Stackset definition (via `nucleator update`, for example) that are 
+consistent with CloudFormation's "update in place" capabilities, the 
+Stackset will be updated in place so that AWS Resources are brought 
+into alignment with the new Stackset definition.
+
+The `redshift` command provides the ability to easily manage
+provisioning parameters supporting setup and common scaling operations
+via the Nucleator CLI.
+
+SUBCOMMANDS
+-----------
+
+REDSHIFT PROVISION
+~~~~~~~~~~~~~~~~~~
+
+'nucleator redshift provision'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--cluster_name <redshift_cluster_name>
+	--username <db_user_name>
+	--password <db_user_password>
+	[--cluster_type <redshift_cluster_type>]
+	[--num_nodes <desired_number_of_nodes>]
+	[--node_type <desired_node_type>]
+	[--database_name <database_name>]
+	[--encrypted <true_or_false>]
+	[--public <true_or_false>]
+	[--port <database_port>]
+	[--preview] [-h | --help]
++
+`nucleator redshift provision` creates an Amazon Redshift cluster 
+in the specified Cage for the specified Customer.
++
+The subcommand supports options that control the cluster size and type of 
+instances to be used for cluster nodes.
+
+
+REDSHIFT DELETE
+~~~~~~~~~~~~~~~
+
+'nucleator redshift delete'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--cluster_name <redshift_cluster_name>
++
+`nucleator redshift delete` attempts to delete the `redshift`
+Stackset instance specified by <redshift_cluster_name> from the
+specified Nucleator Cage.
+
+
+OPTIONS
+-------
+
+--customer <customer_name>::
+	The name of the Customer for whom the specified Cage was provisioned.
+
+--cage <cage_name>::
+	The name of the Cage in which to provision and maintain the beanstalk.
+
+--cluster_name <cluster_name>::
+	The name of the Amazon Redshift cluster to provision,
+	configure, deploy or delete. Note that nucleator will extend this 
+	base cluster name appending "-<cage>-<customer>" to support AWS 
+	naming best practices and ensure uniqueness within the target AWS 
+	account. So for example if "mycluster" is passed as cluster_name, the 
+	provisioned cluster will be named "mycluster-<cage>-<customer>".
+
+--cluster_type <cluster_type>::
+	The type of cluster to provision - either "single-node" or "multi-node".
+	The default is "single-node".
+
+--num_nodes <number_of_nodes>::
+	The number of nodes to provision when deploying a multi-node cluster. 
+
+--node_type <node_type>::
+	The Amazon instance type to be used for provisioned cluster nodes. Valid 
+	values are "dw1.xlarge", "dw1.8xlarge", "dw2.large" and "dw2.8xlarge". The
+	default is "dw2.xlarge" which is eligible for AWS free tier usage.
+
+--username <db_username>::
+	The root username for the provisioned Redshift cluster. The username must 
+	be between 1 - 128 characters, contain only lowercase alphanumeric characters 
+	and cannot be a Redshift reserved word.
+
+--password <db_password>::
+	The root password for the provisioned Redshift cluster. The password must be 
+	between 8 - 64 characters and must contain at least one number, one lowercase 
+	letter and one uppercase letter.
+
+--database_name <database_name>::
+	The name of the initial Redshift database. Defaults to "defaultdb". The 
+	database name must contain only lowercase alphanumeric characters, be 
+	between 1 - 64 characters, and cannot be a Redshift reserved word.
+
+--encrypted <true_or_false>::
+	Controls whether data is encrypted at rest within the Redshift cluster.
+	The default is "false".
+
+--public <true_or_false>::
+	Controls whether the provisioned cluster can be accessed from a public 
+	network. The default is "false".
+
+--port <port_number>::
+	The port number to be used for the Redshift database. The default is 5439.
+
+--preview::
+	When provisioning a cluster, rather than provision the cluster,
+	print preview information about what will be provisioned if
+	run without the `--preview` opion.  Preview text is intended
+	to be descriptive and may also include links to graphical
+	architecture diagrams.
+
+-h::
+--help::
+	Show help for this command.
+
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

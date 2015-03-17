@@ -1,0 +1,73 @@
+nucleator-update(1)
+===================
+
+NAME
+----
+nucleator-update - localize Nucleator Stacksets from specified public or private git sources
+
+
+SYNOPSIS
+--------
+[verse]
+'nucleator update'
+
+
+DESCRIPTION
+-----------
+
+Uses a manifest of Nucleator Stacksets, and a manifest of required Ansible Roles within each, to localize Nucleator Stacksets and Ansible Roles at the specified version from the specified public or private git repositories.
+
+`nucleator update` is used to extend Nucleator to include or prefer customized and potentially private variations of Nucleator Stacksets and/or Ansible Roles.
+
+Updating Nucleator Stacksets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Clones each Stackset specified in `~/.nucleator/sources.yml` from the specified public or private git repository, at the specified version, placing the results in the specified named Stackset directory in `~/.nucleator/contrib`.
+
+Each resulting directory in `~/.nucleator/contrib` is assumed to correspond to a Nucleator command, and will by dynamically loaded by the `nucleator` command line interface at each invocation.
+
+Prior contents of `~/.nucleator/contrib`, if any, are uniquely renamed and moved to `~/.nucleator/contrib.bak`.
+
+Updating Ansible Roles
+~~~~~~~~~~~~~~~~~~~~~~
+
+Nucleator Stacksets may specify one or more Ansible Roles that should be installed during the `nucleator update` process.  Ansible Roles listed in `<stackset_name>/ansible/roles/roles.yml` will be installed from their specified source at the specified version to the specified Ansible Role name.
+
+Note that this is orthogonal to any Ansible Role dependencies stated using ansibles `meta` role dependency mechanism.  Ansible currently will not install roles included in `meta/main.yml` at playbook runtime.  `nucleator update` thus manages the invocation of Ansible's `ansible-galaxy install` command to install these roles within the Nucleator Stackset during the `nucleator update` process.
+
+[[FILES]]
+FILES
+-----
+
+~/.nucleator/::
+	Configuration directory for local nucleator configuration.
+
+~/.nucleator/sources.yml::
+	Source specification for Nucleator Stacksets that should be installed
+	by `nucleator update`.  For each Stackset to be included, specifies the
+	location of the Stackset source (typically a private or public git
+	repository), an optional version (typically a git branch or tag), and
+	the name of the Nucleator command implemented by the Stackset.  Uses
+	the same file format as `ansible-galaxy`.
+
+~/.nucleator/distkeys.yml::
+	Distibution keys that should be used while accessing private repository(ies)
+	used in `sources.yml`.
+
+~/.nucleator/contrib::
+	Directory where those Nucleator Stacksets specified in `sources.yml` are
+	locally materialized.
+
+~/.nucleator/contrib.bak::
+	Prior contrib directory structures are uniquely renamed and moved by
+	`nucleator update` to this backup directory, to avoid any potential
+	loss of data or local edits.
+
+<stackset_name>/ansible/roles/roles.yml::
+	Source specification for Ansible Roles that should be installed by
+	`nucleator update` for Nucleator Stackset `<stackset_name>`.  Uses
+	the same file format as `ansible-galaxy`.
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

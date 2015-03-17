@@ -1,0 +1,45 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+#
+# configuration for customer {{customer_name}} cage: {{cage_name}}
+#
+first8: 172
+second8: {{ second_eight }}
+public1: 0
+public2: 1
+private1: 4
+private2: 5
+db1: 8
+db2: 9
+{% raw %}
+awsdns_ip: "{{first8}}.{{second8}}.0.2"
+
+network_topology:
+  base: "{{first8}}.{{second8}}.0.0"
+  netmask: "255.255.0.0"
+  awsdns_cidr: "{{awsdns_ip}}/32"
+  vpc_cidr: "{{first8}}.{{second8}}.0.0/16"
+  public_cidr: "{{first8}}.{{second8}}.{{public1}}.0/23"
+  public1_cidr: "{{first8}}.{{second8}}.{{public1}}.0/24"
+  public2_cidr: "{{first8}}.{{second8}}.{{public2}}.0/24"
+  private_cidr: "{{first8}}.{{second8}}.{{private1}}.0/23"
+  private1_cidr: "{{first8}}.{{second8}}.{{private1}}.0/24"
+  private2_cidr: "{{first8}}.{{second8}}.{{private2}}.0/24"
+  db_cidr: "{{first8}}.{{second8}}.{{db1}}.0/23"
+  db1_cidr: "{{first8}}.{{second8}}.{{db1}}.0/24"
+  db2_cidr: "{{first8}}.{{second8}}.{{db2}}.0/24"
+
+{% endraw %}
