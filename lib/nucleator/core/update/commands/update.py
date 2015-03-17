@@ -57,7 +57,6 @@ class Update(Command):
             roles_path_tmp=os.path.join(properties.NUCLEATOR_CONFIG_DIR, "-".join( [ "contrib", str(uuid.uuid4()) ] ))
             update_command = [
                 "ansible-galaxy", "install",
-                "--ignore-errors", # TODO - understand why builder stackset blows up if this is not present
                 "--force",
                 "--role-file", sources,
                 "--roles-path", roles_path_tmp,
