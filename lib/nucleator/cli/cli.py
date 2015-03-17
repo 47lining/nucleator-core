@@ -31,6 +31,8 @@ class Cli(object):
         self.parser.add_argument("-p", "--preview", required=False, action="store_true", 
                                  help="Display information about what a command will do, without actually executing the command.\n" +
                                       "The --preview flag should come before any subcommands on the command line.")
+        self.parser.add_argument("-d", "--debug", required=False, action="store_true",
+                                help="Turn on debugging mode")
         self.subparsers = self.parser.add_subparsers(dest="command")
         
     def core_path(self):
@@ -42,24 +44,37 @@ class Cli(object):
         return properties.contrib_path()
 
     def import_commands(self, path):
+        # too early to use self.parse()
+        debug = "--debug" in sys.argv or "-d" in sys.argv
+        if debug:
+            print ">>>IMPORT COMMANDS PATH: "+path
 
         if not os.path.isdir(path):
+            if debug:
+                print ">>>IMPORT PATH NOT A DIR: "+path
             # skip if path to import doesn't exist
             return
 
         sys.path.append(path)
-
         # iterate through nucleator command definitions found as immediate subdirs of path
         for command_dir in next(os.walk(path))[1]:
 
             self.command_paths.append(os.path.join(path,command_dir))
+            if debug:
+                print ">>> IMPORT COMMAND_DIR: "+command_dir
             candidate_location = os.path.join(path, command_dir, "commands")
+            if debug:
+                print ">>> IMPORT CANDIDATE LOCATION: "+candidate_location
             import_candidates = os.listdir(candidate_location) if os.path.isdir(candidate_location) else []
 
             # iterate through filtered import candidates
             for name in [n for n in import_candidates
                          if n.endswith('.py') and n != "__init__.py"]:
+                if debug:
+                    print ">>> IMPORT CANDIDATE NAME: "+name
                 name = name.replace('.py', '')
+                if debug:
+                    print ">>> IMPORT "+"{0}.commands.{1}".format(command_dir, name)
                 module = __import__(
                     "{0}.commands.{1}".format(command_dir, name),
                     fromlist=['']
