@@ -2,7 +2,7 @@
 
 CONFLUENCE_EXPORT="$HOME/host/Downloads/NCD"
 TARGET="/tmp/export"
-NUCLEATOR_CORE="$HOME/git/47lining/nucleator-core"
+NUCLEATOR_CORE="$HOME/git/47lining/github/nucleator-core"
 
 rm -rf $TARGET
 mkdir -p $TARGET
