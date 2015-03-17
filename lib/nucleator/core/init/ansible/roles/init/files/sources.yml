@@ -15,25 +15,25 @@
 
 # siteconfig - Nucleator customer- and cage- specific configuration
 - src: https://github.com/47lining/nucleator-core-siteconfig.git
-#  version: master
+  version: master
   name: siteconfig
 
 # Nucleator Cage - supports cross-account creation of Nucleator Cages
 - src: https://github.com/47lining/nucleator-core-cage.git
-#  version: master
+  version: master
   name: cage
 
 # Nucleator Builder - supports cross-account creation of Nucleator Cages and Stacksets, and visualization via Jenkins
 - src: https://github.com/47lining/nucleator-core-builder.git
-#  version: master
+  version: master
   name: builder
 
 # Nucleator Beanstalk
 - src: https://github.com/47lining/nucleator-core-beanstalk.git
-#  version: master
+  version: master
   name: beanstalk
 
 # Nucleator Redshift
 - src: https://github.com/47lining/nucleator-core-redshift.git
-#  version: master
+  version: master
   name: redshift
