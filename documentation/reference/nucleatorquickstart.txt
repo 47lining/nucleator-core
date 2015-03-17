@@ -36,11 +36,11 @@ Do this:
 
 [source,txt]
 ----
-git clone --recursive --depth 1 -b nucleator_distribution https://github.com/47lining/ansible.git && cd ansible && sudo python setup.py install
+# (If your python installation does not requires root access to install, remove "sudo" from the next two commands)
 
-sudo pip install --upgrade git+ssh://github.com/47lining/nucleator-core.git
+cd /tmp && git clone --recursive --depth 1 -b nucleator_distribution https://github.com/47lining/ansible.git && cd ansible && sudo python setup.py install
 
-# (If your python installation does not requires root access to install, remove sudo from above commands)
+sudo pip install --upgrade git+git://github.com/47lining/nucleator-core.git
 
 nucleator init
 ----
@@ -62,12 +62,13 @@ git clone <clone_url_noted_above>
 STEP 3 - UPDATE STACKSET SOURCES TO USE YOUR PERSONAL SITECONFIG
 ----------------------------------------------------------------
 
-Edit the Stackset sources list in `~/.nucleator/sources.yml` and change
-the siteconfig stanza to include the `<clone_url_noted_above>`.
-Use the `git://` protocol so authentication is not required (just replace
-the `https://` in the https clone url with `git://`).  After an initial
-pass through the quickstart, you can read the User's Guide to learn more
-about how to specify a private repository in `soures.yml`.
+Edit the Stackset sources list in `~/.nucleator/sources.yml` and
+change the siteconfig stanza to include the `<clone_url_noted_above>`.
+Use the `git://` protocol as a clear signal that authentication is not
+required (just replace the `https://` in the https clone url with
+`git://`).  After an initial pass through the quickstart, you can read
+the User's Guide to learn more about how to specify a private
+repository in `soures.yml`.
 
 Do this:
 
@@ -181,117 +182,146 @@ b. Open the file and make the following changes:
 ** map_region_plus_redundant_zone_number_to_vpc_valid_az - Region to Availability Zone Mapping that specifies which AZ's are valid for provisioning VPC subnets within the Account. This can be set by going to the AWS console -> VPCs -> Subnets -> Create Subnet -> and grabbing the first two list items of the Availability Zone dropdown. Note: Will need to change the Region in the top right of the AWS console to grab the Availability Zones for the different Regions
 
 c. Copy the `{customer}-{cage}.yml` file for each Cage specified in your customer configuration file. For example, when done there should be a file for each Cage named something like `mycustomer-build.yml`
+
 d. In your `~/.nucleator` directory, copy the `{customer}-credentials.yml` to use your Customer name
+
 e. Open the file and fill in the `aws_access_key_id` and `aws_secret_access_key` for each account in the specified customer. These values are the saved values that were presented  when `NucleatorUser` was created
 
-NOTE:
-On Accounts that pre-date AWS' introduction of VPCs it is possible that the setup wizard may choose availability zones (AZ) in the {customer}.yml siteconfig file that are not VPC-capable.  If this occurs Nucleator cage provision will fail.  Please reference the link:Troubleshooting-Tips_22052899.html[Troubleshooting Tips] for more details on this issue and how to address it.
+NOTE
+~~~~
+
+On Accounts that pre-date AWS' introduction of VPCs it is possible
+that the setup wizard may choose availability zones (AZ) in the
+`<customer>.yml` siteconfig file that are not VPC-capable.  If this
+occurs Nucleator cage provision will fail.  Please reference the
+link:Troubleshooting-Tips_22052899.html[Troubleshooting Tips] for more
+details on this issue and how to address it.
 
 STEP 7 - COMMIT YOUR SITECONFIG UPDATES
 ---------------------------------------
 
-Whenever siteconfig files are generated and/or updated, you must commit them to your github repository so that Nucleator will be able to use them.  While still in you local clone you can review the config file changes that the wizard has made, or that you have manually made:
+Whenever siteconfig files are generated and/or updated, you must
+commit them to your github repository so that Nucleator will be able
+to use them.  While still in you local clone you can review the config
+file changes that the wizard has made, or that you have manually made:
 
-[source,txt]
-git status
-git diff
+[source,txt] git status git diff
 
 Add, commit and push your updated configuration:
 
-[source,txt]
-git add --all :/
-git commit -m "updated config with customer a, account b and cage c"
-git push
+[source,txt] git add --all :/ git commit -m "updated config with
+customer a, account b and cage c" git push
 
-STEP 8 - NUCLEATOR UPDATE
--------------------------
+STEP 8 - NUCLEATOR UPDATE -------------------------
 
 Do this:
 
-[source,txt]
-nucleator update
+[source,txt] nucleator update
 
-Nucleator update pulls current copies of all Stacksets that you have chosen to be part of your Nucleator installation.  You should run `nucleator update` whenever:
-* you add Stacksets to your selected sources
-* you change the version of a Stackset you are using
-* you modify a Stackset without changing the Stackset version, and you want Nucleator to see those changes
+Nucleator update pulls current copies of all Stacksets that you have
+chosen to be part of your Nucleator installation.  You should run
+`nucleator update` whenever: * you add Stacksets to your selected
+sources * you change the version of a Stackset you are using * you
+modify a Stackset without changing the Stackset version, and you want
+Nucleator to see those changes
 
 
-STEP 8 - PROVISION NUCLEATOR ROLES IN YOUR ACCOUNT
+STEP 9 - PROVISION NUCLEATOR ROLES IN YOUR ACCOUNT
 --------------------------------------------------
 
-Nucleator needs to establish some attributes in your account like iam roles in order to execute correctly.  To do this run:
+Nucleator needs to establish some attributes in your account like iam
+roles in order to execute correctly.  To do this run:
 
-[source,txt]
-----
-    nucleator account rolespec provision --customer <yourcustomername> --account <youraccountname>
+[source,txt] ---- nucleator account rolespec provision --customer
+<yourcustomername> --account <youraccountname>
 
-    # to ensure all the roles were created successfully
-    nucleator account rolespec validate --customer <yourcustomername> --account <youraccountname>
-----
+    # to ensure all the roles were created successfully nucleator
+    account rolespec validate --customer <yourcustomername> --account
+    <youraccountname> ----
 
-STEP 9 - ACCOUNT SETUP
-----------------------
+STEP 10 - ACCOUNT SETUP ----------------------
 
-Next Nucleator needs to set up specific account resources for proper operation such as creating s3 buckets.  To do this run:
+Next Nucleator needs to set up specific account resources for proper
+operation such as creating s3 buckets.  To do this run:
 
-[source,txt]
-    PYTHONUNBUFFERED=1 nucleator account setup --customer <yourcustomername> --account <youraccountname> | tee /tmp/account_setup.out
+[source,txt] PYTHONUNBUFFERED=1 nucleator account setup --customer
+    <yourcustomername> --account <youraccountname> | tee
+    /tmp/account_setup.out
 
-STEP 10 - DNS SETUP
--------------------
+STEP 11 - DNS SETUP -------------------
 
-More detailed instructions on DNS set-up are in the User's Guide section entitled link:Prepare-AWS-Account---Set-Up-DNS-for-Cages-Defined-within-your-Account_22053669.html[Prepare AWS Account - Set Up DNS for Cages Defined within your Account] You will need an externally resolvable Subdomain to which you have authority to add Nameserver records.
+More detailed instructions on DNS set-up are in the User's Guide
+section entitled
+link:Prepare-AWS-Account---Set-Up-DNS-for-Cages-Defined-within-your-Account_22053669.html[Prepare
+AWS Account - Set Up DNS for Cages Defined within your Account] You
+will need an externally resolvable Subdomain to which you have
+authority to add Nameserver records.
 
 For each Cage that you have defined for your Customer:
 
-a. In the AWS console go to Route53 -> Hosted Zones and select the hosted zone created by account setup for the current Cage.  "Go to Record Sets".
+a. In the AWS console go to Route53 -> Hosted Zones and select the
+hosted zone created by account setup for the current Cage.  "Go to
+Record Sets".
 
-b. Copy the Name Servers of the Hosted Zone by selecting its single `NS` record, and selecting and copying the four nameservers from the pane on the right.
+b. Copy the Name Servers of the Hosted Zone by selecting its single
+`NS` record, and selecting and copying the four nameservers from the
+pane on the right.
 
-c. Go to the system that you use to maintain authoritative `NS` records for the `customer_domain` that you specified during step 6.
-+
-** Add a single `NS` record with the name of the current Cage and a value that specifies the four nameservers copied above.
-+
-For example, for customer_domain `somedepartment.mycompany.com` and Cage `build`, you will create an NS record `build.somedepartment.mycompany.com` with a value that specifies the four nameservers copied above.
+c. Go to the system that you use to maintain authoritative `NS`
+records for the `customer_domain` that you specified during step 6.  +
+** Add a single `NS` record with the name of the current Cage and a
+value that specifies the four nameservers copied above.  + For
+example, for customer_domain `somedepartment.mycompany.com` and Cage
+`build`, you will create an NS record
+`build.somedepartment.mycompany.com` with a value that specifies the
+four nameservers copied above.
 
-d. Verify that the DNS updates have propagated
-+
-[source,txt]
-dig +short NS build.somedepartment.mycompany.com
+d. Verify that the DNS updates have propagated + [source,txt] dig
++short NS build.somedepartment.mycompany.com
 
-STEP 11 - PROVISION AND CONFIGURE CAGE
+STEP 12 - PROVISION AND CONFIGURE CAGE
 --------------------------------------
 
 You can now provision and configure your first Nucleator Cage:
 
-[source,txt]
-PYTHONUNBUFFERED=1 nucleator cage provision --customer <yourcustomername> --cage build | tee /tmp/cage_provision.out
-PYTHONUNBUFFERED=1 nucleator cage configure --customer <yourcustomername> --cage build | tee /tmp/cage_configure.out
+[source,txt] PYTHONUNBUFFERED=1 nucleator cage provision --customer
+<yourcustomername> --cage build | tee /tmp/cage_provision.out
+PYTHONUNBUFFERED=1 nucleator cage configure --customer
+<yourcustomername> --cage build | tee /tmp/cage_configure.out
 
-Note that it can take a few minutes for cage resources to be provisioned and 
-become available. You can use the CloudFormation AWS console to see the 
-current status and progress of provisioning while these commands are running.
+Note that it can take a few minutes for cage resources to be
+provisioned and become available. You can use the CloudFormation AWS
+console to see the current status and progress of provisioning while
+these commands are running.
 
-STEP 12 - CREATE A BUILDER STACKSET
+Once complete the builder user interface can be accessed at
+`https://nucleator-ui.<cage>.<customer-domain>`.  The initial login
+information is available in `~/.nucleator/<customer>-credential.yml`.
+
+STEP 13 - CREATE A BUILDER STACKSET
 -----------------------------------
 
-Nuceator support several stacksets that can be created within a cage.  The builder stackset provides a user interface for creating additional stacksets.  To do this run:
+Nuceator support several stacksets that can be created within a cage.
+The builder stackset provides a user interface for creating additional
+stacksets.  To do this run:
 
-[source,txt]
-PYTHONUNBUFFERED=1 nucleator builder provision --customer <yourcustomername> --cage build | tee /tmp/builder_provision.out
-PYTHONUNBUFFERED=1 nucleator builder configure --customer <yourcustomername> --cage build | tee /tmp/builder_configure.out
+[source,txt] PYTHONUNBUFFERED=1 nucleator builder provision --customer
+<yourcustomername> --cage build | tee /tmp/builder_provision.out
+PYTHONUNBUFFERED=1 nucleator builder configure --customer
+<yourcustomername> --cage build | tee /tmp/builder_configure.out
 
-Note that it can take some time for builder resources to be provisioned and 
-become available. You can use the CloudFormation AWS console to see the 
-current status and progress of provisioning while these commands are running.
+Note that it can take some time for builder resources to be
+provisioned and become available. You can use the CloudFormation AWS
+console to see the current status and progress of provisioning while
+these commands are running.
 
-Once complete the builder user interface can be accessed at https://nucleator-ui.{cage}.{customer-domain} and the login information is configured in ~/.nucleator/{customer}-credential.yml.
+Once complete the builder user interface can be accessed at
+https://nucleator-ui.{cage}.{customer-domain} and the login
+information is configured in ~/.nucleator/{customer}-credential.yml.
 
-SUMMARY
--------
+SUMMARY -------
 
-You should now have a configured Cage and Builder Stackset. To provision other Stacksets such as Beanstalk or Redshift, see the documentation for those specific commands. You can also re-run step 11 with any Cage that has been configured in step 6 to provision more Cages.
+You should now have a configured Cage and Builder Stackset. To provision other Stacksets such as Beanstalk or Redshift, see the documentation for those specific commands. You can also re-run step 12 with any Cage that has been configured in step 6 to provision more Cages.
 
 SEE ALSO
 --------
