@@ -221,10 +221,10 @@ map_aws_region_plus_arch_to_worker_ami:
 # http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-beanstalk-environment-tier.html
 beanstalk_tier_type:
   frontend:
-    type: WebServer
-    name: Standard
+    name: WebServer
+    type: Standard
     version: 1.0
   backend:
-    type: Worker
-    name: SQS/HTTP
+    name: Worker
+    type: SQS/HTTP
     version: 1.0
