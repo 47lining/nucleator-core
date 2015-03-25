@@ -18,6 +18,7 @@ from nucleator.cli import utils
 from nucleator.cli import unbuffered_subprocess as usp
 
 import os, subprocess, uuid
+import yaml
 
 class Update(Command):
     
@@ -28,6 +29,7 @@ class Update(Command):
         Initialize parsers for this command.
         """
         init_parser = subparsers.add_parser('update')
+        init_parser.add_argument("--version", required=False, help="Show versions of components", action='store_true')
 
     def update(self, **kwargs):
         """
@@ -39,12 +41,71 @@ class Update(Command):
           - Recursively pulls dependent modules specified in module dependencies for 
             each module in manifest
         """
-
+        if kwargs.get("version"):
+            self.show_versions()
+            return
         self.update_sources(**kwargs)
         self.update_roles(**kwargs)
 
         utils.write("SUCCESS - successfully updated nucleator sources and ansible roles, placed in {0}\n\n".format(properties.contrib_path()))
 
+    def write_versions(self):
+        """
+        show version of each Nucleator stackset specified in sources.yml
+        pull each one into ~/.nucleator/contrib/
+        """
+        sources = os.path.join(properties.NUCLEATOR_CONFIG_DIR, "sources.yml")
+        stream = open(sources, 'r')
+        slist = yaml.load(stream)
+        stream.close()
+        path = os.path.join(properties.NUCLEATOR_CONFIG_DIR, "contrib")
+        for sname in slist:
+            # sname['name'] == "siteconfig":
+            # sname['src']
+            # sname['version']
+            # git ls-remote http://www.kernel.org/pub/scm/git/git.git master
+            src = sname['src']
+            if src.startswith("git+"):
+                src = src[4:]
+            update_command = [ "git", "ls-remote", src ]
+            if 'version' in sname:
+                update_command.append(sname['version'])
+            utils.write(" ".join(update_command) + "\n")
+
+            os.environ["PYTHONUNBUFFERED"]="1"
+            update_process=usp.Popen(
+                update_command,
+                shell=False,
+                stdout=usp.PIPE,
+                stderr=usp.PIPE
+            )
+            update_out, update_err = update_process.communicate()
+            update_rc = update_process.returncode
+            if update_rc == 0:
+                vers_location = os.path.join(path, sname['name'], "__version__")
+                with open(vers_location, 'w') as f:
+                    f.write("Remote Location: "+sname['src']+"\n")
+                    f.write("Remote Branch: ")
+                    f.write("(not specified)" if 'version' not in sname else sname['version'])
+                    commit = update_out.split(" ")
+                    f.write("\nLast Commit: "+commit[0]+"\n")
+
+    def show_versions(self):
+        """
+        show version of each Nucleator stackset specified in sources.yml
+        pull each one into ~/.nucleator/contrib/
+        """
+        from nucleator import __version__
+        utils.write("Your Nucleator core is version "+__version__)
+        path = os.path.join(properties.NUCLEATOR_CONFIG_DIR, "contrib")
+        # iterate through nucleator command definitions found as immediate subdirs of path
+        for command_dir in next(os.walk(path))[1]:
+            candidate_location = os.path.join(path, command_dir, "__version__")
+            if os.path.isfile(candidate_location):
+                with open(candidate_location, 'r') as f:
+                    read_data = f.read()
+                utils.write("Version of "+command_dir+"\n"+read_data)
+        return 0
 
     def update_sources(self, **kwargs):
         """
@@ -108,7 +169,7 @@ class Update(Command):
             utils.write_err("Received non-zero return code {0} while attempting to update from nucleator sources using command: {1}\n\ncaptured stderr:\n{2}\n\n exiting with return code 1...".format(update_rc, " ".join(update_command), update_err))
         elif move_rc !=0:
             utils.write_err("Received non-zero return code {0} while attempting to move updated nucleator sources into place using command: {1}\n\ncaptured stderr:\n{2}\n\n exiting with return code 1...".format(move_rc, move_sequence, move_err))
-        
+        self.write_versions()
         return 0
 
     def update_roles(self, **kwargs):
