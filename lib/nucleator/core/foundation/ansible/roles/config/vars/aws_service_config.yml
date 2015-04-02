@@ -188,3 +188,13 @@ map_aws_region_plus_arch_to_worker_ami:
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
 
+# http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-beanstalk-environment-tier.html
+beanstalk_tier_type:
+  frontend:
+    name: WebServer
+    type: Standard
+    version: 1.0
+  backend:
+    name: Worker
+    type: SQS/HTTP
+    version: 1.0
