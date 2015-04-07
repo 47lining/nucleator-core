@@ -344,8 +344,9 @@ class Setup(Command):
                         is_found = True
                         break
                 if not is_found:
-                    print "No entry in distkeys for "+src['name']
-            print src['name']+" checked."
+                    print "No entry in distkeys for "+src['name']+" ("+src['src']+"), should be public."
+                else:
+                    print src['name']+" has distkey."
         # For each entry in distkeys.yml, does the key file exist?
         if distkeys:
             for key in distkeys['distribution_keys']:
@@ -384,7 +385,13 @@ class Setup(Command):
         """
         Read the siteconfig and other(?) things to attempt to detect issues
         """
-        siteconfig_home = os.path.join(properties.NUCLEATOR_CONFIG_DIR, 'siteconfig')
+        siteconfig_home = kwargs.get("siteconfig_dir", None)
+        if siteconfig_home:
+            if not os.path.isdir(siteconfig_home):
+                print "Directory doesn't exist: "+siteconfig_home
+                return 0
+        else:
+            siteconfig_home = os.path.join(properties.NUCLEATOR_CONFIG_DIR, 'siteconfig')
         siteconfig = self.load_siteconfig(siteconfig_home)
         print "Validation Step 1: Are the Cages in your yml files all described?"
         for customer in siteconfig['customers']:
@@ -408,7 +415,8 @@ class Setup(Command):
         # show subcommand
         setup_subparsers.add_parser('show', help="show a siteconfig")
         # validate subcommand
-        setup_subparsers.add_parser('validate', help="validate a siteconfig")
+        validater = setup_subparsers.add_parser('validate', help="validate a siteconfig")
+        validater.add_argument("--siteconfig_dir", required=False, help="Siteconfig directory to check (Default ~/.nucleator/siteconfig)")
 
 # Create the singleton for auto-discovery
 command = Setup()
