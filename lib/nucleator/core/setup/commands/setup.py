@@ -18,6 +18,7 @@ import utils.input_utils as INP
 import utils.generate_cert as GC
 import re, os, json, boto, sys, stat, yaml
 from boto import ec2
+from boto import iam
 from jinja2 import Template
 
 jenkins_keystore_password = 'P@ssw0rd'
@@ -224,28 +225,44 @@ class Setup(Command):
                     if "ACCESS_KEY" in os.environ:
                         access_key = os.environ["ACCESS_KEY"]
                     else:
-                        access_key = INP.ask_string("What is the access key for account '"+account_name+"'")
+                        access_key = INP.ask_string("What is the access key for the NucleatorUser in that account '"+account_name+"'")
                     if "SECRET_KEY" in os.environ:
                         secret_key = os.environ["SECRET_KEY"]
                     else:
-                        secret_key = INP.ask_string("What is the secret key for account '"+account_name+"'")
+                        secret_key = INP.ask_string("What is the secret key for the NucleatorUser in that account '"+account_name+"'")
                     if do_validation:
-                        conn = ec2.connection.EC2Connection(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
                         try:
-                            print ("Checking with AWS... "),
+                            print "Checking with AWS... "
+                            conn = iam.connection.IAMConnection(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+                            user = conn.get_user()
+                            user_name = user.get_user_response.get_user_result.user.user_name
+                            if user_name != "NucleatorUser":
+                                print "The access and secret keys are not for the user 'NucleatorUser'"
+                                continue
+                            arn = user.get_user_response.get_user_result.user.arn
+                            # 'arn:aws:iam::172139249013:user/NucleatorUser'
+                            aws_number = arn.split(':')[4]
+                        except boto.exception.EC2ResponseError as err:
+                            print "AWS doesn't recognize your access and/or secret key"
+                            continue
+                        except:
+                            print "AWS doesn't recognize your access and/or secret key"
+                            continue
+                        try:
+                            conn = ec2.connection.EC2Connection(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
                             reg_array = conn.get_all_regions()
                             # [RegionInfo:eu-central-1, RegionInfo:sa-east-1,
                             aws_regions = ['us-east-1', 'us-west-2', 'eu-west-1']
                             # for r in reg_array:
                                 # aws_regions.append(str(r.name))
                             # print ("OK, you have "+str(len(reg_array))+" regions available.")
-                            print ("OK, that looks good.")
+                            print ("OK, that all looks good.")
                             break
                         except boto.exception.EC2ResponseError as err:
-                            print "AWS doesn't recognize your access and/or secret key"
+                            print "AWS EC2 connection has a problem with your account."
                     else:
                         break
-                aws_number = INP.ask_number("What is the AWS account number for account '"+account_name+"'? ")
+                # aws_number = INP.ask_number("What is the AWS account number for account '"+account_name+"'? ")
                 default_region = INP.multiple_choice("Choose a default region for Nucleator Cages ",
                         aws_regions, 1, "This will be the default region where your cages will be created")
                 customer['accounts'].append({ 'name': account_name, 'access_key': access_key,
