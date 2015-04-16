@@ -306,23 +306,27 @@ class CliWithAnsibleLauncher(Cli):
                 **extra_vars
             )
             
-            filter=subprocess.Popen(
-                ["grep", "-A", "1", "^NUCLEATOR_TEMPORARY_CREDENTIALS$"],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            filter_out, filter_err = filter.communicate(playbook['stdout'])
-            found=True if filter.returncode==0 else False
+            #filter=subprocess.Popen(
+            #    ["grep", "-A", "1", "^NUCLEATOR_TEMPORARY_CREDENTIALS$"],
+            #    stdin=subprocess.PIPE,
+            #    stdout=subprocess.PIPE,
+            #    stderr=subprocess.PIPE
+            #)
+            #filter_out, filter_err = filter.communicate(playbook['stdout'])
+            #found=True if filter.returncode==0 else False
         
-            if not found:
-                write_err("Unable to find temporary credentials, Exiting...")
+            #if not found:
+            #    write_err("Unable to find temporary credentials, Exiting...")
         
             # HMMMmmmmm.  We only get stdout from the playbook, and need to rip out env variables to set from that.
             # What's the best way?  Seems like reverting to shell behavior isn't it.  Shouldn't we be 
             # parsing, splitting, then using os.environ[]
         
-            assignments=shlex.split(filter_out.split(os.linesep)[1])
+            #assignments=shlex.split(filter_out.split(os.linesep)[1])
+
+            with open("/tmp/creds.conf", "r") as content_file:
+                content = content_file.read()
+            assignments = shlex.split(content)
             
             p = re.compile('([^=]+)=(.*)')
             for assignment in assignments:
@@ -337,5 +341,7 @@ class CliWithAnsibleLauncher(Cli):
                 write_info('Temporary Credentials: {0} = {1}'.format(key, value))
         
         aws_environment_with_rolenames = json.dumps(aws_environment_with_rolenames)
+
+        os.remove("/tmp/creds.conf")
 
         return
