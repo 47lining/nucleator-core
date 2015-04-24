@@ -94,6 +94,7 @@ c. If you are visiting the console using your AWS Console shortcut link for
    root account credentials" beneath the Sign In button to get to the "Sign In
    or Create an AWS Account" Page
 d. Complete the Account Signup process using the conventions described below
+e. Be sure to activate SES - it requires some extra steps after AWS account signup
 +
 *Account Name:* `<youraccountname>-<yourcustomername>`
 +
