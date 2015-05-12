@@ -90,6 +90,28 @@
 - name: show cloudformation output parameters
   action: debug msg="{{account_setup_stack['stack_outputs']}}"
 
+- name: Set credentials variable to desired role
+  set_fact:
+    role_credentials: "{{item.NucleatorConfigProvisioner}}"
+  with_items:
+    - "{{aws_environment_with_rolenames}}"
+  no_log: True
+
+- name: log credentials variable
+  debug: var=role_credentials
+  when: debug_credentials
+
+- name: Setup AWS Config
+  config_provision: 
+    account_number: "{{target_account_number}}"
+    role_name: NucleatorConfigProvisioner
+    region: "{{aws_accounts[account_name]['bootstrap_region']}}"
+  environment: role_credentials
+
+#- name: Run config provision
+#  command: "aws configservice subscribe --s3-bucket config-bucket-{{target_account_number}} --sns-topic config-notice-{{target_account_number}} --iam-role arn:aws:iam::{{target_account_number}}:role/NucleatorConfigProvisioner"
+#  environment: role_credentials
+
 ## Once account is initialized and roles for cross-account access are in place, use IAM Role temporary credentials
 #
 #- name: log aws_environment_with_rolenames

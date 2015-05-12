@@ -96,3 +96,50 @@ role_specification:
                 - "cloudtrail:CreateTrail"
                 - "cloudtrail:StartLogging"
               Resource: '*'
+  - role_name: NucleatorConfigProvisioner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorConfigProvisionerTrustPolicy1
+          Principal :
+            Service : config.amazonaws.com
+          Action : sts:AssumeRole
+        - Effect : Allow
+          Sid : NucleatorConfigProvisionerTrustPolicy2
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorConfigProvisionerAccessPolicy # Includes ability to provision beanstalks, do everything needed in the "account_setup" playbook...
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "cloudtrail:DescribeTrails"
+                - "ec2:Describe*"
+              Resource: '*'
+            - Effect: Allow
+              Action: 
+                - "s3:PutObject"
+              Resource: arn:aws:s3:::*
+              Condition:
+                StringLike:
+                  s3:x-amz-acl: 'bucket-owner-full-control'
+            - Effect: Allow
+              Action: 
+                - "s3:GetBucketAcl"
+                - "s3:CreateBucket"
+                - "s3:ListBucket"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action: 
+                - "sns:Publish"
+                - "sns:CreateTopic"
+                - "config:PutConfigurationRecorder"
+                - "config:PutDeliveryChannel"
+                - "config:StartConfigurationRecorder"
+                - "config:DescribeConfigurationRecorders"
+                - "config:DescribeDeliveryChannels"
+                - "iam:PassRole"
+              Resource: '*'
