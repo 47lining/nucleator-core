@@ -150,7 +150,7 @@ class Init(Command):
             import boto
             utils.write(boto.Version + "\n")
             no_boto=False
-            if not StrictVersion(boto.Version) >= StrictVersion('2.34.0'):
+            if not StrictVersion(boto.Version) >= StrictVersion('2.38.0'):
                 msg="Prerequisite boto not up to date.\nNucleator requires boto version 2.34.0 or greater to run. " \
                 "You can install it via:\n" \
                 "\tpip install boto"
