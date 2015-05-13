@@ -106,6 +106,7 @@
     account_number: "{{target_account_number}}"
     role_name: NucleatorConfigProvisioner
     region: "{{aws_accounts[account_name]['bootstrap_region']}}"
+    log_bucket: "{{nucleator_logging_bucketname_specification}}"
   environment: role_credentials
 
 #- name: Run config provision

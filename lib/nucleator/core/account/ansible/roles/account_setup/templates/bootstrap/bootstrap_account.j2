@@ -2,12 +2,34 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Create pre-requisite AWS Resources for use with Nucleator in a new AWS Account.  Create an S3 Bucket for publishing Nucleator's customer-specific CloudFormation templates.  Set up Account best-practice hygiene (Create CloudTrail Bucket, Enable CloudTrail, Create S3 Bucket and Bucket Policy for detailed billing)",
     "Resources": {
+    "LoggingBucket" : {
+	    "Type" : "AWS::S3::Bucket",
+	    "Metadata" : { "DocString" :
+			   "S3 Bucket used by Nucleator to store logs from the other Nucleator buckets." },
+	    "Properties" : {
+	    "AccessControl" : "LogDeliveryWrite",
+		"BucketName" : "{{nucleator_logging_bucketname_specification}}",
+		"LoggingConfiguration": { 
+			"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+			"LogFilePrefix": "LoggingBucket/"
+		},
+		"Tags": [
+		    { "Key": "Name", "Value": "{{nucleator_logging_bucketname_specification}}" },
+		    { "Key": "NucleatorGroup", "Value": "nucleatorTemplates" },
+		    {{ nucleator_common_tags | to_json_fragment }}
+		]
+	    }
+	},
 	"TemplateBucket" : {
 	    "Type" : "AWS::S3::Bucket",
 	    "Metadata" : { "DocString" :
 			   "S3 Bucket used by Nucleator to store json templates for consumption by CloudFormation.  These templates are consistently used to provision Nucleator Cages and Stacksets." },
 	    "Properties" : {
 		"BucketName" : "{{nucleator_template_bucketname_specification}}",
+		"LoggingConfiguration": { 
+			"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+			"LogFilePrefix": "TemplateBucket/"
+		},
 		"Tags": [
 		    { "Key": "Name", "Value": "{{nucleator_billing_bucketname_specification}}" },
 		    { "Key": "NucleatorGroup", "Value": "nucleatorTemplates" },
@@ -21,6 +43,10 @@
 			   "S3 Bucket created by Nucleator for the purpose of storing detailed billing info for the AWS Account." },
 	    "Properties" : {
 		"BucketName" : "{{nucleator_billing_bucketname_specification}}",
+		"LoggingConfiguration": { 
+			"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+			"LogFilePrefix": "BillingBucket/"
+		},
 		"Tags": [
 		    { "Key": "Name", "Value": "{{nucleator_billing_bucketname_specification}}" },
 		    { "Key": "NucleatorGroup", "Value": "billing" },
@@ -74,6 +100,10 @@
 	    "DeletionPolicy" : "Retain",
 	    "Properties" : {
 		"BucketName" : "{{nucleator_cloudtrail_bucketname_specification}}",
+		"LoggingConfiguration": { 
+			"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+			"LogFilePrefix": "CloudTrailBucket/"
+		},
 		"Tags": [
 		    { "Key": "Name", "Value": "{{nucleator_cloudtrail_bucketname_specification}}" },
 		    { "Key": "NucleatorGroup", "Value": "cloudTrail" },

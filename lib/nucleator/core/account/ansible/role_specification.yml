@@ -90,6 +90,8 @@ role_specification:
               Action:
                 - "s3:CreateBucket"
                 - "s3:PutBucketPolicy"
+                - "s3:PutBucketLogging"
+                - "s3:PutBucketACL"
               Resource: arn:aws:s3:::*
             - Effect: Allow
               Action:
