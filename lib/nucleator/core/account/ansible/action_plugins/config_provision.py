@@ -27,6 +27,7 @@ class ActionModule(object):
 			role_name = args["role_name"]
 			account_number = args["account_number"]
 			region = args["region"]
+			logging_bucket = args["log_bucket"]
 
 			envdict={}
 			if self.runner.environment:
@@ -43,9 +44,13 @@ class ActionModule(object):
 				bucket = s3_conn.get_bucket(bucketName)
 			except Exception, e:
 				if(region is "us-east-1"):
-					bucket = s3_conn.create_bucket(bucketName)
+					bucket1 = s3_conn.create_bucket(bucketName)
+					bucket2 = s3_conn.get_bucket(logging_bucket)
+					response = bucket1.enable_logging(bucket2, "ConfigBucket/")
 				else:
-					bucket = s3_conn.create_bucket(bucketName, location=region)
+					bucket1 = s3_conn.create_bucket(bucketName, location=region)
+					bucket2 = s3_conn.get_bucket(logging_bucket)
+					response = bucket1.enable_logging(bucket2, "ConfigBucket/")
 
 			connection = configservice.connect_to_region(region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
                     aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),

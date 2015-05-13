@@ -25,3 +25,5 @@ nucleator_template_bucketname_specification:  "{{ nucleator_template_bucketname_
 nucleator_cloudtrail_bucketname_specification: "{{ ('ct-' ~ nucleator_template_bucketname_specification) | s3safe }}"
 
 nucleator_billing_bucketname_specification: "{{ ('billing-' ~ nucleator_template_bucketname_specification) | s3safe }}"
+
+nucleator_logging_bucketname_specification: "{{ ('logging-' ~ nucleator_template_bucketname_specification) | s3safe }}"
