@@ -133,6 +133,7 @@ role_specification:
                 - "s3:GetBucketAcl"
                 - "s3:CreateBucket"
                 - "s3:ListBucket"
+                - "s3:PutBucketLogging"
               Resource: arn:aws:s3:::*
             - Effect: Allow
               Action: 
