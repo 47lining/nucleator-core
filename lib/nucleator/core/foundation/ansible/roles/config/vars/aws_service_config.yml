@@ -136,6 +136,8 @@ map_aws_instance_type_to_architecture:
     Arch: "q64GPU"
   g2.2xlarge:
     Arch: "q64GPU"
+  r3.8xlarge:
+    Arch: "q64hvm"
 
 map_aws_region_plus_arch_to_public_bastion_ami:
   us-east-1:
