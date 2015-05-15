@@ -40,6 +40,11 @@ supported_ec2_instance_types:
   - c3.8xlarge
   - c3.large
   - c3.xlarge
+  - c4.2xlarge
+  - c4.4xlarge
+  - c4.8xlarge
+  - c4.large
+  - c4.xlarge
   - cc1.4xlarge
   - cc2.8xlarge
   - cg1.4xlarge
@@ -128,6 +133,16 @@ map_aws_instance_type_to_architecture:
     Arch: "q64"
   c3.8xlarge:
     Arch: "q64"
+  c4.large:
+    Arch: "q64hvm"
+  c4.xlarge:
+    Arch: "q64hvm"
+  c4.2xlarge:
+    Arch: "q64hvm"
+  c4.4xlarge:
+    Arch: "q64hvm"
+  c4.8xlarge:
+    Arch: "q64hvm"
   cc1.4xlarge:
     Arch: "q64Cluster"
   cc2.8xlarge:
