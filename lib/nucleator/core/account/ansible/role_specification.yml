@@ -139,6 +139,7 @@ role_specification:
               Action: 
                 - "sns:Publish"
                 - "sns:CreateTopic"
+                - "sns:ListTopics"
                 - "config:PutConfigurationRecorder"
                 - "config:PutDeliveryChannel"
                 - "config:StartConfigurationRecorder"
