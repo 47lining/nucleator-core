@@ -117,9 +117,10 @@ b. During the creation of the user, generate an Access Key for the user and be
    screen.  Retain the downloaded IAM Credentials for `NucleatorUser`.
    You will need to use these during the configuration process for Nucleator later.
    You will not be able to reaccess this Access Key information later.
-c. Add a User Policy to NucleatorUser by expanding the "Inline Policies" section
-   of the user description screen.  Select a custom policy and copy and paste
-   the policy listed below; name the policy `NucleatorUserPolicy` and apply it.
+c. Create a new group called NucleatorBootstrapGroup.
+d. Add a User Policy to NucleatorBootstrapGroup by expanding the "Inline Policies" section
+   of the group description screen.  Select a custom policy and copy and paste
+   the policy listed below; name the policy `NucleatorGroupPolicy` and apply it.
 +
 [source,txt]
     {
@@ -143,6 +144,7 @@ c. Add a User Policy to NucleatorUser by expanding the "Inline Policies" section
             }
         ]
     }
+d. Add NucleatorUser to NucleatorBootstrapGroup by clicking the Add Users to Group button from the group description screen. Select NucleatorUser and click Add Users.
 
 STEP 6 - CREATE INITIAL CONFIG FOR CUSTOMER, ACCOUNT AND CAGE
 -------------------------------------------------------------
