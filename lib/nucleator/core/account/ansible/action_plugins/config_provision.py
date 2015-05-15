@@ -6,6 +6,7 @@ import time
 
 from boto import configservice
 from boto import s3
+from boto import sns
 
 from ansible.runner.return_data import ReturnData
 from ansible.utils import parse_kv, template
@@ -35,6 +36,7 @@ class ActionModule(object):
 				env = utils.safe_eval(env)
 
 			bucketName = "config-bucket-%s" % account_number
+			snsName = "config-topic-%s" % account_number
 			
 			s3_conn = s3.connect_to_region(region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
                     aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
@@ -51,6 +53,14 @@ class ActionModule(object):
 					bucket1 = s3_conn.create_bucket(bucketName, location=region)
 					bucket2 = s3_conn.get_bucket(logging_bucket)
 					response = bucket1.enable_logging(bucket2, "ConfigBucket/")
+
+			sns_conn = sns.connect_to_region(region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
+                    aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
+                    security_token=env.get("AWS_SECURITY_TOKEN"))
+
+			sns_conn.create_topic(snsName)
+
+			snsARN = "arn:aws:sns:%s:%s:%s" % (region, account_number, snsName)
 
 			connection = configservice.connect_to_region(region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
                     aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
@@ -79,7 +89,8 @@ class ActionModule(object):
 
 			ConfigurationChannel={
 				'name': channel_name,
-				's3BucketName': bucketName
+				's3BucketName': bucketName,
+				'snsTopicARN': snsARN
 			}
 
 			response = connection.put_configuration_recorder(ConfigurationRecorder)
