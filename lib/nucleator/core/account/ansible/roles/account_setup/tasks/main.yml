@@ -90,6 +90,13 @@
 - name: show cloudformation output parameters
   action: debug msg="{{account_setup_stack['stack_outputs']}}"
 
+- name: Setup CloudTrail in All Supported Regions
+  cloudtrail_provision: 
+    account_number: "{{target_account_number}}"
+    region: "{{aws_accounts[account_name]['bootstrap_region']}}"
+    cloudtrail_bucket: "{{nucleator_cloudtrail_bucketname_specification}}"
+  environment: role_credentials
+
 - name: Set credentials variable to desired role
   set_fact:
     role_credentials: "{{item.NucleatorConfigProvisioner}}"
