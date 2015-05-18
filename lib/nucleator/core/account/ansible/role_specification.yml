@@ -97,6 +97,7 @@ role_specification:
               Action:
                 - "cloudtrail:CreateTrail"
                 - "cloudtrail:StartLogging"
+                - "cloudtrail:UpdateTrail"
               Resource: '*'
   - role_name: NucleatorConfigProvisioner
     trust_policy:
