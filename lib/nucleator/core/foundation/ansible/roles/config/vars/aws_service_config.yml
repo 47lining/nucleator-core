@@ -29,6 +29,7 @@ aws_environment: # TODO - move to role-specific environments.  This is the "defa
 
 supported_regions:
   - us-east-1
+  - us-west-1
   - us-west-2
   - eu-west-1
 
@@ -156,10 +157,13 @@ map_aws_instance_type_to_architecture:
 
 map_aws_region_plus_arch_to_public_bastion_ami:
   us-east-1:
-    q64: ami-246ed34c
+    q64: ami-246ed34c # amzn-ami-pv-2014.09.1.x86_64-ebs
     q64hvm: ami-b66ed3de
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
+  us-west-1:
+    q64: ami-7aba833f # amzn-ami-pv-2014.03.1.x86_64-ebs
+    q64hvm: ami-cb14f28f # amzn-ami-hvm-2015.03.0.x86_64-ebs
   us-west-2:
     q64: ami-55a7ea65
     q64hvm: ami-b5a7ea85
@@ -177,6 +181,9 @@ map_aws_region_plus_arch_to_public_nat_ami:
     q64hvm: ami-184dc970 # amzn-ami-vpc-nat-hvm-2014.09.1.x86_64-gp2 - ami-184dc970
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
+  us-west-1:
+    q64: ami-67a54423 # amzn-ami-vpc-nat-pv-2015.03.0.x86_64-ebs
+    q64hvm: ami-7da94839 # amzn-ami-vpc-nat-hvm-2015.03.0.x86_64-gp2
   us-west-2:
     q64: ami-030f4133 # amzn-ami-vpc-nat-pv-2014.09.1.x86_64-ebs - ami-030f4133
     q64hvm: ami-290f4119 # amzn-ami-vpc-nat-hvm-2014.09.1.x86_64-gp2 - ami-290f4119
@@ -190,12 +197,15 @@ map_aws_region_plus_arch_to_public_nat_ami:
 
 map_aws_region_plus_arch_to_worker_ami:
   us-east-1:
-    q64: ami-246ed34c
+    q64: ami-246ed34c # amzn-ami-pv-2014.09.1.x86_64-ebs
     q64hvm: ami-b66ed3de
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
+  us-west-1:
+    q64: ami-7aba833f # amzn-ami-pv-2014.03.1.x86_64-ebs
+    q64hvm: ami-cb14f28f # amzn-ami-hvm-2015.03.0.x86_64-ebs
   us-west-2:
-    q64: ami-55a7ea65
+    q64: ami-55a7ea65 # amzn-ami-pv-2014.09.1.x86_64-ebs
     q64hvm: ami-b5a7ea85
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
