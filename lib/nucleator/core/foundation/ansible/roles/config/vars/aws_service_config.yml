@@ -120,15 +120,35 @@ map_aws_instance_type_to_architecture:
   c1.xlarge:
     Arch: "q64"
   c3.large:
-    Arch: "q64"
+    Arch: "q64hvm"
   c3.xlarge:
-    Arch: "q64"
+    Arch: "q64hvm"
   c3.2xlarge:
-    Arch: "q64"
+    Arch: "q64hvm"
   c3.4xlarge:
-    Arch: "q64"
+    Arch: "q64hvm"
   c3.8xlarge:
-    Arch: "q64"
+    Arch: "q64hvm"
+  r3.large:
+    Arch: "q64hvm"
+  r3.xlarge:
+    Arch: "q64hvm"
+  r3.2xlarge:
+    Arch: "q64hvm"
+  r3.4xlarge:
+    Arch: "q64hvm"
+  r3.8xlarge:
+    Arch: "q64hvm"
+  i2.large:
+    Arch: "q64hvm"
+  i2.xlarge:
+    Arch: "q64hvm"
+  i2.2xlarge:
+    Arch: "q64hvm"
+  i2.4xlarge:
+    Arch: "q64hvm"
+  i2.8xlarge:
+    Arch: "q64hvm"
   cc1.4xlarge:
     Arch: "q64Cluster"
   cc2.8xlarge:
