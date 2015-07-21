@@ -133,7 +133,7 @@ class ActionModule(object):
                     return ReturnData(conn=conn, comm_ok=False, result=result)
 
             # add a short delay to allow for eventual consistency
-            if role_name == "NucleatorAgent":
+            if role_name == "NucleatorAgent" or role_name == "NucleatorBucketandqDistributorServiceRunner":
                 print "30 second delay to let roles catch up"
                 time.sleep(30)
                 '''
