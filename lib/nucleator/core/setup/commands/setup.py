@@ -16,7 +16,7 @@ from nucleator.cli import utils
 from nucleator.cli.command import Command
 import utils.input_utils as INP
 import utils.generate_cert as GC
-import re, os, json, boto, sys, stat
+import re, os, json, boto, sys, stat, yaml
 from boto import ec2
 from jinja2 import Template
 
@@ -321,14 +321,83 @@ class Setup(Command):
         print json.dumps(siteconfig, sort_keys=True, indent=4, separators=(',', ': '))
         return 0
 
+    def validate_keys(self, home_dir):
+        # Read the sources.yml and distkeys.yml
+        # For each entry in sources.yml, is there a host in distkeys.yml?
+        sources = None
+        if not os.path.isfile(os.path.join(home_dir, "sources.yml")):
+            print "There is no definition file 'sources.yml' in "+home_dir
+        else:
+            sources = yaml.load(open(os.path.join(home_dir, "sources.yml")))
+        distkeys = None
+        if not os.path.isfile(os.path.join(home_dir, "distkeys.yml")):
+            print "There is no definition file 'distkeys.yml' in "+home_dir
+        else:
+            distkeys = yaml.load(open(os.path.join(home_dir, "distkeys.yml")))
+        if sources and distkeys:
+            for src in sources:
+                # src, version, name
+                # check hostname in src present in distkeys
+                is_found = False
+                for key in distkeys['distribution_keys']:
+                    if src['src'] in key['hostname']:
+                        is_found = True
+                        break
+                if not is_found:
+                    print "No entry in distkeys for "+src['name']+" ("+src['src']+"), should be public."
+                else:
+                    print src['name']+" has distkey."
+        # For each entry in distkeys.yml, does the key file exist?
+        if distkeys:
+            for key in distkeys['distribution_keys']:
+                # hostname, ssh_config_host, private_keyfile
+                if not os.path.isfile(os.path.join(home_dir, "distkeys", key['private_keyfile'])):
+                    print "There is no key file '"+key['private_keyfile']+"' in "+home_dir+"/distkeys"
+                else:
+                    print key['hostname']+" keyfile exists..."
+
+    def validate_cages(self, siteconfig_home, customer):
+        # Read the customer.yml
+        # For each cage, see if there's a customer-cage.yml, but not much to check in it.
+        print "Checking cages for customer "+customer['name']
+        customer_yaml = yaml.load(open(os.path.join(siteconfig_home, customer['name']+".yml"), 'r'))
+        for cage in customer['cages']:
+            if cage not in customer_yaml['cage_names']:
+                print "There is no definition for cage "+cage+" in the "+customer['name']+".yml file"
+            if not os.path.isfile(os.path.join(siteconfig_home, customer['name']+"-"+cage+".yml")):
+                print "There is no definition file for customer "+customer['name']+", cage "+cage
+            if 'aws_accounts' not in customer_yaml:
+                print "You need to define accounts in 'aws_accounts' in "+customer['name']+".yml"
+            else:
+                if 'region' not in customer_yaml['cage_names'][cage]:
+                    print "You should define the region for cage "+cage
+                if 'owner' not in customer_yaml['cage_names'][cage]:
+                    print "You should define the owner for cage "+cage
+                if 'account' not in customer_yaml['cage_names'][cage]:
+                    print "You need to define the account for cage "+cage
+                else:
+                    if customer_yaml['cage_names'][cage]['account'] not in customer_yaml['aws_accounts']:
+                        print "The account "+customer_yaml['cage_names'][cage]['account']+" for cage "+cage+" needs to be included in 'aws_accounts'"
+                    else:
+                        print "Cage "+cage+" looks good."
+
     def validate(self, **kwargs):
         """
         Read the siteconfig and other(?) things to attempt to detect issues
         """
-        siteconfig_home = os.path.join(properties.NUCLEATOR_CONFIG_DIR, 'siteconfig')
+        siteconfig_home = kwargs.get("siteconfig_dir", None)
+        if siteconfig_home:
+            if not os.path.isdir(siteconfig_home):
+                print "Directory doesn't exist: "+siteconfig_home
+                return 0
+        else:
+            siteconfig_home = os.path.join(properties.NUCLEATOR_CONFIG_DIR, 'siteconfig')
         siteconfig = self.load_siteconfig(siteconfig_home)
         print "Validation Step 1: Are the Cages in your yml files all described?"
+        for customer in siteconfig['customers']:
+            self.validate_cages(siteconfig_home, customer)
         print "Validation Step 2: Check your distkeys.yml for existence of all the keys"
+        self.validate_keys(properties.NUCLEATOR_CONFIG_DIR)
         return 0
 
     def parser_init(self, subparsers):
@@ -346,7 +415,8 @@ class Setup(Command):
         # show subcommand
         setup_subparsers.add_parser('show', help="show a siteconfig")
         # validate subcommand
-        setup_subparsers.add_parser('validate', help="validate a siteconfig")
+        validater = setup_subparsers.add_parser('validate', help="validate a siteconfig")
+        validater.add_argument("--siteconfig_dir", required=False, help="Siteconfig directory to check (Default ~/.nucleator/siteconfig)")
 
 # Create the singleton for auto-discovery
 command = Setup()
