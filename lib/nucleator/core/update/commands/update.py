@@ -96,7 +96,7 @@ class Update(Command):
         pull each one into ~/.nucleator/contrib/
         """
         from nucleator import __version__
-        utils.write("Your Nucleator core is version "+__version__+"\n")
+        utils.write("Your Nucleator core is version "+__version__+"\n\n")
         path = os.path.join(properties.NUCLEATOR_CONFIG_DIR, "contrib")
         # iterate through nucleator command definitions found as immediate subdirs of path
         for command_dir in next(os.walk(path))[1]:
