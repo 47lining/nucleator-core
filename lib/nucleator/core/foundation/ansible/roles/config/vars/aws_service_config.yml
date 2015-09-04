@@ -115,6 +115,16 @@ map_aws_instance_type_to_architecture:
     Arch: "q64"
   m3.2xlarge:
     Arch: "q64"
+  m4.large:
+    Arch: "q64hvm"
+  m4.xlarge:
+    Arch: "q64hvm"
+  m4.2xlarge:
+    Arch: "q64hvm"
+  m4.4xlarge:
+    Arch: "q64hvm"
+  m4.10xlarge:
+    Arch: "q64hvm"
   c1.medium:
     Arch: "q64"
   c1.xlarge:
