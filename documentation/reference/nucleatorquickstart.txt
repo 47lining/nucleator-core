@@ -201,7 +201,16 @@ occurs Nucleator cage provision will fail.  Please reference the
 link:Troubleshooting-Tips_22052899.html[Troubleshooting Tips] for more
 details on this issue and how to address it.
 
-STEP 7 - COMMIT YOUR SITECONFIG UPDATES
+STEP 7 - CREATE CAGE SPECIFIC CRT FILES
+---------------------------------------
+
+a. Using a terminal, Navigate to your .nucleator/siteconfig directory.
+
+b. Run the following command by filling in the variables: sh make-self-signed-crt <customer name> <cage name> <customer domain> 
+
+c. Repeat for all cages
+
+STEP 8 - COMMIT YOUR SITECONFIG UPDATES
 ---------------------------------------
 
 Whenever siteconfig files are generated and/or updated, you must
@@ -220,7 +229,7 @@ git add --all :/
 git commit -m "updated config with customer <a>, account <b> and cage <c>"
 git push
 
-STEP 8 - NUCLEATOR UPDATE
+STEP 9 - NUCLEATOR UPDATE
 -------------------------
 
 Do this:
@@ -235,7 +244,7 @@ Nucleator update pulls current copies of all Stacksets that you have chosen to b
 * you modify a Stackset without changing the Stackset version, and you want Nucleator to see those changes
 
 
-STEP 9 - PROVISION NUCLEATOR ROLES IN YOUR ACCOUNT
+STEP 10 - PROVISION NUCLEATOR ROLES IN YOUR ACCOUNT
 --------------------------------------------------
 
 Nucleator needs to establish some attributes in your account like iam roles in order to execute correctly.  To do this run:
@@ -248,7 +257,7 @@ Nucleator needs to establish some attributes in your account like iam roles in o
     nucleator account rolespec validate --customer <yourcustomername> --account <youraccountname>
 ----
 
-STEP 10 - ACCOUNT SETUP
+STEP 11 - ACCOUNT SETUP
 ----------------------
 
 Next Nucleator needs to set up specific account resources for proper operation such as creating s3 buckets.  To do this run:
@@ -256,7 +265,7 @@ Next Nucleator needs to set up specific account resources for proper operation s
 [source,txt]
     PYTHONUNBUFFERED=1 nucleator account setup --customer <yourcustomername> --account <youraccountname> | tee /tmp/account_setup.out
 
-STEP 11 - DNS SETUP
+STEP 12 - DNS SETUP
 -------------------
 
 More detailed instructions on DNS set-up are in the User's Guide section entitled link:Prepare-AWS-Account---Set-Up-DNS-for-Cages-Defined-within-your-Account_22053669.html[Prepare AWS Account - Set Up DNS for Cages Defined within your Account] You will need an externally resolvable Subdomain to which you have authority to add Nameserver records.
@@ -278,7 +287,7 @@ d. Verify that the DNS updates have propagated
 [source,txt]
 dig +short NS build.somedepartment.mycompany.com
 
-STEP 12 - PROVISION AND CONFIGURE CAGE
+STEP 13 - PROVISION AND CONFIGURE CAGE
 --------------------------------------
 
 You can now provision and configure your first Nucleator Cage:
@@ -291,7 +300,7 @@ Note that it can take a few minutes for cage resources to be provisioned and
 become available. You can use the CloudFormation AWS console to see the 
 current status and progress of provisioning while these commands are running.
 
-STEP 13 - CREATE A BUILDER STACKSET
+STEP 14 - CREATE A BUILDER STACKSET
 -----------------------------------
 
 Nucleator supports several Stacksets that can be created within a cage.  The Builder Stackset provides a user interface for creating additional Stacksets.  To do this run:
