@@ -210,6 +210,11 @@ b. Run the following command by filling in the variables: sh make-self-signed-cr
 
 c. Repeat for all cages
 
+NOTE
+~~~~
+
+Note: The password asked for by the script must match the jenkins_keystore_password in the <customer>-credentials.yml file in your .nucleator directory
+
 STEP 8 - COMMIT YOUR SITECONFIG UPDATES
 ---------------------------------------
 
