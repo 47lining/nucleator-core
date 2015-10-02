@@ -69,7 +69,7 @@ class CliWithAnsibleLauncher(Cli):
         limit_stackset_instance=EXTRA_VARS.pop("limit_stackset_instance", None)
         list_hosts=EXTRA_VARS.pop("list_hosts", None)
         
-        HOSTS=STATIC_HOSTS_PATH if is_static else DYNAMIC_HOSTS_PATH
+        HOSTS=STATIC_HOSTS_BOOTSTRAP if is_static else DYNAMIC_HOSTS_PATH
 
         limit_group = ""
         if customer_name != "":

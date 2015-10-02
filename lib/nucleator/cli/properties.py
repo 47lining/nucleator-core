@@ -31,6 +31,8 @@ NUCLEATOR_CONFIG_DIR=get_clean("NUCLEATOR_CONFIG_DIR", os.path.join(HOME, ".nucl
 NUCLEATOR_CONTRIB_DIR=os.path.join(NUCLEATOR_CONFIG_DIR, "contrib")
 
 DYNAMIC_HOSTS_SRC = os.path.join(ANSIBLE_LOCATION, "dynamic_hosts")
+STATIC_HOSTS_BOOTSTRAP=os.path.join(DYNAMIC_HOSTS_SRC, "static_hosts")
+
 DYNAMIC_HOSTS_PATH = os.path.join(NUCLEATOR_CONFIG_DIR, "inventory")
 STATIC_HOSTS_PATH=os.path.join(DYNAMIC_HOSTS_PATH, "static_hosts")
 
