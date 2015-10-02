@@ -53,7 +53,11 @@ class Init(Command):
         cli=kwargs.get("cli", None)
         if cli is None:
             raise ValueError("INTERNAL ERROR: cli should have been set by upstream code, but is not specified")
-        extra_vars={"verbosity": kwargs.get("verbosity", None),}
+        extra_vars={
+            "verbosity": kwargs.get("verbosity", None),
+            "nucleator_dynamic_hosts_src": properties.DYNAMIC_HOSTS_SRC,
+            "nucleator_dynamic_hosts_dest": properties.DYNAMIC_HOSTS_PATH,
+        }
         return cli.safe_playbook(
             self.get_command_playbook("init.yml"),
             is_static=True,

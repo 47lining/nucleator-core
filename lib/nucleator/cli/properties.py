@@ -30,7 +30,8 @@ ANSIBLE_CONFIG=get_clean("ANSIBLE_CONFIG", os.path.join(ANSIBLE_LOCATION, "ansib
 NUCLEATOR_CONFIG_DIR=get_clean("NUCLEATOR_CONFIG_DIR", os.path.join(HOME, ".nucleator"))
 NUCLEATOR_CONTRIB_DIR=os.path.join(NUCLEATOR_CONFIG_DIR, "contrib")
 
-DYNAMIC_HOSTS_PATH = os.path.join(ANSIBLE_LOCATION, "dynamic_hosts")
+DYNAMIC_HOSTS_SRC = os.path.join(ANSIBLE_LOCATION, "dynamic_hosts")
+DYNAMIC_HOSTS_PATH = os.path.join(NUCLEATOR_CONFIG_DIR, "inventory")
 STATIC_HOSTS_PATH=os.path.join(DYNAMIC_HOSTS_PATH, "static_hosts")
 
 EC2_INI="ec2.ini.private"

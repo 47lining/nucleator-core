@@ -19,10 +19,17 @@
     mode=0700
     state=directory
 
+- name: Copy inventory structure from nucleator installation to nucleator config directory
+  copy:
+    src="{{ nucleator_dynamic_hosts_src }}"
+    dest="{{ nucleator_dynamic_hosts_dest }}"
+    force=no
+
 - name: populate nucleator config dir with example config files
   copy:
     src="{{ item }}"
     dest="{{ nucleator_configuration_dir}}"
+    force=no
     mode=0600
   with_fileglob:
     - "../files/*"
