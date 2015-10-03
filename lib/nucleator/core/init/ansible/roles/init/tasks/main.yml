@@ -23,7 +23,7 @@
     - "{{ nucleator_dynamic_hosts_dest }}"
 
 - name: Copy inventory structure from nucleator installation to nucleator config directory
-  command: "cp --no-clobber --recursive {{nucleator_dynamic_hosts_src}}/* {{nucleator_dynamic_hosts_dest}}/"
+  shell: "cp --no-clobber --recursive {{nucleator_dynamic_hosts_src}}/* {{nucleator_dynamic_hosts_dest}}/"
 
 - name: populate nucleator config dir with example config files
   copy:
