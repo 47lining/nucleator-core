@@ -60,7 +60,7 @@ class Init(Command):
         }
         return cli.safe_playbook(
             self.get_command_playbook("init.yml"),
-            is_static=True,
+            is_static="Bootstrap",
             **extra_vars
         )
 
