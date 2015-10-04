@@ -28,7 +28,7 @@
 - name: populate nucleator config dir with example config files
   copy:
     src="{{ item }}"
-    dest="{{ nucleator_configuration_dir}}"
+    dest="{{ nucleator_configuration_dir | osPathJoin(item | basename) }}"
     force=no
     mode=0600
   with_fileglob:
