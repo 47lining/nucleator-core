@@ -18,7 +18,8 @@
 		    { "Key": "NucleatorGroup", "Value": "nucleatorTemplates" },
 		    {{ nucleator_common_tags | to_json_fragment }}
 		]
-	    }
+	    },
+	    "DeletionPolicy" : "Retain"
 	},
 	"TemplateBucket" : {
 	    "Type" : "AWS::S3::Bucket",
@@ -35,7 +36,8 @@
 		    { "Key": "NucleatorGroup", "Value": "nucleatorTemplates" },
 		    {{ nucleator_common_tags | to_json_fragment }}
 		]
-	    }
+	    },
+	    "DependsOn" : "LoggingBucket"
 	},
 	"BillingBucket" : {
 	    "Type" : "AWS::S3::Bucket",
@@ -52,7 +54,8 @@
 		    { "Key": "NucleatorGroup", "Value": "billing" },
 		    {{ nucleator_common_tags | to_json_fragment }}
 		]
-	    }
+	    },
+	    "DependsOn" : "LoggingBucket"
 	},
 	"BillingBucketPolicy" : {
 	    "Type" : "AWS::S3::BucketPolicy",
@@ -109,7 +112,8 @@
 		    { "Key": "NucleatorGroup", "Value": "cloudTrail" },
 		    {{ nucleator_common_tags | to_json_fragment }}
 		]
-	    }
+	    },
+	    "DependsOn" : "LoggingBucket"
 	},
 	"CloudTrailBucketPolicy" : {
 	    "Type" : "AWS::S3::BucketPolicy",
