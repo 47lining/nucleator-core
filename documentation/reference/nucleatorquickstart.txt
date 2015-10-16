@@ -49,7 +49,7 @@ nucleator init
 STEP 2 - FORK THE PUBLIC nucleator-core-siteconfig GITHUB REPOSITORY
 --------------------------------------------------------------------
 
-For your first use of Nucleator, this quickstart recommends that you use a public siteconfig.  Once you've seen how Nucleator Cages and Stacksets work, you can create a private siteconfig repository and provide Nucleator with a distribution key to access it.  (For more information on setting up a github account see https://help.github.com/articles/set-up-git/ )
+For your first use of Nucleator, this quickstart recommends that you use a public siteconfig.  Once you've seen how Nucleator Cages and Stacksets work, you can create a private siteconfig repository and provide Nucleator with a distribution key to access it.  (For more information on setting up a github account see `https://help.github.com/articles/set-up-git/` )
 
 a. log into github and navigate to https://github.com/47lining/nucleator-core-siteconfig
 b. Fork your own copy of this repository into your github account by clicking the "fork" button in the upper right
@@ -201,19 +201,25 @@ occurs Nucleator cage provision will fail.  Please reference the
 link:Troubleshooting-Tips_22052899.html[Troubleshooting Tips] for more
 details on this issue and how to address it.
 
-STEP 7 - CREATE CAGE SPECIFIC CRT FILES
----------------------------------------
+STEP 7 - GENERATE AND PROVIDE CAGE-SPECIFIC SELF-SIGNED SSL CERTIFICATES
+------------------------------------------------------------------------
 
-a. Using a terminal, Navigate to your .nucleator/siteconfig directory.
+a. decide on a password to use to protect the private keys and certificates
+   that you will generate in the steps below.  Enter this password as the
+   value for the `pkcs12_bundle_password` key in your customer credentials
+   file at `~/.nucleator/<customer>-credentials.yml`
 
-b. Run the following command by filling in the variables: sh make-self-signed-crt <customer name> <cage name> <customer domain> 
+b. In your local clone of your personal fork of `nucleator-core-siteconfig`,
+   navigate to directory `ansible/roles/siteconfig/vars/`.
 
-c. Repeat for all cages
+c. Run the following command by filling in the variables:
++
+[source,txt]
+    ./make-certificate-bundle <customer_name> <cage_name> <customer_domain> <pkcs12_bundle_password>
 
-NOTE
-~~~~
-
-Note: The password asked for by the script must match the jenkins_keystore_password in the <customer>-credentials.yml file in your .nucleator directory
+d. Repeat for all cages.  Use the customer_name, customer_domain and each
+   cage_name that you specified during STEP 6.  Use the
+   pkcs12_bundle_password that you specified in STEP 7.a.
 
 STEP 8 - COMMIT YOUR SITECONFIG UPDATES
 ---------------------------------------
