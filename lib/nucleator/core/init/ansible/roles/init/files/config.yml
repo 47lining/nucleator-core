@@ -20,3 +20,22 @@
 # Nucleator can (re)install itself.  From whence should it do so?
 NUCLEATOR_CORE_REPO: "git+https://github.com/47lining/nucleator-core.git"
 NUCLEATOR_BRANCH_OR_TAG: "master"
+
+#
+# Nucleator Cage CIDR Whitelist
+#
+# Access to Nucleator Cages will be limited to those CIDRs listed here
+NUCLEATOR_CAGE_CIDR_WHITELIST:
+  - 0.0.0.0/0    # replace with whitelist entries
+
+# To enable clean stack updates, if CIDR_WHITELIST changes,
+# ensure INITIAL_RULENUM also changes such that new NACL rulenum
+# values are entirely nonoverlapping with prior rulenum values
+#
+# Also take care not to exceed maximum number of rules per NACL
+NUCLEATOR_CAGE_CIDR_WHITELIST_INITIAL_RULENUM: 100
+
+# Uncomment to change from default values
+
+#nucleator_cage_bastion_instance_type: t2.micro
+#nucleator_cage_nat_instance_type: t2.micro
