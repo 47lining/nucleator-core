@@ -119,6 +119,7 @@ class ActionModule(object):
 
                 # TODO use nucleator facts instead
                 private_ip = data['ec2_private_ip_address']
+                user = data['ssh_ansible_user']
                 instance_name = host
                 bastion_suffix = instance_name.split(".")
                 short_name=bastion_suffix.pop(0)
@@ -127,6 +128,7 @@ class ActionModule(object):
                 configfile=os.path.join(dest, customer_name, cage_name)
     
                 if short_name == "bastion":
+                    bastion_user = user
                     bastion_entries += ssh_config_bastion_entry(
                         "".join( (short_name, "-", cage_name) ),
                         instance_name,
