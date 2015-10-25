@@ -105,7 +105,7 @@ class ActionModule(object):
     
             dest = args.get('dest', None)
             identity_file = args.get('identity_file', None)
-            user = args.get('user', 'ec2-user')
+            default_user = args.get('user', 'ec2-user')
             bastion_user = args.get('bastion_user', args.get('user', 'ec2-user'))
 
             # Iterate though all hosts in the customer, cage pair
@@ -119,7 +119,7 @@ class ActionModule(object):
 
                 # TODO use nucleator facts instead
                 private_ip = data['ec2_private_ip_address']
-                user = data['ssh_ansible_user']
+                user = data.get('ansible_ssh_user', default_user)
                 instance_name = host
                 bastion_suffix = instance_name.split(".")
                 short_name=bastion_suffix.pop(0)

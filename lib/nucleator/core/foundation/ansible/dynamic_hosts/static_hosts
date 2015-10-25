@@ -8,5 +8,14 @@
 #   - You can enter hostnames or ip addresses
 #   - A hostname/ip can be a member of multiple groups
 
+# Most Nucleator Stacksets use AWS Linux, which uses ec2-user.
+# Other distros vary - you can maintain ability to connect to other groups
+# that you provision using different distros by adding a group_vars file
+# for the corresponding group in inventory as part of your provisioning plays.
+# That will override the default value defined here.
+#
+[all:vars]
+ansible_ssh_user=ec2-user
+
 [local]
 localhost ansible_connection=local
