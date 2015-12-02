@@ -1,0 +1,391 @@
+RELEASE 1.0.3:
+
+commit d6beeb25c9b345c885a74f71421ab4a7c92167e7
+Author: Mark Chance <mark.chance@hpe.com>
+Date:   Wed Dec 2 09:13:25 2015 -0700
+
+    fix for github issue: validation breaks if ~/.nucleator is symlinked #5
+
+commit c004883757bf12660cf8e20a9a07e9b3a5ad39d7
+Author: Brian Lloyd <brian.lloyd2@hp.com>
+Date:   Mon Nov 23 13:06:38 2015 -0500
+
+    add m4 instance types
+
+commit 82d6a1e90a550e1f96fbe1254868b2158c45c3d6
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Sun Oct 25 10:29:03 2015 -0600
+
+    use ansible_ssh_user in ssh config generation to support different usernames on different OS distros
+
+commit 59bbc1aed536c28ae5678a40465475eb352d1c08
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Sat Oct 24 17:32:35 2015 -0600
+
+    add NUCLEATOR_CAGE_REMOVE_INBOUND_PUBLIC_RULES to support mods to Cage CIDR Whitelist without conflict
+
+commit 97ddec68dc5fd4ead9d8a991b4dca0ad7d59bcde
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Sat Oct 24 17:29:33 2015 -0600
+
+    use ansible_ssh_user in ssh config generation to support different usernames on different OS distros
+
+commit da4e1d58536a6918da2c0b848e21a1f8970551f8
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Thu Oct 22 22:43:48 2015 -0600
+
+    support CIDR whitelist and bastion/nat instance sizing config
+
+--------------------------
+RELEASE 1.0.2:
+
+commit b17f1b7b36650448f88f1ad34dc74a17906e3b59
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Thu Oct 15 23:55:15 2015 -0600
+
+    doc enhancements for nucleator 1.0.2
+
+commit 0c4471e6d9189689d5166217bfa4e10b4b6c5aac
+Author: Brian Lloyd <brian.lloyd2@hp.com>
+Date:   Thu Oct 15 22:27:42 2015 -0400
+
+    fixes
+
+commit 5a2cbe301f19913b93cedf8beb3e4f6694e758c3
+Author: Brian Lloyd <brian.lloyd2@hp.com>
+Date:   Tue Oct 13 19:07:39 2015 -0400
+
+    fix boto version output and cp command to work on *nix and mac
+
+commit 42db80b295bf9b792c33578ed7899353be1b537a
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Sun Oct 4 11:46:09 2015 -0600
+
+    ensure that nucleator init copies default config files properly and without overwriting files that already exist in the nucleator configuration directory
+
+commit 839ed1425f8ccd0a0bbb267c178cb4e5bf74f91d
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Sun Oct 4 10:57:44 2015 -0600
+
+    align certificate bundle presentation and utility script with docs, default customer credentials file and builder stackset
+
+commit d796f9391cb5336d232cc1cb2a67c5768dedf2ee
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Fri Oct 2 22:38:27 2015 -0600
+
+    define a path for static inventory to be used for the nucleator init command, modify cli.launch_playbook to use it when is_static is set to 'Bootstrap', and do so from the nucleator init command.  This will allow all other Nucleator commands to use inventory within the nucleator config dir so they can pick up ansible_python_interpreter if set.
+
+commit 800cfc5abdde0ce84391a00b266a7eff2c34d1bb
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Fri Oct 2 18:17:16 2015 -0600
+
+    use shell (not command) when fileglob expansion is required
+
+commit 1f83d708e6b0d42cd780eb2d7a22c50678dd5b5a
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Fri Oct 2 18:04:49 2015 -0600
+
+    make that a variable!  Fix copy/paste error.
+
+commit 91882101b925b0ea12f81a0dff26f3d339de03f2
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Fri Oct 2 17:31:54 2015 -0600
+
+    additional mods to support movement of inventory into nucleator config dir
+
+commit a30992429dccafd259435b1f048dd36fc59a6498
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Thu Oct 1 23:34:33 2015 -0600
+
+    use static hosts file in nucleator installation dir when is_static, rather than inventory structure in ~/.nucleator.  This avoids bootstrapping errors/issues, because ansible is used by nucleator init to copy the inventory structure to ~/.nucleator at the outset.
+
+commit cd405e1ddf8397747939f619b132bc8963095e7f
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Thu Oct 1 23:12:08 2015 -0600
+
+    copy inventory to ~/nucleator/inventory upon nucleator init to ease inventory, host_vars and group_vars modifications and to enhance installation-specific flexibility.
+
+commit 9c17106842e0cd8061724c1b2f81c4644f6016d5
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Wed Sep 30 15:25:28 2015 -0600
+
+    Update to quickstart.txt to include instructions for creating siteconfig crt files
+
+commit 398273462bbd486adac30d8a5291b96462b2077d
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Wed Sep 30 14:33:14 2015 -0600
+
+    Update to quickstart.txt to include instructions for creating siteconfig crt files
+
+commit 0e199c8ad98c69737b0cee6a98a2b422ac926305
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Fri Sep 4 13:54:16 2015 -0600
+
+    Add arch mappings for m4 instance types
+
+commit ea304e07df2ba094a79d868a16478688b7fa01bb
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Mon Aug 24 20:36:40 2015 -0600
+
+    refine formatting on nucleator update --version
+
+commit 46b898c0d88449a2d9db1f3e4ac911bfc4265395
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Mon Aug 24 20:35:11 2015 -0600
+
+    refine formatting on nucleator update --version
+
+commit de1256e020446731a2fe2dcc0072b4a5bb4e0d7b
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Mon Aug 24 20:17:22 2015 -0600
+
+    bump __version__ to 1.0.2
+
+commit 1a2d7d79bee8930227ab9f7e4cdcfb7ebe313746
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Sun Aug 23 21:44:19 2015 -0600
+
+    squashed merge RS-526-validate
+
+commit aec4f2000383b70b78a871ed8d8756b7ff0a9527
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Sun Aug 23 21:33:19 2015 -0600
+
+    squashed merge RS-568-versioning
+
+commit 6b484ebf752fc7a1a2e5ee877f38fba774fc1d21
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Mon Jul 20 20:52:56 2015 -0600
+
+    RS-710 Image pipeline full checkin
+
+commit 0f6ded117d57284f819d2374ff119bd1f65564b9
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Mon May 18 14:07:37 2015 -0600
+
+    RS-669 Added action plugin to account setup to start cloud trail in all nucleator supported regions not already started up by cloudformation template
+
+commit 946ef4f05f720e7d9f71b79210f3e9359af36b83
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Fri May 15 15:53:21 2015 -0600
+
+    RS-668 Added text to quickstartguide.txt for adding NucleatorUser to a group and giving the group the necessary permissions
+
+commit 04393b4983e8300ba1a4a087a33fcebaaf26a5db
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Fri May 15 14:32:26 2015 -0600
+
+    Added an sns topic to the aws config according to cloudchecker
+
+commit d658c13cda911c928427b7b830c6008bb8cf7a27
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Thu May 14 15:38:38 2015 -0600
+
+    RS-666 Fix mistake in rolespec to give config provisioner rights to enable logging
+
+commit 806b8b73500988be6b34bc158e71e912868fabcd
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Wed May 13 16:24:58 2015 -0600
+
+    RS-671 Added a new logging bucket and made all account setup buckets log to that new bucket
+
+commit c2286135c3e296cff7da570f3e2948bb3fbc85f8
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Tue May 12 16:25:08 2015 -0600
+
+    RS-666 Added changes to account setup so that aws config is turned in the bootstrap region
+
+commit 37689453fbad8a860eba94513edc613931ad9564
+Author: Eric Putney <eric.putney@47lining.com>
+Date:   Thu Apr 16 14:28:24 2015 -0600
+
+    RS-546 Changed the credential output so it writes to a temp file that gets read in by obtain_credentials and then the temp file is deleted
+
+commit e0ce7fc960cdc067bd614a02a49073ecbcf8fae0
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Wed Mar 18 22:45:02 2015 -0600
+
+    update installation commands
+
+commit c18670fbc19e3a392142d3115ae15841fab66127
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Tue Mar 17 14:07:20 2015 -0600
+
+    quickstart formatting refinements
+
+commit d8f823069d6486f87a8e54164bcd417836ad7063
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Wed Mar 18 22:45:02 2015 -0600
+
+    update installation commands
+
+commit d2530e42cbc1b023228ee83a8a2f506df6bccaff
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Tue Mar 17 14:07:20 2015 -0600
+
+    quickstart formatting refinements
+
+commit adda0d4c4c5ce106f8a1801d4d52d816677de55f
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Wed Mar 18 22:45:02 2015 -0600
+
+    update installation commands
+
+commit f10b489ad98bfd3192f5cf7b29705330f11fa699
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Tue Mar 17 14:07:20 2015 -0600
+
+    quickstart formatting refinements
+
+commit b9cb4cfbeefad83b161f7c5d30f0d5e5006e0d0e
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Thu Mar 19 13:29:27 2015 -0600
+
+    name/type reversed
+
+commit a7d5f12f73fef251d6a5a5e8bc5e5240ae780580
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Thu Mar 19 12:03:29 2015 -0600
+
+    add description of beanstalk tiers
+
+commit b92b808cc5d7bd09818f8292869767fe0203510e
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Mon Aug 24 20:12:59 2015 -0600
+
+    bump __version__ to 1.0.1
+
+commit b89630f21d6aea95048acf283b5b251506cbbdd1
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Thu Jun 25 14:28:17 2015 -0600
+
+    fix arch type for c3 instances.  Add r3 and i2 instances to arch mapping.
+
+commit d561b34335040fb2b5309ed6a978d4171c85416a
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Fri May 29 18:57:21 2015 -0400
+
+    add us-west-1 to regions scanned for hosts
+
+commit d0b8ade0c1481b8ab2834fa0de7aad359afd9b1e
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Fri May 29 15:53:11 2015 -0400
+
+    added q64hvm ami ids for us-west-1
+
+commit 5eefe8aef183a104e63c4015057ab9d33d9b058c
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Fri May 29 15:26:46 2015 -0400
+
+    add us-west1 to supported regions and add amis
+
+commit 0528103dfb46ffb0f76334f695fd7d3a9dffda2e
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Mon Mar 23 11:11:42 2015 -0600
+
+    add embedded nucleator video
+
+commit 36b2bff06c8390d16b94f14135c4605ac661a589
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Wed Mar 18 22:45:02 2015 -0600
+
+    update installation commands
+
+commit 1775191b622c8d30566ec521fddb80f956cb60db
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Tue Mar 17 14:07:20 2015 -0600
+
+    quickstart formatting refinements
+
+commit 93fa261caceedb15f45c26b3541edecca173d087
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Tue Mar 17 13:32:40 2015 -0600
+
+    add debug flag to nucleator command
+
+commit cfcf29ffae8f173f091fe64153fc72209707d069
+Merge: 21d362a 74e46a1
+Author: Brian Lloyd <brian.d.lloyd@gmail.com>
+Date:   Tue Mar 17 14:31:32 2015 -0400
+
+    Merge branch 'master' of https://github.com/47lining/nucleator-core
+
+commit 74e46a11909cf79c5fc2b0cb5c23c2e43b2aded7
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Tue Mar 17 11:44:40 2015 -0600
+
+    remove ignore-errors on galaxy now that we've fixed the not-failing one
+
+commit 21d362aa92f562b8668d07cb9e2a4d49fe30dc6a
+Merge: 7ecbb60 ef77942
+Author: Brian Lloyd <brian.d.lloyd@gmail.com>
+Date:   Tue Mar 17 13:16:37 2015 -0400
+
+    Merge branch 'master' of https://github.com/47lining/nucleator-core
+
+commit 7ecbb604627f761563ed68192d583643920205a9
+Author: Brian Lloyd <brian.d.lloyd@gmail.com>
+Date:   Tue Mar 17 13:16:29 2015 -0400
+
+    add tojsonfragment filter
+
+commit ef77942a2428a8ce70eba29e5837b1f40b67e1d1
+Merge: 97155f6 0078f31
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Tue Mar 17 10:45:56 2015 -0600
+
+    Merge branch 'master' of https://github.com/47lining/nucleator-core
+
+commit 97155f6877a8c88fb30b040f6ddd3090bca11d0c
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Tue Mar 17 10:45:49 2015 -0600
+
+    add git+ to the core repo url
+
+commit 0078f3175b4e789c9b5c362962985f53f0833c56
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Tue Mar 17 10:00:10 2015 -0600
+
+    quickstart refinements and doc assembly process updates
+
+commit 8fcf7fe7cb7c815dc23cdf65ee59cc90cde3da52
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Tue Mar 17 09:35:59 2015 -0600
+
+    move protocol for public sources to git://.  Use explicit "git+" notation.
+
+commit c1dbbb6eb76f6f8e893a78b183e3b67df12c5df3
+Author: Mark Chance <mark@peopledesigned.com>
+Date:   Tue Mar 17 09:29:25 2015 -0600
+
+    uncommented all version statements since they are supported now
+
+commit 273a23ddfee4f24c41a1e61ee6bbc8e8625aa4a0
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Tue Mar 17 00:24:01 2015 -0600
+
+    align regions in ec2.ini with Nucleator regions
+
+commit 4955facb0df2a2fe1c785d9734314a30d199bdb8
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Mon Mar 16 23:35:34 2015 -0600
+
+    documentation assembly process fixes
+
+commit 623b6b92dc36f935c4b74b8e836e08e810983b28
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Mon Mar 16 23:35:06 2015 -0600
+
+    quickstart refinements
+
+commit f50980d34888146e95e902c0a40a2106a96afcda
+Author: Brian Lloyd <brian.d.lloyd@gmail.com>
+Date:   Tue Mar 17 00:26:54 2015 -0400
+
+    initial public commit
+
+commit 4a060f7d291676ee3e6a17a685f5e16fc70aa4c2
+Author: Brian Lloyd <brian.d.lloyd@gmail.com>
+Date:   Tue Mar 17 00:21:42 2015 -0400
+
+    add gitignore
