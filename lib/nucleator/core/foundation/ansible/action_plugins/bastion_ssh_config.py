@@ -229,10 +229,10 @@ class ActionModule(object):
             # fix file permissions when the copy is done as a different user
 
             # ansible pre-1.9.4 uses "sudo" & "sudo_user" or "su" & "su_user"
-            sudo_18=self.runner.get("sudo", False)
-            su_18=self.runner.get("su", False)
+            sudo_18=getattr(self.runner, "sudo", False)
+            su_18=getattr(self.runner, "su", False)
             # ansible 1.9.4-1 uses "become" & "become_user"
-            become_1941=self.runner.get("become", False)
+            become_1941=getattr(self.runner,"become", False)
 
             if sudo_18 and self.runner.sudo_user != 'root' or su_18 and self.runner.su_user != 'root' or become_1941 and self.runner.become_user != 'root':
                 self.runner._remote_chmod(conn, 'a+r', xfered, tmp)
