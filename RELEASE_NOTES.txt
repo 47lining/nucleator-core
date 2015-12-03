@@ -1,5 +1,17 @@
 RELEASE 1.0.3:
 
+commit 9232288d3eb471ede68ca1c6d9dbfc4e29aea4cb
+Author: Mick Bass <mick.bass@47lining.com>
+Date:   Thu Dec 3 08:03:11 2015 -0700
+
+    update bastion_ssh_config acton plugin to work with ansible 1.9.4 (runner.become) as well as pre-1.9.4 (runner.sudo, or runner.su)
+
+commit b48984f71c7386b471fd607f28a3f3a48c7b7734
+Author: Mark Chance <mark.chance@hpe.com>
+Date:   Wed Dec 2 09:16:01 2015 -0700
+
+    put the git log to RELEASE NOTES as a start
+
 commit d6beeb25c9b345c885a74f71421ab4a7c92167e7
 Author: Mark Chance <mark.chance@hpe.com>
 Date:   Wed Dec 2 09:13:25 2015 -0700
