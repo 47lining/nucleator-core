@@ -77,7 +77,7 @@ class ActionModule(object):
         for customer_name in customers:
             for cage_name in customers[customer_name]:
                 if customer_name == "None" or cage_name == "None":
-                    break
+                    continue
                 try:
                     return_data=self.ssh_config(customers, customer_name, cage_name, conn, tmp, module_name, module_args, inject, complex_args, **kwargs)
                     failed |= return_data.result.get('failed', False)
