@@ -40,7 +40,7 @@
 	    "DeletionPolicy" : "Retain"
 	},
 
-	"LoggingBucketELBPolicy-{{current_region}}" : {
+	"LoggingBucketELBPolicy{{region_counter}}" : {
 	    "Type" : "AWS::S3::BucketPolicy",
 	    "Metadata" : { "DocString" :
 			   "Policy that permits AWS ELB Service to put logging information into the Logging Bucket" },
