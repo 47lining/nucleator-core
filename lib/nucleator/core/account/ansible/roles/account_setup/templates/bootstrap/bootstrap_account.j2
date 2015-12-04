@@ -23,8 +23,9 @@
 	},
 
 {# Establish a Nucleator-maintained logging bucket in each supported region #}
+{% set region_counter=0 %}
 {% for current_region in supported_regions %}
-	"ElbLoggingBucket-{{current_region}}" : {
+	"ElbLoggingBucket{{region_counter}}" : {
 	    "Type" : "AWS::S3::Bucket",
 	    "Metadata" : { "DocString" :
 			   "S3 Bucket used by Nucleator to store logs from elastic loadbalancers in Nucleator Stacksets." },
@@ -45,7 +46,7 @@
 			   "Policy that permits AWS ELB Service to put logging information into the Logging Bucket" },
 	    "Properties" : {
 		"Bucket" : {
-		    "Ref": "ElbLoggingBucket-{{current_region}}"
+		    "Ref": "ElbLoggingBucket{{region_counter}}"
 		},
 		"PolicyDocument": {
 		    "Version": "2008-10-17",
@@ -76,6 +77,7 @@
 		}
 	    }
 	},
+{% set region_counter = region_counter + 1 %}
 {% endfor %}
 
 
