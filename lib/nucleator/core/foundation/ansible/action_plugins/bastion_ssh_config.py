@@ -57,7 +57,7 @@ class ActionModule(object):
                 if 'ec2_tag_NucleatorCage' in data:
                     cage_name = data['ec2_tag_NucleatorCage']
                 else:
-                    cage_name=data['ec2_tag_Name'].split("-")[1]
+                    cage_name=data['ec2_tag_Name'].split("-")[1] if 'ec2_tag_Name' in data else "None"
 
                 if customer_name not in customers:
                     customers[customer_name]={}
@@ -76,6 +76,8 @@ class ActionModule(object):
         comm_ok=True
         for customer_name in customers:
             for cage_name in customers[customer_name]:
+                if cage_name == "None":
+                    break
                 try:
                     return_data=self.ssh_config(customers, customer_name, cage_name, conn, tmp, module_name, module_args, inject, complex_args, **kwargs)
                     failed |= return_data.result.get('failed', False)
