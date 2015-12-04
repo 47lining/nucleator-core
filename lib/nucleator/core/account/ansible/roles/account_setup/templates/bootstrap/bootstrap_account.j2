@@ -2,16 +2,16 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Create pre-requisite AWS Resources for use with Nucleator in a new AWS Account.  Create an S3 Bucket for publishing Nucleator's customer-specific CloudFormation templates.  Set up Account best-practice hygiene (Create CloudTrail Bucket, Enable CloudTrail, Create S3 Bucket and Bucket Policy for detailed billing)",
     "Resources": {
-    "LoggingBucket" : {
+	"LoggingBucket" : {
 	    "Type" : "AWS::S3::Bucket",
 	    "Metadata" : { "DocString" :
 			   "S3 Bucket used by Nucleator to store logs from the other Nucleator buckets." },
 	    "Properties" : {
-	    "AccessControl" : "LogDeliveryWrite",
+		"AccessControl" : "LogDeliveryWrite",
 		"BucketName" : "{{nucleator_logging_bucketname_specification}}",
 		"LoggingConfiguration": { 
-			"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
-			"LogFilePrefix": "LoggingBucket/"
+		    "DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+		    "LogFilePrefix": "LoggingBucket/"
 		},
 		"Tags": [
 		    { "Key": "Name", "Value": "{{nucleator_logging_bucketname_specification}}" },
@@ -21,6 +21,45 @@
 	    },
 	    "DeletionPolicy" : "Retain"
 	},
+
+	"LoggingBucketELBPolicy" : {
+	    "Type" : "AWS::S3::BucketPolicy",
+	    "Metadata" : { "DocString" :
+			   "Policy that permits AWS ELB Service to put logging information into the Logging Bucket" },
+	    "Properties" : {
+		"Bucket" : {
+		    "Ref": "LoggingBucket"
+		},
+		"PolicyDocument": {
+		    "Version": "2008-10-17",
+		    "Id": "LoggingBucketPolicy-{{nucleator_logging_bucketname_specification}}",
+		    "Statement": [
+			{
+			    "Sid": "AwsPut-{{nucleator_logging_bucketname_specification}}",
+			    "Effect": "Allow",
+			    "Principal": {
+				"AWS": [
+				    "127311923021",
+				    "027434742980",
+				    "797873946194",
+				    "156460612806",
+				    "054676820928",
+				    "582318560864",
+				    "114774131450",
+				    "783225319266",
+				    "507241528517",
+				    "048591011584",
+				    "638102146993"
+			    },
+			    "Action": [
+				"s3:PutObject"
+			    ],
+			    "Resource": "arn:aws:s3:::{{nucleator_logging_bucketname_specification}}/CloudWatch/*"
+			}
+			]
+		}
+	    }
+	},
 	"TemplateBucket" : {
 	    "Type" : "AWS::S3::Bucket",
 	    "Metadata" : { "DocString" :
@@ -28,8 +67,8 @@
 	    "Properties" : {
 		"BucketName" : "{{nucleator_template_bucketname_specification}}",
 		"LoggingConfiguration": { 
-			"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
-			"LogFilePrefix": "TemplateBucket/"
+		    "DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+		    "LogFilePrefix": "TemplateBucket/"
 		},
 		"Tags": [
 		    { "Key": "Name", "Value": "{{nucleator_billing_bucketname_specification}}" },
@@ -46,8 +85,8 @@
 	    "Properties" : {
 		"BucketName" : "{{nucleator_billing_bucketname_specification}}",
 		"LoggingConfiguration": { 
-			"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
-			"LogFilePrefix": "BillingBucket/"
+		    "DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+		    "LogFilePrefix": "BillingBucket/"
 		},
 		"Tags": [
 		    { "Key": "Name", "Value": "{{nucleator_billing_bucketname_specification}}" },
@@ -104,8 +143,8 @@
 	    "Properties" : {
 		"BucketName" : "{{nucleator_cloudtrail_bucketname_specification}}",
 		"LoggingConfiguration": { 
-			"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
-			"LogFilePrefix": "CloudTrailBucket/"
+		    "DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+		    "LogFilePrefix": "CloudTrailBucket/"
 		},
 		"Tags": [
 		    { "Key": "Name", "Value": "{{nucleator_cloudtrail_bucketname_specification}}" },
@@ -184,7 +223,7 @@
 		}
 	    }
 	}{% for current_cage, current_cage_entries in cage_names.iteritems() if current_cage_entries['account'] == account_name %}
-,
+	,
 	"{{current_cage|capitalize}}HostedZone" : {
 	    "Type" : "AWS::Route53::HostedZone",
 	    "Properties" : {
