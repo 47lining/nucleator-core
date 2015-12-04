@@ -113,13 +113,13 @@ map_aws_instance_type_to_architecture:
   m2.4xlarge:
     Arch: "q64"
   m3.medium:
-    Arch: "q64"
+    Arch: "q64hvm"
   m3.large:
-    Arch: "q64"
+    Arch: "q64hvm"
   m3.xlarge:
-    Arch: "q64"
+    Arch: "q64hvm"
   m3.2xlarge:
-    Arch: "q64"
+    Arch: "q64hvm"
   m4.large:
     Arch: "q64hvm"
   m4.xlarge:
