@@ -22,20 +22,37 @@
 	    "DeletionPolicy" : "Retain"
 	},
 
-	"LoggingBucketELBPolicy" : {
+{# Establish a Nucleator-maintained logging bucket in each supported region #}
+{% for current_region in supported_regions %}
+	"ElbLoggingBucket-{{current_region}}" : {
+	    "Type" : "AWS::S3::Bucket",
+	    "Metadata" : { "DocString" :
+			   "S3 Bucket used by Nucleator to store logs from elastic loadbalancers in Nucleator Stacksets." },
+	    "Properties" : {
+		"BucketName" : "elb-{{nucleator_logging_bucketname_specification}}-{{current_region}}",
+		"Tags": [
+		    { "Key": "Name", "Value": "elb-{{nucleator_logging_bucketname_specification}}-{{current_region}}" },
+		    { "Key": "NucleatorGroup", "Value": "nucleatorElbLogging" },
+		    {{ nucleator_common_tags | to_json_fragment }}
+		]
+	    },
+	    "DeletionPolicy" : "Retain"
+	},
+
+	"LoggingBucketELBPolicy-{{current_region}}" : {
 	    "Type" : "AWS::S3::BucketPolicy",
 	    "Metadata" : { "DocString" :
 			   "Policy that permits AWS ELB Service to put logging information into the Logging Bucket" },
 	    "Properties" : {
 		"Bucket" : {
-		    "Ref": "LoggingBucket"
+		    "Ref": "ElbLoggingBucket-{{current_region}}"
 		},
 		"PolicyDocument": {
 		    "Version": "2008-10-17",
 		    "Id": "LoggingBucketPolicy-{{nucleator_logging_bucketname_specification}}",
 		    "Statement": [
 			{
-			    "Sid": "AwsPut-{{nucleator_logging_bucketname_specification}}",
+			    "Sid": "AwsPut-{{nucleator_logging_bucketname_specification}}-{{current_region}}",
 			    "Effect": "Allow",
 			    "Principal": {
 				"AWS": [
@@ -53,12 +70,15 @@
 			    "Action": [
 				"s3:PutObject"
 			    ],
-			    "Resource": "arn:aws:s3:::{{nucleator_logging_bucketname_specification}}/CloudWatch/*"
+			    "Resource": "arn:aws:s3:::elb-{{nucleator_logging_bucketname_specification}}-{{current_region}}/*"
 			}
 		    ]
 		}
 	    }
 	},
+{% endfor %}
+
+
 	"TemplateBucket" : {
 	    "Type" : "AWS::S3::Bucket",
 	    "Metadata" : { "DocString" :
