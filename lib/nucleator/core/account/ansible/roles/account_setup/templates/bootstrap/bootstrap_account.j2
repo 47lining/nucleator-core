@@ -30,9 +30,9 @@
 	    "Metadata" : { "DocString" :
 			   "S3 Bucket used by Nucleator to store logs from elastic loadbalancers in Nucleator Stacksets." },
 	    "Properties" : {
-		"BucketName" : "elb-{{nucleator_logging_bucketname_specification}}-{{current_region}}",
+		"BucketName" : "lb-{{nucleator_logging_bucketname_specification}}-{{current_region}}",
 		"Tags": [
-		    { "Key": "Name", "Value": "elb-{{nucleator_logging_bucketname_specification}}-{{current_region}}" },
+		    { "Key": "Name", "Value": "lb-{{nucleator_logging_bucketname_specification}}-{{current_region}}" },
 		    { "Key": "NucleatorGroup", "Value": "nucleatorElbLogging" },
 		    {{ nucleator_common_tags | to_json_fragment }}
 		]
@@ -71,7 +71,7 @@
 			    "Action": [
 				"s3:PutObject"
 			    ],
-			    "Resource": "arn:aws:s3:::elb-{{nucleator_logging_bucketname_specification}}-{{current_region}}/*"
+			    "Resource": "arn:aws:s3:::lb-{{nucleator_logging_bucketname_specification}}-{{current_region}}/*"
 			}
 		    ]
 		}
