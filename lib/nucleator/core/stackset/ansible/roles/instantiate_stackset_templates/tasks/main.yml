@@ -30,8 +30,13 @@
 - fail: msg="Stack name '{{ stackset_instance_name }}{{ stackset_name }}' contains illegal characters"
   when: not stackset_name | match("^[a-zA-Z0-9-]*$")
 
+# nucleator-core-bakery uses a template role per bakery_group.  Respect that if present.
+- name: determine name of templates role
+  set_fact: 
+    templates_role_name: "{{bakery_group | default('stackset')}}_template"
+
 - name: Include stackset-specific vars
-  include_vars: "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/stackset_templates/vars/{{stackset_name}}.yml"
+  include_vars: "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/{{templates_role_name}}/vars/{{stackset_name}}.yml"
 
 - name: Instantiate stackset templates
   template:
