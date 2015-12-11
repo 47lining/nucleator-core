@@ -44,5 +44,5 @@
     dest="{{ cloudformation_template_instantiation_dir | expanduser }}/{{ customer_name }}/{{ cage_name }}/stackset/{{ stackset_name }}/{{stackset_instance_name}}{{ item|basename|regex_replace('\\.j2$', '.json') }}"
     mode=0755
   with_fileglob:
-    - "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/stackset_templates/templates/*.j2"
+    - "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/{{templates_role_name}}/templates/*.j2"
 
