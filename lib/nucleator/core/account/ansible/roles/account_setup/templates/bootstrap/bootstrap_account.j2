@@ -21,66 +21,6 @@
 	    },
 	    "DeletionPolicy" : "Retain"
 	},
-
-{# Establish a Nucleator-maintained logging bucket in each supported region #}
-{% set region_counter=0 %}
-{% for current_region in supported_regions %}
-	"ElbLoggingBucket{{region_counter}}" : {
-	    "Type" : "AWS::S3::Bucket",
-	    "Metadata" : { "DocString" :
-			   "S3 Bucket used by Nucleator to store logs from elastic loadbalancers in Nucleator Stacksets." },
-	    "Properties" : {
-		"BucketName" : "lb-{{nucleator_logging_bucketname_specification}}-{{current_region}}",
-		"Tags": [
-		    { "Key": "Name", "Value": "lb-{{nucleator_logging_bucketname_specification}}-{{current_region}}" },
-		    { "Key": "NucleatorGroup", "Value": "nucleatorElbLogging" },
-		    {{ nucleator_common_tags | to_json_fragment }}
-		]
-	    },
-	    "DeletionPolicy" : "Retain"
-	},
-
-	"LoggingBucketELBPolicy{{region_counter}}" : {
-	    "Type" : "AWS::S3::BucketPolicy",
-	    "Metadata" : { "DocString" :
-			   "Policy that permits AWS ELB Service to put logging information into the Logging Bucket" },
-	    "Properties" : {
-		"Bucket" : {
-		    "Ref": "ElbLoggingBucket{{region_counter}}"
-		},
-		"PolicyDocument": {
-		    "Version": "2008-10-17",
-		    "Id": "LoggingBucketPolicy-{{nucleator_logging_bucketname_specification}}",
-		    "Statement": [
-			{
-			    "Sid": "AwsPut-{{nucleator_logging_bucketname_specification}}-{{current_region}}",
-			    "Effect": "Allow",
-			    "Principal": {
-				"AWS": [
-				    "127311923021",
-				    "027434742980",
-				    "797873946194",
-				    "156460612806",
-				    "054676820928",
-				    "582318560864",
-				    "114774131450",
-				    "783225319266",
-				    "507241528517"
-				]
-			    },
-			    "Action": [
-				"s3:PutObject"
-			    ],
-			    "Resource": "arn:aws:s3:::lb-{{nucleator_logging_bucketname_specification}}-{{current_region}}/*"
-			}
-		    ]
-		}
-	    }
-	},
-{% set region_counter = region_counter + 1 %}
-{% endfor %}
-
-
 	"TemplateBucket" : {
 	    "Type" : "AWS::S3::Bucket",
 	    "Metadata" : { "DocString" :
