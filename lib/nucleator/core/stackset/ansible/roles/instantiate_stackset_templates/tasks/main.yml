@@ -33,7 +33,7 @@
 # nucleator-core-bakery uses a template role per bakery_group.  Respect that if present.
 - name: determine name of templates role
   set_fact: 
-    templates_role_name: "{{bakery_group | default('stackset')}}_template"
+    templates_role_name: "{{bakery_group | default('stackset')}}_templates"
 
 - name: Include stackset-specific vars
   include_vars: "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/{{templates_role_name}}/vars/{{stackset_name}}.yml"
