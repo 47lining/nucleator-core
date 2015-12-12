@@ -30,13 +30,15 @@
 - fail: msg="Stack name '{{ stackset_instance_name }}{{ stackset_name }}' contains illegal characters"
   when: not stackset_name | match("^[a-zA-Z0-9-]*$")
 
-# nucleator-core-bakery uses a template role per bakery_group.  Respect that if present.
+# nucleator-core-bakery uses a template role per bakery_group, in the bakery-roles stackset.  Respect that if present.
 - name: determine name of templates role
   set_fact: 
     templates_role_name: "{{bakery_group | default('stackset')}}_templates"
+    target_stackset: stackset_name if stackset_name != "bakery" else "bakery-roles"
+    target_vars: stackset_name if stackset_name != "bakery" else bakery_group
 
 - name: Include stackset-specific vars
-  include_vars: "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/{{templates_role_name}}/vars/{{stackset_name}}.yml"
+  include_vars: "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/vars/{{target_vars}}.yml"
 
 - name: Instantiate stackset templates
   template:
@@ -44,5 +46,5 @@
     dest="{{ cloudformation_template_instantiation_dir | expanduser }}/{{ customer_name }}/{{ cage_name }}/stackset/{{ stackset_name }}/{{stackset_instance_name}}{{ item|basename|regex_replace('\\.j2$', '.json') }}"
     mode=0755
   with_fileglob:
-    - "{{nucleator_configuration_dir}}/contrib/{{stackset_name}}/ansible/roles/{{templates_role_name}}/templates/*.j2"
+    - "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/templates/*.j2"
 
