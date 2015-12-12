@@ -34,8 +34,8 @@
 - name: determine name of templates role
   set_fact: 
     templates_role_name: "{{bakery_group | default('stackset')}}_templates"
-    target_stackset: stackset_name if stackset_name != "bakery" else "bakery-roles"
-    target_vars: stackset_name if stackset_name != "bakery" else bakery_group
+    target_stackset: "{{stackset_name if stackset_name != 'bakery' else 'bakery-roles'}}"
+    target_vars: "{{stackset_name if stackset_name != 'bakery' else bakery_group}}"
 
 - name: Include stackset-specific vars
   include_vars: "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/vars/{{target_vars}}.yml"
