@@ -40,11 +40,11 @@
 - name: Include stackset-specific vars
   include_vars: "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/vars/{{target_vars}}.yml"
 
-- name: Instantiate stackset templates
+- name: Instantiate stackset templates & userdata scripts
   template:
     src={{ item }}
     dest="{{ cloudformation_template_instantiation_dir | expanduser }}/{{ customer_name }}/{{ cage_name }}/stackset/{{ stackset_name }}/{{stackset_instance_name}}{{ item|basename|regex_replace('\\.j2$', '.json') }}"
     mode=0755
   with_fileglob:
-    - "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/templates/*.j2"
+    - "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/templates/*"
 
