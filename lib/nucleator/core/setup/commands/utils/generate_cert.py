@@ -16,7 +16,7 @@ from jinja2 import Template
 from subprocess import Popen, PIPE
 
 def generate_cert(file_name, cage_name, customer_domain, templates_home, siteconfig_home,
-    jenkins_keystore_password, debug=False):
+    pkcs12_bundle_password, debug=False):
     # Erase previous files
     if os.path.isfile("openssl.cfg"):
         os.remove("openssl.cfg")
@@ -32,7 +32,7 @@ def generate_cert(file_name, cage_name, customer_domain, templates_home, sitecon
         data = myfile.read()
     t = Template(data)
     output = t.render(customer_domain=customer_domain, file_name=file_name, cage_name=cage_name,
-        jenkins_keystore_password=jenkins_keystore_password)
+        pkcs12_bundle_password=pkcs12_bundle_password)
     with open (siteconfig_home+'/openssl.cfg', "w") as myfile:
         myfile.write(output)
 

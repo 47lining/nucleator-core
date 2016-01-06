@@ -20,7 +20,8 @@ import re, os, json, boto, sys, stat, yaml
 from boto import ec2
 from jinja2 import Template
 
-jenkins_keystore_password = 'P@ssw0rd'
+pkcs12_bundle_password = 'P@ssw0rd'
+jenkins_java_keystore_password = 'changeit'
 
 class Setup(Command):
     """
@@ -65,7 +66,7 @@ class Setup(Command):
                 data = myfile.read()
             t = Template(data)
             output = t.render(account_list=customer['accounts'], customer_name=customer['name'],
-                jenkins_keystore_password=jenkins_keystore_password, jenkins_java_keystore_password='changeit')
+                pkcs12_bundle_password=pkcs12_bundle_password, jenkins_java_keystore_password=jenkins_java_keystore_password)
             with open (properties.NUCLEATOR_CONFIG_DIR+'/'+customer['name']+'-credentials.yml', "w") as myfile:
                 myfile.write(output)
             try:
@@ -90,7 +91,7 @@ class Setup(Command):
                 with open (siteconfig_home+'/'+customer['name']+'-'+cage['name']+'.yml', "w") as myfile:
                     myfile.write(output)
                 second_eight = second_eight + 1
-                GC.generate_cert(customer['name']+'-'+cage['name'], cage['name'], customer['domain'], templates_home, siteconfig_home, jenkins_keystore_password=jenkins_keystore_password)
+                GC.generate_cert(customer['name']+'-'+cage['name'], cage['name'], customer['domain'], templates_home, siteconfig_home, pkcs12_bundle_password=pkcs12_bundle_password)
 
     @staticmethod
     def load_siteconfig(siteconfig_home):
