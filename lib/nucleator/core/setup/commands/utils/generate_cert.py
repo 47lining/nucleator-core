@@ -41,13 +41,19 @@ def generate_cert(file_name, cage_name, customer_domain, templates_home, sitecon
     cmd = "openssl req -x509 -newkey rsa:2048 -keyout "+file_name+".pem -out "+file_name+".509 -days 365 -config openssl.cfg"
     Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE, stdin=PIPE).wait()
 
+    if not os.path.isfile(file_name+".509"):
+        print "Something went wrong in the openssl request x509 step..."
+        print "Try running this command: '"+cmd+"'"
+        return
+
     print "Converting to pkcs12"
     # openssl pkcs12 -export -in $cert_name.crt -inkey $keypair_name -out $cert_name.p12 -name $cert_name-cert -CAfile ca.crt -caname root -password pass:$keystore_password
-    cmd = "openssl pkcs12 -export -in "+file_name+".509 -inkey "+file_name+".pem -out "+file_name+".crt -name "+file_name+"-cert -CAfile ca.crt -caname root -password pass:P@ssw0rd -passin pass:P@ssw0rd"
+    cmd = "openssl pkcs12 -export -in "+file_name+".509 -inkey "+file_name+".pem -out "+file_name+".crt -name "+file_name+"-cert -CAfile ca.crt -caname root -password pass:"+pkcs12_bundle_password+" -passin pass:"+pkcs12_bundle_password
     Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE, stdin=PIPE).wait()
 
     if not os.path.isfile(file_name+".crt"):
-        print "Something went worng"
+        print "Something went wrong in the openssl pkcs12 export step..."
+        print "Try running this command: '"+cmd+"'"
     else:
         # clean up temp files
         if not debug:

@@ -21,7 +21,7 @@ from boto import ec2
 from jinja2 import Template
 
 pkcs12_bundle_password = 'P@ssw0rd'
-jenkins_java_keystore_password = 'changeit'
+java_cacert_keystore_password = 'changeit'
 
 class Setup(Command):
     """
@@ -66,7 +66,7 @@ class Setup(Command):
                 data = myfile.read()
             t = Template(data)
             output = t.render(account_list=customer['accounts'], customer_name=customer['name'],
-                pkcs12_bundle_password=pkcs12_bundle_password, jenkins_java_keystore_password=jenkins_java_keystore_password)
+                pkcs12_bundle_password=pkcs12_bundle_password, java_cacert_keystore_password=java_cacert_keystore_password)
             with open (properties.NUCLEATOR_CONFIG_DIR+'/'+customer['name']+'-credentials.yml', "w") as myfile:
                 myfile.write(output)
             try:
