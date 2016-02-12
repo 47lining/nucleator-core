@@ -20,3 +20,49 @@
 # Nucleator can (re)install itself.  From whence should it do so?
 NUCLEATOR_CORE_REPO: "git+https://github.com/47lining/nucleator-core.git"
 NUCLEATOR_BRANCH_OR_TAG: "master"
+
+#
+# Nucleator Cage CIDR Whitelist
+#
+# Access to Nucleator Cages will be limited to those CIDRs listed here
+# 
+# If you add a specific whitelist and are using the Nucleator Builder
+# Stackset to manage provisioning & configuration of other Cages, be
+# sure to include the public IP of the NAT instance in the build cage
+# in your whitelist.
+#
+NUCLEATOR_CAGE_CIDR_WHITELIST:
+  - 0.0.0.0/0    # Override with values in ~/.nucleator/config.yml
+
+# When CIDR_WHITELIST changes, special care must be taken not to:
+#
+# - exceed the max numbe of rules per NACL; or
+# - create conflicting NACL rule numbers
+#
+# Both of these can be avoided by setting
+#     NUCLEATOR_CAGE_REMOVE_INBOUND_PUBLIC_RULES
+# to True for an intervening "cage provision" to force a stack
+# update that removes all inbound NACL rules between updates
+# to the Whitelist. This approach will create some
+# minimal access downtime for your cage
+#
+# As an alternative,
+#     NUCLEATOR_CAGE_CIDR_WHITELIST_INITIAL_RULENUM
+# is provided, so that rules can be updated to use a different
+# initial rulenum. This approach avoids conflicting NACL rule numbers
+# and incurs zero downtime, but with more than a small number of
+# whitelist entries (about 4), will likely exhaust the max number of
+# rules per NACL.
+#
+# This is true because, when updating stacks, Cloudformation first
+# creates all required new Resources, then in the
+# "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS" phase it deletes unused
+# resources.
+#
+NUCLEATOR_CAGE_CIDR_WHITELIST_INITIAL_RULENUM: 100
+NUCLEATOR_CAGE_REMOVE_INBOUND_PUBLIC_RULES: False
+
+# Uncomment to change from default values
+
+#nucleator_cage_bastion_instance_type: t2.micro
+#nucleator_cage_nat_instance_type: t2.micro

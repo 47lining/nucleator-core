@@ -1,0 +1,77 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Autoremove unused packages
+    command: apt-get -y autoremove
+    register: autoremove_output
+    changed_when: "'The following packages will be REMOVED' in autoremove_output.stdout"
+    sudo: True
+
+  - name: Install required packages
+    apt: name="{{ item }}" state=present
+    with_items:
+      - git
+      - python-pip
+    sudo: True
+
+  - name: clean up old ansible dir
+    file:
+      dest="/tmp/ansible"
+      state=absent
+    sudo: True
+
+  - name: Check for Ansible installation
+    command: ansible --version
+    register: result
+    ignore_errors: True
+
+  - name: Install 47Lining customized Ansible
+    git: 
+      repo=https://github.com/47lining/ansible.git
+      version=nucleator_distribution
+      dest=/tmp/ansible
+    when: result|failed or result.stdout_lines[0] != "ansible 1.9"
+  # clone --recursive --depth 1 -b  ; cd ansible; sudo 
+
+  - name: install ansible
+    shell: python setup.py install
+    args:
+      chdir: "/tmp/ansible"
+      creates: "/usr/bin/ansible"
+    sudo: True
+    when: result|failed or result.stdout_lines[0] != "ansible 1.9"
+
+  - name: clean up
+    file:
+      dest="/tmp/ansible"
+      state=absent
+    sudo: True
+
+  - name: Check for Nucleator installation
+    command: nucleator -h
+    register: result
+    ignore_errors: True
+
+  # The Ansible pip module fails on this format. 
+  # pip: name='git+https://github.com/47lining/nucleator-core.git' state=latest
+  # {"cmd": "/usr/bin/pip install -U -e git+https://github.com/47lining/nucleator-core.git"
+  # stdout: --editable=git+https://github.com/47lining/nucleator-core.git is not the right format; it must have #egg=Package
+  # Ansible 2.0 adds the editable argument, but in the meantime:
+  - name: Install Nucleator
+    command: /usr/bin/pip install -U git+https://github.com/47lining/nucleator-core.git
+    sudo: True
+    when: result|failed or not result.stdout_lines[0].startswith("usage")
+
+  - name: Check for Nucleator initialization
+    file:
+      dest="~/.nucleator"
+      state=directory
+    register: dot_nucleator
+
+  - name: Run Nucleator initialization
+    command: nucleator init
+    when: dot_nucleator|changed
+
+  - name: Next steps
+    debug: msg="Now update ~/.nucleator/sources.yml and run 'nucleator update'"

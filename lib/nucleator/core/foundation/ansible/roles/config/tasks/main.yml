@@ -18,11 +18,16 @@
 
 - name: Test existence of nucleator config directory
   stat: path="{{ nucleator_configuration_dir | expanduser }}"
-  register: check_config
+  register: check_config_dir
+
+- name: If it is a sym link, check the destination
+  stat: path="{{ check_config_dir.stat.lnk_source }}"
+  when: check_config_dir.stat.islnk
+  register: check_config_lnk
 
 - name: Fail if nucleator config directory not present
   fail: msg="Nucleator configuration directory {{nucleator_configuration_dir}} not found.  Please run nucleator init."
-  when: check_config.stat.isdir is not defined or not check_config.stat.isdir
+  when: not check_config_dir.stat.islnk and (check_config_dir.stat.isdir is not defined or not check_config_dir.stat.isdir) or check_config_dir.stat.islnk and (check_config_lnk.stat.isdir is not defined or not check_config_lnk.stat.isdir)
 
 - name: Include nucleator config vars
   include_vars: "{{ nucleator_configuration_dir }}/config.yml"

@@ -57,7 +57,7 @@ class ActionModule(object):
                 if 'ec2_tag_NucleatorCage' in data:
                     cage_name = data['ec2_tag_NucleatorCage']
                 else:
-                    cage_name=data['ec2_tag_Name'].split("-")[1]
+                    cage_name=data['ec2_tag_Name'].split("-")[1] if 'ec2_tag_Name' in data else "None"
 
                 if customer_name not in customers:
                     customers[customer_name]={}
@@ -76,6 +76,8 @@ class ActionModule(object):
         comm_ok=True
         for customer_name in customers:
             for cage_name in customers[customer_name]:
+                if customer_name == "None" or cage_name == "None":
+                    continue
                 try:
                     return_data=self.ssh_config(customers, customer_name, cage_name, conn, tmp, module_name, module_args, inject, complex_args, **kwargs)
                     failed |= return_data.result.get('failed', False)
@@ -105,7 +107,7 @@ class ActionModule(object):
     
             dest = args.get('dest', None)
             identity_file = args.get('identity_file', None)
-            user = args.get('user', 'ec2-user')
+            default_user = args.get('user', 'ec2-user')
             bastion_user = args.get('bastion_user', args.get('user', 'ec2-user'))
 
             # Iterate though all hosts in the customer, cage pair
@@ -119,6 +121,7 @@ class ActionModule(object):
 
                 # TODO use nucleator facts instead
                 private_ip = data['ec2_private_ip_address']
+                user = data.get('ansible_ssh_user', default_user)
                 instance_name = host
                 bastion_suffix = instance_name.split(".")
                 short_name=bastion_suffix.pop(0)
@@ -127,6 +130,7 @@ class ActionModule(object):
                 configfile=os.path.join(dest, customer_name, cage_name)
     
                 if short_name == "bastion":
+                    bastion_user = user
                     bastion_entries += ssh_config_bastion_entry(
                         "".join( (short_name, "-", cage_name) ),
                         instance_name,
@@ -225,7 +229,14 @@ class ActionModule(object):
             vv ("transfer successful!!")
 
             # fix file permissions when the copy is done as a different user
-            if self.runner.sudo and self.runner.sudo_user != 'root' or self.runner.su and self.runner.su_user != 'root':
+
+            # ansible pre-1.9.4 uses "sudo" & "sudo_user" or "su" & "su_user"
+            sudo_18=getattr(self.runner, "sudo", False)
+            su_18=getattr(self.runner, "su", False)
+            # ansible 1.9.4-1 uses "become" & "become_user"
+            become_1941=getattr(self.runner,"become", False)
+
+            if sudo_18 and self.runner.sudo_user != 'root' or su_18 and self.runner.su_user != 'root' or become_1941 and self.runner.become_user != 'root':
                 self.runner._remote_chmod(conn, 'a+r', xfered, tmp)
 
             # run the copy module

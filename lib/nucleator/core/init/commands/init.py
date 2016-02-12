@@ -67,6 +67,21 @@ class Init(Command):
     def check_prerequisites(self):
         """Check that nucleator pre-requisites are in place"""
 
+        # graffiti monkey
+        utils.write("\nChecking graffiti monkey installation...\n")
+        try:
+            import graffiti_monkey
+            from graffiti_monkey.core import GraffitiMonkey
+            no_graffiti_monkey=False
+        except ImportError:
+            no_graffiti_monkey=True
+            msg="Prerequisite graffiti_monkey not found.\nNucleator requires graffiti_monkey to run. " \
+                "You can install it via:\n" \
+                "\tpip install graffiti_monkey==0.7"
+            utils.write_err(msg, False)
+            utils.write_err("Missing pre-requisite, exiting")
+            return
+
         # paramiko
         utils.write("\nChecking paramiko installation...\n")
         try:
@@ -135,7 +150,7 @@ class Init(Command):
                 "You can install it via:\n" \
                 "\tpip install awscli"
             utils.write_err(msg, False)
-        
+
         # httplib2
         utils.write("\nChecking httplib2 installation...\n")
         try:
@@ -148,6 +163,18 @@ class Init(Command):
                 "\tpip install httplib2"
             utils.write_err(msg, False)
         
+        # winrm
+        utils.write("\nChecking winrm installation...\n")
+        try:
+            from winrm import Response
+            from winrm.exceptions import WinRMTransportError
+            from winrm.protocol import Protocol
+        except ImportError:
+            msg="Prerequisite winrm not found.\nNucleator requires winrm to run when configuring Windows instances. Ignore this if you are not using any Windows instances. " \
+                "You can install it via:\n" \
+                "\tpip install pywinrm"
+            utils.write(msg)
+
         # boto
         utils.write("\nChecking boto installation...\n")
         try:

@@ -48,14 +48,18 @@ BEANSTALK PROVISION
 	--cage <cage_name>
 	--app_name <beanstalk_application_name>
 	--type <application_type>
-	[--beanstalk_instance_type <ec2_instance_type>]
-	[--database_instance_type <rds_instance_type>]
-	[--database_name <database_name>]
-	[--database_user <database_user>]
-	[--database_password <database_password>]
+	[--tier <tier_type>]
+	[--beanstalk-instance-type <ec2_instance_type>]
+	[--database-instance-type <rds_instance_type>]
+	[--database-name <database_name>]
+	[--database-user <database_user>]
+	[--database-password <database_password>]
 	[--minscale <min_value>]
 	[--maxscale <max_value>]
-	[--service_role <iam_role_name>]
+	[--service-role <iam_role_name>]
+	[--queue-url <url>]
+	[--inactivity-timeout <timeout_value>]
+	[--visibility-timeout <timeout_value>]
 	[--preview] [-h | --help]
 +
 `nucleator beanstalk provision` creates an AWS Elastic Beanstalk
@@ -74,7 +78,7 @@ BEANSTALK CONFIGURE
 'nucleator beanstalk configure'::
 	--customer <customer_name>
 	--cage <cage_name>
-	--limit_stackset_instance <beanstalk_application_name>
+	--app-name <beanstalk_application_name>
 	[-h | --help]
 +
 `nucleator beanstalk configure` performs post-provisioning configuration of
@@ -82,7 +86,7 @@ all EC2 resources associated with the beanstalk.
 +
 By default all hosts associated with any instance of the `beanstalk`
 Stackset within the specified Cage will be configured. The
-`limit_stackset_instance` option can be used to optionally constrain
+`app-name` option can be used to optionally constrain
 the set of configured instances to hosts associated with a specified
 `beanstalk` Stackset instance.
 
@@ -92,9 +96,9 @@ BEANSTALK DEPLOY
 'nucleator beanstalk deploy'::
 	--customer <customer_name>
 	--cage <cage_name>
-	--app_name <app_name>
-	--app_version <beanstalk_application_version>
-	--app_url <application_url>
+	--app-name <app_name>
+	--app-version <beanstalk_application_version>
+	--app-url <application_url>
 +
 `nucleator beanstalk deploy` deploys the application deployment
 artifact at `<application_url>` (typically drawn from an artifactory)
@@ -109,7 +113,7 @@ BEANSTALK DELETE
 'nucleator beanstalk delete'::
 	--customer <customer_name>
 	--cage <cage_name>
-	--app_name <beanstalk_application_name>
+	--app-name <beanstalk_application_name>
 +
 `nucleator beanstalk delete` attempts to delete the `beanstalk`
 Stackset instance specified by <beanstalk_application_name> from the
@@ -125,7 +129,7 @@ OPTIONS
 --cage <cage_name>::
 	The name of the Cage in which to provision and maintain the beanstalk.
 
---app_name <beanstalk_application_name>::
+--app-name <beanstalk_application_name>::
 	The name of the elastic beanstalk application to provision,
 	configure, deploy or delete. Note that nucleator will extend this 
 	base application name appending "-<cage>-<customer>" to support AWS 
@@ -134,38 +138,48 @@ OPTIONS
 	provisioned beanstalk will be named "myapp-<cage>-<customer>".
 
 --type <application_type>::
-	The type of application environment to provision. Currently support 
-	application types are "python" and "java".
+	The type of application environment to provision. Currently supported 
+	application types are "java8", "java7", "nodejs", "python3", "python27",
+    "ruby22_pass", "ruby22_puma", "tomcat8", "tomcat7", "tomcat7java6",
+    "go", "docker17", "docker16".  These correspond to the AWS Beanstalk instance
+    types, so you may consult the AWS documentation for details.
 
---beanstalk_instance_type <ec2_instance_type>::
+--tier <tier_type>::
+    The "tier" of the instance, meaning, either "worker" or "webserver".  A web
+    server instance is placed behind a load balancer and gets an internal DNS
+    entry.  A worker instance gets an SQS queue associated with it.  A daemon
+    is created and runs on the instance which reads that queue and posts messages
+    to the worker application when the queue is read.
+
+--beanstalk-instance-type <ec2_instance_type>::
 	The type of ec2 instance to use within the elastic beanstalk.
 	Must be drawn from the list of currently supported ec2
 	instance types in aws_service_config.yml.  Defaults to
 	"t2.micro".  See also <<FILES>>.
 
---database_instance_type <rds_instance_type>::
+--database-instance-type <rds_instance_type>::
 	The type of AWS Relational Database Service (RDS) instance to
 	use within the elastic beanstalk.  Must be drawn from the list
 	of currently supported RDS instance types in
 	aws_service_config.yml.  Use "None" to signify that no RDS
 	instance should be provisioned.  Defaults to "None". See also <<FILES>>.
 
---database_name <database_name>::
+--database-name <database_name>::
 	The name of the database to provision within the RDS instance
 	provisioned to provide data persistence for the Elastic
 	Beanstalk.  Defaults to "nucleator".  See also <<FILES>>.
 
---database_user <database_user>::
+--database-user <database_user>::
 	The database user created in the RDS instance
 	provisioned to provide data persistence for the Elastic
 	Beanstalk.  Defaults to "nucleatorAdmin".  See also <<FILES>>.
 
---database_password <database_password>::
+--database-password <database_password>::
 	The password for the database user created in the RDS instance
 	provisioned to provide data persistence for the Elastic
 	Beanstalk.  Defaults to "DefaultPassword".  See also <<FILES>>.
 
---limit_stackset_instance <beanstalk_application_name>
+--limit-stackset-instance <beanstalk_application_name>::
 	Limits stackset configuration to hosts associated with `beanstalk`
 	Stackset instance `<beanstalk_application_name>`.
 
@@ -179,7 +193,7 @@ OPTIONS
 	autoscaling group associated with the elastic beanstalk.
 	Defaults to 4.
 
---service_role <iam_role_name>::
+--service-role <iam_role_name>::
 	The IAM role to be associated with the instance profile that is associated 
 	with beanstalk EC2 resources. Defaults to NucleatorBeanstalkServiceRunner. 
 	Applications may wish to use an alternate IAM role if extended permissions 

@@ -5,7 +5,7 @@
  distinguished_name     = req_distinguished_name
  attributes             = req_attributes
  prompt                 = no
- output_password        = {{ jenkins_keystore_password }}
+ output_password        = {{ pkcs12_bundle_password }}
  dirstring_type			= nobmp
 
  [ req_distinguished_name ]
@@ -24,4 +24,4 @@
 # CN                     = Common Name
 
  [ req_attributes ]
- challengePassword              =  {{ jenkins_keystore_password }}
+ challengePassword              =  {{ pkcs12_bundle_password }}
