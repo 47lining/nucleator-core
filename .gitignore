@@ -49,4 +49,6 @@ Thumbs.db
 
 documentation/*xml
 documentation/*html
+documentation/reference/*html
+documentation/reference/*made
 documentation/*1

@@ -1,0 +1,178 @@
+nucleator-bakery(1)
+===================
+
+NAME
+----
+nucleator-bakery - Provision, Configure and Publish Operations on EC2 Amazon Machine Images
+
+SYNOPSIS
+--------
+[verse]
+'nucleator bakery provision' <args> [options]
+'nucleator bakery configure' <args> [options]
+'nucleator bakery publish' <args> [options]
+'nucleator bakery delete' <args> [options]
+
+
+DESCRIPTION
+-----------
+
+The `bakery` command and its subcommands are used to create and publish
+Amazon Machine Images.
+
+Running `nucleator bakery provision` and `nucleator bakery
+configure` multiple times is safe, because provisioning and
+configuration operations are idempotent. If no changes have been made
+to the stackset definition in `~/.nucleator/contrib/bakery`, these
+commands will result in no change.  If updates were made to to the
+Stackset definition (via `nucleator update`, for example) that are
+consistent with CloudFormation's "update in place" capabilities, the
+stackset will be updated in place so that AWS resources are brought
+into alignment with the new stackset definition.  This can be useful,
+for example, when modifying security groups to support application
+communication on various ports that the app may require.
+
+The `bakery` command provides the ability to easily create an EC2 instance
+from an Amazon Machine Image (AMI), make the instance available for further
+configuration and then create (bake) a new AMI based on that instance
+via the Nucleator CLI.
+
+SUBCOMMANDS
+-----------
+
+BAKERY PROVISION
+~~~~~~~~~~~~~~~~
+
+'nucleator bakery provision'::
+	--customer <customer_name>
+	--group <bakery_ansible_role>
+	[--cage <cage_name>]
+	[--ami-id <id>
+	[--ami-name <name>]
+	[--name <instance_name>]
+	[--keypair-name <keypair_name>]
++
+`nucleator bakery provision` creates an AWS EC2 instance in the specified
+cage for the specified customer.  Either an ID or a name must be provided
+for the source AMI from which the EC2 instance will be launched.  One of 
+the two options must be provided.  If you expect to login to the instance,
+you should provide a keypair name.  If you don't specify a cage name, it
+will use the 'build' cage.  If you don't specify a name for the instance,
+it will use 'singleton'.
++
+The 'group' option lets you specify a set of Ansible roles which will be
+used during the provisioning, configuring and published steps.  These roles
+will go by the names "<group>_provision", "<group>_configure",
+"<group>_publish", "<group>_templates".  Examples of these are provided for
+both Linux and Windows instances in https://github.com/47lining/nucleator-core-bakery/tree/rc-1.0.3/samples[this GitHub repo].  Those roles should be copied into your Nucleator installation
+directory:  `~/.nucleator/contrib/bakery-roles/ansible/roles/example_linux_provision`
+for example.
+
+BAKERY CONFIGURE
+~~~~~~~~~~~~~~~~
+
+'nucleator bakery configure'::
+	--customer <customer_name>
+	--group <bakery_ansible_role>
+	[--cage <cage_name>]
+	[--name <bakery_instance_name>]
+	[-h | --help]
++
+`nucleator bakery configure` performs post-provisioning configuration of
+the EC2 instance associated with the bakery.
+
+BAKERY PUBLISH
+~~~~~~~~~~~~~~
+
+'nucleator bakery publish'::
+	--customer <customer_name>
+	--group <bakery_ansible_role>
+	--ami-name <ami__name>
+	[--cage <cage_name>]
+	[--name <bakery_instance_name>]
+	[--ami-region <region>]
++
+`nucleator bakery publish` creates the AMI from the named EC2 instance.  The ami-name is
+applied to that AMI which is published into the specified region.  If no region is
+specified, it will go into the same region as where the EC2 instance is running.
+
+BAKERY DELETE
+~~~~~~~~~~~~~
+
+'nucleator bakery delete'::
+	--customer <customer_name>
+	--group <bakery_ansible_role>
+	--cage <cage_name>
+	--name <bakery_instance_name>
++
+`nucleator bakery delete` deletes the bakery instance specified by <bakery_application_name> from the
+specified Nucleator cage.
+
+
+OPTIONS
+-------
+
+--customer <customer_name>::
+	The name of the customer for whom the specified cage was provisioned.
+
+--cage <cage_name>::
+	The name of the cage in which to provision and maintain the bakery. When
+	this option is not required, the default is 'build'.
+
+--group <group_name>::
+	The name of a set if Ansible roles which will be used to provide custom
+	provisioning and configuration. These roles, written by the customer,
+	will go by the names "<group>_provision", "<group>_configure",
+	"<group>_publish", "<group>_templates".  Examples of these are provided for
+	both Linux and Windows instances in https://github.com/47lining/nucleator-core-bakery/tree/rc-1.0.3/samples[this GitHub repo].  Those roles should be copied into your Nucleator installation
+	directory:  `~/.nucleator/contrib/bakery-roles/ansible/roles/example_linux_provision`
+	for example.
+
+--ami-id <id>::
+	The ID of an Amazon Machine Image (AMI) which will be the source of the EC2 instance
+	which will be launched.  This AMI needs to reside in the region of the cage which
+	you have specified.  When this option is not required, it means that Nucelator will
+	look for an AMI with the name specified by the next option, "ami-name".
+
+--ami-name <name>::
+	The name of an Amazon Machine Image (AMI) which will be the source of the EC2 instance
+	which will be launched.  This AMI needs to reside in the region of the cage which
+	you have specified.  When this option is not required, it means that Nucelator will
+	look for an AMI with the ID specified by the previous option, "ami-id".  For the `publish`
+	command, this value will be assigned to the resultant AMI.
+
+--name <instance_name>::
+	The "instance_name" value will be assigned to the launched EC2 instance.  If this option is
+	not specified, a default value of 'singleton' is used.
+
+--keypair-name <keypair_name>::
+	If you will need to login to the launched EC2 instance, the keypair should be specified
+	so that it can be associated with the EC2 instance at launch time.
+
+--ami-region <region_name>::
+	The publish command will place the resulting AMI in the specified region.  If not specified,
+	the AMI will be published in the region where the EC2 instance is running.
+
+-h::
+--help::
+	Show help for this command.
+              
+
+[[FILES]]
+FILES
+-----
+
+NUCLEATOR_INSTALL_DIR/nucleator-core/lib/nucleator/core/foundation/ansible/roles/config/vars/aws_service_config.yml::
+	AWS Services config file including dicts for currently supported EC2 and
+	RDS instance types.
+
+~/.nucleator/contrib/bakery/ansible/roles/bakery_provision/defaults/main.yml::
+	Default values for optional arguments to the `bakery` command.
+
+~/.nucleator/contrib/bakery-roles/ansible/roles::
+	The customer-provided Ansible roles should be placed in this directory.
+
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite
