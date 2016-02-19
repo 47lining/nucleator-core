@@ -144,7 +144,9 @@ d. Add a User Policy to NucleatorBootstrapGroup by expanding the "Inline Policie
             }
         ]
     }
-d. Add NucleatorUser to NucleatorBootstrapGroup by clicking the Add Users to Group button from the group description screen. Select NucleatorUser and click Add Users.
+e. Add NucleatorUser to NucleatorBootstrapGroup by clicking the Add Users to Group button from the group description screen. Select NucleatorUser and click Add Users.
+f. Enable Security Token Service (STS) in the regions you will be using.  This can be done from
+the Identity Access Manager (IAM) "Account Settings" console page.
 
 STEP 6 - CREATE INITIAL CONFIG FOR CUSTOMER, ACCOUNT AND CAGE
 -------------------------------------------------------------
