@@ -1,0 +1,81 @@
+nucleator-openvpn(1)
+====================
+
+NAME
+----
+nucleator-openvpn - Provision, Configure and Delete Operations on an OpenVPN installation on an Amazon EC2 instance
+
+SYNOPSIS
+--------
+[verse]
+'nucleator openvpn provision' <args> [options]
+'nucleator openvpn configure' <args> [options]
+'nucleator openvpn delete' <args> [options]
+
+
+DESCRIPTION
+-----------
+
+The `openvpn` command and its subcommands are used to create and configure
+an OpenVPN installation.  It creates an EC2 instance in the cage you specify,
+and creates the appropriate security groups and networking components.
+
+SUBCOMMANDS
+-----------
+
+OPENVPN PROVISION
+~~~~~~~~~~~~~~~~~
+
+'nucleator openvpn provision'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--name <instance_name>
++
+`nucleator openvpn provision` creates an AWS EC2 instance in the specified
+cage for the specified customer.  The name must be provided for the instance.
+
+OPENVPN CONFIGURE
+~~~~~~~~~~~~~~~~~
+
+'nucleator openvpn configure'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--name <instance_name>
++
+`nucleator openvpn configure` performs post-provisioning configuration of
+the EC2 instance associated with the VPN server.
+
+OPENVPN DELETE
+~~~~~~~~~~~~~~
+
+'nucleator openvpn delete'::
+	--customer <customer_name>
+	--cage <cage_name>
+	--name <instance_name>
++
+`nucleator openvpn delete` deletes the OpenVPN server instance specified by <application_name> from the specified Nucleator cage.
+
+
+OPTIONS
+-------
+
+--customer <customer_name>::
+	The name of the customer for whom the specified cage was provisioned.
+
+--cage <cage_name>::
+	The name of the cage in which to provision and maintain the server.
+
+--name <instance_name>::
+	The "instance_name" value will be assigned to the launched EC2 instance.              
+
+[[FILES]]
+FILES
+-----
+
+NUCLEATOR_INSTALL_DIR/nucleator-core/lib/nucleator/core/foundation/ansible/roles/config/vars/aws_service_config.yml::
+	AWS Services config file including dicts for currently supported EC2 and
+	RDS instance types.
+
+NUCLEATOR
+---------
+Part of the linknucleator:nucleator[1] suite

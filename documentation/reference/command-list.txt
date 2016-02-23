@@ -11,3 +11,4 @@ nucleator-bakery                        core common
 nucleator-builder                       core common
 nucleator-beanstalk                     core common
 nucleator-redshift                      core common
+nucleator-openvpn                       core common
