@@ -68,12 +68,13 @@ class Account(Command):
         command_list = []
         command_list.append("account")
 
-        cli.obtain_credentials(commands=command_list, account=account, customer=customer, verbosity=kwargs.get("verbosity", None))
+        cli.obtain_credentials(commands=command_list, account=account, customer=customer, verbosity=kwargs.get("verbosity", None), debug_credentials=kwargs.get("debug_credentials", None))
 
         extra_vars={
             "account_name": account,
             "customer_name": customer,
             "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
         }
 
         return cli.safe_playbook(
@@ -222,6 +223,7 @@ class Account(Command):
                     "customer_name": kwargs.get("customer", None),
                     "account_name": kwargs.get("account", None),
                     "verbosity": kwargs.get("verbosity", None),
+                    "debug_credentials": kwargs.get("debug_credentials", None),
                 }
                 print "Role names sent to playbook are: ", rolename_list
                 cli.safe_playbook(
@@ -241,6 +243,7 @@ class Account(Command):
                             "customer_name": kwargs.get("customer", None),
                             "account_name": kwargs.get("account", None),
                             "verbosity": kwargs.get("verbosity", None),
+                            "debug_credentials": kwargs.get("debug_credentials", None),
                         }
                         cli.safe_playbook(
                             role_playbook,
@@ -366,6 +369,7 @@ class Account(Command):
                                         "customer_name": kwargs.get("customer", None),
                                         "account_name": account_name,
                                         "verbosity": kwargs.get("verbosity", None),
+                                        "debug_credentials": kwargs.get("debug_credentials", None),
                                     }
                                     cli.safe_playbook(
                                         role_playbook,
@@ -425,6 +429,7 @@ class Account(Command):
                                         "customer_name": kwargs.get("customer", None),
                                         "account_name": account_name,
                                         "verbosity": kwargs.get("verbosity", None),
+                                        "debug_credentials": kwargs.get("debug_credentials", None),
                                     }
                                     cli.safe_playbook(
                                         role_playbook,

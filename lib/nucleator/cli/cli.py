@@ -28,6 +28,9 @@ class Cli(object):
         # Setup the root argument parser
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument("-v", "--verbosity", required=False, action="count", help="Increase output verbosity")
+        self.parser.add_argument("--debug-credentials", required=False, action='store_true', help="Show credential output for debugging purposes")
+        self.parser.add_argument("--no-debug-credentials", required=False, action='store_false', help="Dont show credential output")
+        
         self.parser.add_argument("-p", "--preview", required=False, action="store_true", 
                                  help="Display information about what a command will do, without actually executing the command.\n" +
                                       "The --preview flag should come before any subcommands on the command line.")
