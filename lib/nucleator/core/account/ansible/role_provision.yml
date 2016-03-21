@@ -27,13 +27,13 @@
       nucleator_use_target_credentials: True
   roles:
     - config
-    - siteconfig  
+    - siteconfig
   post_tasks:
     - name: load role specification for this nucleator command
       include_vars: "{{role_specification_varsfile}}"
 
     - name: Create IAM Roles for each specified role name
-      environment: aws_environment
+      environment: "{{aws_environment}}"
       iam_role: 
         role_name: "{{item[0].role_name}}"
         trust_policy: "{{item[0].trust_policy}}"

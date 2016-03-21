@@ -1,63 +1,80 @@
-import boto
-import os
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+try:
+    from __main__ import display
+except ImportError:
+    from ansible.utils.display import Display
+    display = Display()
+from ansible.plugins.action import ActionBase
 
+import boto, os
 from boto import cloudtrail
 
-from ansible.runner.return_data import ReturnData
-from ansible.utils import parse_kv, template
 from ansible import utils
 
-class ActionModule(object):
-    def __init__(self, runner):
-        self.runner = runner
+class ActionModule(ActionBase):
 
-    def run(self, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
+    # def run(self, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
+    def run(self, tmp=None, task_vars=None):
+        if task_vars is None:
+            task_vars = dict()
+
+        result = super(ActionModule, self).run(tmp, task_vars)
         
-		try:
-			
-			args = {}
-			if complex_args:
-				args.update(complex_args)
-			args.update(parse_kv(module_args))
+        try:
 
-			account_number = args["account_number"]
-			region = args["region"]
-			cloudtrail_bucket = args["cloudtrail_bucket"]
+            args = {}
+            args.update(self._task.args)
 
-			envdict={}
-			if self.runner.environment:
-				env=template.template(self.runner.basedir, self.runner.environment, inject, convert_bare=True)
-				env = utils.safe_eval(env)
+            account_number = args["account_number"]
+            region = args["region"]
+            cloudtrail_bucket = args["cloudtrail_bucket"]
 
-			if region == "us-east-":
-				other_regions = ["us-west-2", "eu-west-1"]
-			else:
-				if region == "us-west-2":
-					other_regions = ["us-east-1", "eu-west-1"]
-				else:
-					other_regions = ["us-east-1", "us-west-2"]
+            envdict={}
+            if self._task.environment:
+                env=self._task.environment[0]
 
-			for connect_region in other_regions:	
+            if region == "us-east-":
+                other_regions = ["us-west-2", "eu-west-1"]
+            else:
+                if region == "us-west-2":
+                    other_regions = ["us-east-1", "eu-west-1"]
+                else:
+                    other_regions = ["us-east-1", "us-west-2"]
 
-				cloudtrail_name = "Cloudtrail-%s-%s" % (account_number, connect_region)
+            for connect_region in other_regions:    
 
-				connection = cloudtrail.connect_to_region(connect_region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
+                cloudtrail_name = "Cloudtrail-%s-%s" % (account_number, connect_region)
+
+                connection = cloudtrail.connect_to_region(connect_region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
                     aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
                     security_token=env.get("AWS_SECURITY_TOKEN"))
-				
-				try:
-					result = connection.update_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
-					result = connection.start_logging(cloudtrail_name)
-				except Exception, e:
-					result = connection.create_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
-					result = connection.start_logging(cloudtrail_name)
+                
+                try:
+                    connection.update_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
+                    connection.start_logging(cloudtrail_name)
+                except Exception, e:
+                    connection.create_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
+                    connection.start_logging(cloudtrail_name)
 
-			return ReturnData(conn=conn,
-                comm_ok=True,
-                result=dict(failed=False, changed=False, msg="Cloud Trail Service Started"))
+            result['failed']=False
+            result['changed']=False
+            result['msg']="Cloud Trail Service Started"
+            return result
 
-		except Exception, e:
-			# deal with failure gracefully
-			result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-			return ReturnData(conn=conn, comm_ok=False, result=result)
-
+        except Exception, e:
+            # deal with failure gracefully
+            result['failed']=True
+            result['msg']=type(e).__name__ + ": " + str(e)
+            return result

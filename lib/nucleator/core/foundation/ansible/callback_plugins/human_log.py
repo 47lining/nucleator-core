@@ -4,8 +4,11 @@
 # Code originated here: https://gist.github.com/cliffano/9868180
 # There are, I believe, some tweaks by 47Lining
 #
+import time, os
 
-import os
+from ansible.plugins.callback import CallbackBase
+
+__metaclass__ = type
 
 FIELDS = [
     'cmd',
@@ -29,7 +32,12 @@ def human_log(res):
          
                 print '{0}{1}:{0}{2}'.format(os.linesep, field, res_field.encode('utf-8') if isinstance(res_field, basestring) else res_field)	
 		
-class CallbackModule(object):
+class CallbackModule(CallbackBase):
+    CALLBACK_VERSION = 2.0
+    CALLBACK_TYPE = 'aggregate'
+
+    def __init__(self):
+        super(CallbackModule, self).__init__()
 
     def on_any(self, *args, **kwargs):
         pass

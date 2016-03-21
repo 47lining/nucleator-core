@@ -12,10 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ansible.callbacks import display
-import time
+# See for example ansible.plugins.callback.timer.py
 
-class CallbackModule(object):
+import time
+from ansible.plugins.callback import CallbackBase
+
+__metaclass__ = type
+
+class CallbackModule(CallbackBase):
+    """
+    This callback module tells you how long your plays ran for.
+    """
+    CALLBACK_VERSION = 2.0
+    CALLBACK_TYPE = 'aggregate'
+    CALLBACK_NAME = 'timing'
+
+    def __init__(self):
+        super(CallbackModule, self).__init__()
 
     def format_time(self, value):
         func = lambda ll,b : list(divmod(ll[0],b)) + ll[1:]
@@ -36,9 +49,9 @@ class CallbackModule(object):
         last_elapsed = self.format_time(time_now - self.stamp)
         total_elapsed = self.format_time(time_now - self.start)
         self.stamp = time_now
-        display(self.pad( '%s (%s)       %s' % (formatted_dt, last_elapsed, total_elapsed)))
+        self._display.display(self.pad( '%s (%s)       %s' % (formatted_dt, last_elapsed, total_elapsed)))
         if underline:
-            display("*" * 79)
+            self._display.display("*" * 79)
 
     def playbook_on_task_start(self, name, is_conditional):
         self.timestamp(True)

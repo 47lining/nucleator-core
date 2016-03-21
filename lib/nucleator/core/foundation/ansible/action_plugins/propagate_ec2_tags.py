@@ -14,11 +14,9 @@
 
 import ansible
 
-from ansible.callbacks import vv
+from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleError as ae
-from ansible.runner.return_data import ReturnData
 from ansible import utils
-from ansible.utils import parse_kv, template
 from graffiti_monkey.core import GraffitiMonkey
 
 import os
@@ -26,7 +24,7 @@ import os.path
 import sys
 import time
 
-class ActionModule(object):
+class ActionModule(ActionBase):
     """
     An action plugin to deploy to propagate tags from ec2 instances to related EBS volumes and snapshots.
     """
@@ -34,10 +32,12 @@ class ActionModule(object):
     ### Make sure runs once per play only
     BYPASS_HOST_LOOP = True
 
-    def __init__(self, runner):
-        self.runner = runner
+    # def run(self, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
+    def run(self, tmp=None, task_vars=None):
+        if task_vars is None:
+            task_vars = dict()
 
-    def run(self, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
+        result = super(ActionModule, self).run(tmp, task_vars)
         try:
             args = {}
             if complex_args:
@@ -92,10 +92,10 @@ class ActionModule(object):
             monkey.propagate_tags()
 
         except Exception, e:
-            result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-            return ReturnData(conn=conn, comm_ok=False, result=result)
+            result['failed']=True
+            result['msg']=type(e).__name__ + ": " + str(e)
+            return result
 
-        result = dict(failed=False, changed=True)
-        
-        return ReturnData(conn=conn, comm_ok=True, result=result)
-
+        result['failed']=False
+        result['changed']=True
+        return result

@@ -11,9 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+try:
+    from __main__ import display
+except ImportError:
+    from ansible.utils.display import Display
+    display = Display()
+from ansible.plugins.action import ActionBase
 
-from ansible.runner.return_data import ReturnData
-from ansible.utils import parse_kv, template
+from ansible.parsing.splitter import parse_kv
+from ansible.template import template, safe_eval
 from ansible import utils
 from boto.sts import STSConnection
 
@@ -23,18 +29,19 @@ import urllib
 import os
 import time
 
-class ActionModule(object):
-    def __init__(self, runner):
-        self.runner = runner
+class ActionModule(ActionBase):
 
-    def run(self, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
+    # def run(self, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
+    def run(self, tmp=None, task_vars=None):
+        if task_vars is None:
+            task_vars = dict()
+
+        result = super(ActionModule, self).run(tmp, task_vars)
         
         try:
             
             args = {}
-            if complex_args:
-                args.update(complex_args)
-            args.update(parse_kv(module_args))
+            args.update(self._task.args)
 
             access_policies = {}
 
@@ -46,17 +53,19 @@ class ActionModule(object):
             access_policies = args["access_policies"]
 
             envdict={}
-            if self.runner.environment:
-                env=template.template(self.runner.basedir, self.runner.environment, inject, convert_bare=True)
-                env = utils.safe_eval(env)
+            if self._task.environment:
+                env=self._task.environment[0]
                 
-                sts_connection = STSConnection(
-                    aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
-                    aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
-                    security_token=env.get("AWS_SECURITY_TOKEN")
-                )
+            sts_connection = STSConnection(
+                aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
+                aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
+                security_token=env.get("AWS_SECURITY_TOKEN")
+            )
 
-            c = boto.connect_iam(aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"), aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"), security_token=env.get("AWS_SECURITY_TOKEN"))
+            c = boto.connect_iam(
+                aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
+                aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
+                security_token=env.get("AWS_SECURITY_TOKEN"))
             
             #Look for the role
             try:
@@ -92,8 +101,9 @@ class ActionModule(object):
                                 c.put_role_policy(role_name, policies["policy_name"], json.dumps(policies["policy_document"]))
                             except Exception, e:
                                 # deal with failure gracefully
-                                result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-                                return ReturnData(conn=conn, comm_ok=False, result=result)
+                                result['failed']=True
+                                result['msg']=type(e).__name__ + ": " + str(e)
+                                return result
 
                     #Returns true if the policy name exists
                     def checkIfPolicyExists(access_policies, temp_name):
@@ -115,8 +125,9 @@ class ActionModule(object):
                         c.update_assume_role_policy(role_name, assume_role_trust_policy)
                     except Exception, e:
                         # deal with failure gracefully
-                        result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-                        return ReturnData(conn=conn, comm_ok=False, result=result)
+                        result['failed']=True
+                        result['msg']=type(e).__name__ + ": " + str(e)
+                        return result
             
             #Can't find role, add the role and its policies
             except Exception, e:
@@ -129,12 +140,13 @@ class ActionModule(object):
                         c.put_role_policy(role_name, policies["policy_name"], json.dumps(policies["policy_document"]))
                 except Exception, e:
                     # deal with failure gracefully
-                    result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-                    return ReturnData(conn=conn, comm_ok=False, result=result)
+                    result['failed']=True
+                    result['msg']=type(e).__name__ + ": " + str(e)
+                    return result
 
             # add a short delay to allow for eventual consistency
             if role_name == "NucleatorAgent" or role_name == "NucleatorBucketandqDistributorServiceRunner":
-                print "30 second delay to let roles catch up"
+                display("30 second delay to let roles catch up")
                 time.sleep(30)
                 '''
                 role = None
@@ -155,16 +167,13 @@ class ActionModule(object):
                             result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
                             return ReturnData(conn=conn, comm_ok=False, result=result)
                 '''
-                
-
-            return ReturnData(conn=conn,
-                comm_ok=True,
-                result=dict(failed=False, changed=False, msg="Roles are updated!"))
+            result['failed']=False
+            result['changed']=False
+            result['msg']="Roles are updated!"
+            return result
 
         except Exception, e:
             # deal with failure gracefully
-            result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-            return ReturnData(conn=conn, comm_ok=False, result=result)
-
-
-                                
+            result['failed']=True
+            result['msg']=type(e).__name__ + ": " + str(e)
+            return result

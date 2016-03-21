@@ -81,7 +81,7 @@
     disable_rollback=yes
     template="{{ cloudformation_template_instantiation_dir | expanduser }}/{{customer_name}}/bootstrap/bootstrap_account.json"
   # TODO how will this work with tmp creds?  Does it need to? (I think it does)
-  environment: role_credentials
+  environment: "{{role_credentials}}"
   register: "account_setup_stack"
 
 - name: show all cloudformation output
@@ -95,7 +95,7 @@
     account_number: "{{target_account_number}}"
     region: "{{aws_accounts[account_name]['bootstrap_region']}}"
     cloudtrail_bucket: "{{nucleator_cloudtrail_bucketname_specification}}"
-  environment: role_credentials
+  environment: "{{role_credentials}}"
 
 - name: Set credentials variable to desired role
   set_fact:
@@ -114,11 +114,11 @@
     role_name: NucleatorConfigProvisioner
     region: "{{aws_accounts[account_name]['bootstrap_region']}}"
     log_bucket: "{{nucleator_logging_bucketname_specification}}"
-  environment: role_credentials
+  environment: "{{role_credentials}}"
 
 #- name: Run config provision
 #  command: "aws configservice subscribe --s3-bucket config-bucket-{{target_account_number}} --sns-topic config-notice-{{target_account_number}} --iam-role arn:aws:iam::{{target_account_number}}:role/NucleatorConfigProvisioner"
-#  environment: role_credentials
+#  environment: "{{role_credentials}}"
 
 ## Once account is initialized and roles for cross-account access are in place, use IAM Role temporary credentials
 #

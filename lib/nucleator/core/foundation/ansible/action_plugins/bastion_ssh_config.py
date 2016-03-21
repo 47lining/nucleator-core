@@ -13,31 +13,38 @@
 # limitations under the License.
 
 import ansible
+try:
+    from __main__ import display
+except ImportError:
+    from ansible.utils.display import Display
+    display = Display()
 
-from ansible.callbacks import vv
+from ansible.parsing.splitter import parse_kv
+from ansible.template import template, safe_eval
+from ansible.plugins.action import ActionBase
+
 from ansible.errors import AnsibleError as ae
-from ansible.runner.return_data import ReturnData
 from ansible import utils
-from ansible.utils import parse_kv, template, to_bytes
 from ansible.inventory import Inventory
 from ansible.inventory.host import Host
 from ansible.inventory.group import Group
 import ansible.constants as C
 
-import os
-import json
+import os, json
 
-class ActionModule(object):
+class ActionModule(ActionBase):
     ''' Create ssh-config from dynamic inventory with bastion proxy-commands '''
 
     ### Make sure runs once per play only
     BYPASS_HOST_LOOP = True
     TRANSFERS_FILES = True
 
-    def __init__(self, runner):
-        self.runner = runner
+    # def run(self, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
+    def run(self, tmp=None, task_vars=None):
+        if task_vars is None:
+            task_vars = dict()
 
-    def run(self, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
+        result = super(ActionModule, self).run(tmp, task_vars)
 
         try:
             # determine hosts in each cage for each customer
@@ -67,8 +74,9 @@ class ActionModule(object):
                 customers[customer_name][cage_name].append(host)
 
         except Exception, e:
-            result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-            return ReturnData(conn=conn, comm_ok=False, result=result)
+            result['failed']=True
+            result['msg']=type(e).__name__ + ": " + str(e)
+            return result
         
         configs={}
         failed=False
@@ -86,12 +94,16 @@ class ActionModule(object):
                     configs[cage_name]=return_data.result
 
                 except Exception, e:
-                    result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-                    return ReturnData(conn=conn, comm_ok=False, result=result)
+                    result['failed']=True
+                    result['msg']=type(e).__name__ + ": " + str(e)
+                    return result
 
         self.cleanup(conn, tmp)
-        result = dict(failed=failed, changed=changed, msg="Generated ssh configs", configs=configs)
-        return ReturnData(conn=conn, comm_ok=comm_ok, result=result)
+        result['failed']=failed
+        result['changed']=changed
+        result['configs']=configs
+        result['msg']="Generated ssh configs"
+        return result
 
     def ssh_config(self, customers, customer_name, cage_name, conn, tmp, module_name, module_args, inject, complex_args=None, **kwargs):
         try:
@@ -178,8 +190,9 @@ class ActionModule(object):
             config += "".join(entries)
 
         except Exception, e:
-            result = dict(failed=True, msg=type(e).__name__ + ": " + str(e))
-            return ReturnData(conn=conn, comm_ok=False, result=result)
+            result['failed']=True
+            result['msg']=type(e).__name__ + ": " + str(e)
+            return result
 
         config_dest=os.path.join(dest, customer_name, cage_name)
         return self.materialize_results(config_dest, config, conn, tmp, 'dontcare', module_args, inject=inject, complex_args=complex_args, **kwargs)
@@ -224,9 +237,9 @@ class ActionModule(object):
                     else:
                         raise Exception("unknown encoding, failed: %s" % dest_result.result)
  
-            vv ("transfering {0}, {1}, {2}, {3}".format(conn, tmp, 'source', resultant))
+            display.vv ("transfering {0}, {1}, {2}, {3}".format(conn, tmp, 'source', resultant))
             xfered = self.runner._transfer_str(conn, tmp, 'source', resultant)
-            vv ("transfer successful!!")
+            display.vv ("transfer successful!!")
 
             # fix file permissions when the copy is done as a different user
 
@@ -240,7 +253,7 @@ class ActionModule(object):
                 self.runner._remote_chmod(conn, 'a+r', xfered, tmp)
 
             # run the copy module
-            vv ("running copy module")
+            display.vv ("running copy module")
             new_module_args = dict(
                src=xfered,
                dest=dest,
@@ -254,7 +267,7 @@ class ActionModule(object):
             return res
 
         else:
-            vv ("checksums match, using file module to fix up file parameters")
+            display.vv ("checksums match, using file module to fix up file parameters")
 
             # when running the file module based on the template data, we do
             # not want the source filename (the name of the template) to be used,
