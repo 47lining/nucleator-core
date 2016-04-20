@@ -36,6 +36,11 @@ def multiple_choice(prompt, choices, default, help_msg='No help available'):
 			print "Please enter a number between 1 and "+str(len(choices))
 			continue
 		return choices[selection-1]
+def is_yes(input):
+	return input in ['y', 'Y', 'true', 'True', 'yes']
+
+def is_no(input):
+	return input in ['n', 'N', 'false', 'False', 'no']
 
 def ask_yesno(prompt, default=None, help_msg='No help available'):
 	defstr = ''
@@ -50,9 +55,9 @@ def ask_yesno(prompt, default=None, help_msg='No help available'):
 		if input == '?':
 			print help_msg
 			continue
-		if input in ['y', 'Y', 'true', 'True', 'yes']:
+		if is_yes(input):
 			return True
-		if input in ['n', 'N', 'false', 'False', 'no']:
+		if is_no(input):
 			return False
 		print "Please enter 'y' or 'n'"
 
