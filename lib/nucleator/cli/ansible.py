@@ -70,6 +70,7 @@ class CliWithAnsibleLauncher(Cli):
         list_hosts=EXTRA_VARS.pop("list_hosts", None)
 
         debug_credentials = EXTRA_VARS['debug_credentials'] if 'debug_credentials' in EXTRA_VARS else False
+        EXTRA_VARS['debug_credentials'] = debug_credentials
 
         is_bootstrap=True if is_static == "Bootstrap" else False
         HOSTS=BOOTSTRAP_HOSTS_PATH if is_bootstrap else STATIC_HOSTS_PATH if is_static else DYNAMIC_HOSTS_PATH
