@@ -166,10 +166,12 @@ class Setup(Command):
         ...
         ~/.nucleator/siteconfig/<customer_name>-cage_name_n>.yml
         """
-        do_validation = kwargs.get("validate", None)
-        if do_validation is None:
+        validate_arg = kwargs.get("validate", None)
+        do_validation = True
+        if INP.is_yes(validate_arg):
             do_validation = True
-
+        if INP.is_no(validate_arg):
+            do_validation = False
         cont = INP.ask_yesno("This wizard creates a Nucleator siteconfig for one or more Customers, AWS Accounts and Cages in the current directory", True)
         if not cont:
             sys.exit(-1)
@@ -230,13 +232,13 @@ class Setup(Command):
                         secret_key = os.environ["SECRET_KEY"]
                     else:
                         secret_key = INP.ask_string("What is the secret key for account '"+account_name+"'")
+                    aws_regions = ['us-east-1', 'us-west-2', 'eu-west-1']
                     if do_validation:
                         conn = ec2.connection.EC2Connection(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
                         try:
                             print ("Checking with AWS... "),
                             reg_array = conn.get_all_regions()
                             # [RegionInfo:eu-central-1, RegionInfo:sa-east-1,
-                            aws_regions = ['us-east-1', 'us-west-2', 'eu-west-1']
                             # for r in reg_array:
                                 # aws_regions.append(str(r.name))
                             # print ("OK, you have "+str(len(reg_array))+" regions available.")
