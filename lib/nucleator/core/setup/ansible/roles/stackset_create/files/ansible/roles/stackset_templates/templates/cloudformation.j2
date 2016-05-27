@@ -1,0 +1,26 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "Create nucleator stackset resources",
+ 
+  "Parameters": {
+    "CageName": {
+      "Description": "Name of the Cage for use in instance tagging",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "255",
+      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+      "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+    }
+  },
+
+  "Conditions": {
+    "IsMultiNodeCluster": { "Fn::Equals": [ { "Ref": "ClusterType" }, "multi-node" ] }
+  },
+
+  "Resources": {
+
+  },
+  "Outputs": {
+  }
+}

@@ -1,0 +1,75 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+role_specification:
+  - role_name: Nucleator{{stackset_name | capitalize}}ServiceRunner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : Nucleator{{stackset_name | capitalize}}ServiceRunnerTrustPolicy
+          Principal :
+            Service : TODO
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: Nucleator{{stackset_name | capitalize}}ServiceRunnerAccessPolicy
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action: 
+                - "s3:List*"
+              Resource: '*'
+  - role_name: Nucleator{{stackset_name | capitalize}}Provisioner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : Nucleator{{stackset_name | capitalize}}ProvisionerTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::\{\{ aws_accounts[cage_names['build']['account']]['account_number'] \}\}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: Nucleator{{stackset_name | capitalize}}ProvisionerAccessPolicy
+        policy_document:
+          Statement :
+            - Effect : Allow
+              Action: 
+                # These are example actions
+                - "cloudformation:CreateStack"
+                - "cloudformation:UpdateStack"
+                - "cloudformation:DescribeStacks"
+                - "cloudformation:DescribeStackEvents"
+              Resource: arn:aws:cloudformation:*
+            # Add any other statements required
+  - role_name: Nucleator{{stackset_name | capitalize}}Deleter
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : Nucleator{{stackset_name | capitalize}}DeleterTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::\{\{ aws_accounts[cage_names['build']['account']]['account_number'] \}\}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: Nucleator{{stackset_name | capitalize}}DeleterAccessPolicy
+        policy_document:
+          Statement :
+            - Effect : Allow
+              Action: 
+                - "cloudformation:DescribeStacks"
+                - "cloudformation:DeleteStack"
+                - "cloudformation:DescribeStackEvents"
+              Resource: arn:aws:cloudformation:*
+            # Add any other statements required

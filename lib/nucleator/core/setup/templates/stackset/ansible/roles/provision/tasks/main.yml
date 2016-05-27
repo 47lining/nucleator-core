@@ -1,0 +1,102 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- name: "set stackset name"
+  set_fact:
+    stackset_stack_name: "stackset-{{stackset_name}}-{{application_name}}-{{cage_name}}-{{account_name}}-{{customer_name}}"
+    stackset_template: "{{ cloudformation_template_instantiation_dir | expanduser }}/{{customer_name}}/{{cage_name}}/stackset/{{stackset_name}}/{{stackset_instance_name}}{{stackset_name}}.json"
+
+- name: Set credentials variable to desired role
+  set_fact:
+    role_credentials: "{{item.NucleatorBeanstalkProvisioner if beanstalk_deleting is not defined or not beanstalk_deleting|bool else item.NucleatorBeanstalkDeleter}}"
+  with_items:
+    - "{{aws_environment_with_rolenames}}"
+  no_log: True
+
+- name: log credentials variable
+  debug: var=role_credentials
+  when: debug_credentials
+
+# The nucleator command parsing checks for proper values; could be incorrect if playbook run directly
+- name: Set paramenters for webserver beanstalk type
+  set_fact:
+    beanstalk_tier: "{{hostvars.localhost.beanstalk_tier_type.frontend}}"
+    beanstalk_dnsrecord: "{{ beanstalk.dnsrecord | to_json_fragment }}"
+    beanstalk_cnameprefix: "{{ beanstalk.cnameprefix | to_json_fragment }}"
+    beanstalk_endpoint: "{{ beanstalk.endpoint | to_json_fragment }}"
+  when: not beanstalk_tiertype_arg is defined or beanstalk_tiertype_arg == 'webserver'
+
+- name: Set paramenters for worker beanstalk type
+  set_fact:
+    beanstalk_tier: "{{hostvars.localhost.beanstalk_tier_type.backend}}"
+    beanstalk_dnsrecord:
+    beanstalk_cnameprefix:
+    beanstalk_endpoint:
+  when: beanstalk_tiertype_arg is defined and beanstalk_tiertype_arg == 'worker'
+
+- name: "provision stackset via cloudformation"
+  connection: local
+  cloudformation:
+    stack_name="{{ stackset_stack_name }}"
+    state="{{'present' if beanstalk_deleting is not defined or not beanstalk_deleting|bool else 'absent'}}"
+    region="{{cage_names[cage_name]["region"]}}"
+    disable_rollback=yes
+    template="{{stackset_template}}"
+  args:
+    template_parameters:
+      CageName: "{{cage_name}}"
+      ApplicationName: "{{application_name}}"
+      EnvironmentName: "{{environment_name}}"
+      VpcId: "{{vpc_id}}"
+      NatSecurityGroupId: "{{nat_security_group_id}}"
+      BastionSecurityGroupId: "{{bastion_security_group_id}}"
+      PublicSubnet1Id: "{{public_subnet1_id}}"
+      PublicSubnet2Id: "{{public_subnet2_id}}"
+      PrivateSubnet1Id: "{{private_subnet1_id}}"
+      PrivateSubnet2Id: "{{private_subnet2_id}}"
+      DatabaseSubnetGroupId: "{{database_subnet_group_id}}"
+      KeypairName: "{{ keypair_name }}"
+      BeanstalkInstanceType: "{{beanstalk_instance_type}}"
+      BeanstalkAutoscaleMinSize: "{{beanstalk_autoscale_min_size}}"
+      BeanstalkAutoscaleMaxSize: "{{beanstalk_autoscale_max_size}}"
+      BeanstalkTierName: "{{beanstalk_tier.name}}"
+      BeanstalkTierType: "{{beanstalk_tier.type}}"
+      BeanstalkTierVersion: "{{beanstalk_tier.version}}"
+      DatabaseInstanceType: "{{database_instance_type}}"
+      DatabaseMultiAZ: "{{database_multi_az}}"
+      DatabaseStorage: "{{database_storage}}"
+      DatabaseName: "{{database_name}}"
+      DatabaseUser: "{{database_user}}"
+      DatabasePassword: "{{database_password}}"
+      ServiceRole: "{{service_role}}"
+
+    # TODO how will this work with tmp creds?  Does it need to? (I think it does)
+  environment: role_credentials
+  register: "create_stackset_stack"
+
+- name: show all cloudformation output
+  action: debug msg="{{create_stackset_stack}}"
+
+- name: show cloudformation output parameters
+  action: debug msg="{{create_stackset_stack['stack_outputs']}}"
+  when: beanstalk_deleting is not defined or not beanstalk_deleting|bool
+
+- name: Enable Logging on beanstalk s3 bucket
+  enable_logging:
+    log_bucket: "{{nucleator_logging_bucketname_specification}}"
+    region: "{{cage_names[cage_name]['region']}}"
+    account_number: "{{target_account_number}}"
+  environment: role_credentials
+  when: beanstalk_deleting is not defined or not beanstalk_deleting|bool 

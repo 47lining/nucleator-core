@@ -1,0 +1,56 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- name: Create directory for stackset
+  debug: msg="Creating directory {{stackset_name}}"
+
+- name: Mkdir
+  file:
+    state: directory
+    path: "{{stackset_dir}}/{{item}}"
+  with_items:
+    - "{{stackset_name}}"
+    - "{{stackset_name}}/ansible"
+    - "{{stackset_name}}/ansible/roles"
+    - "{{stackset_name}}/ansible/roles/{{stackset_name}}_provision"
+    - "{{stackset_name}}/ansible/roles/{{stackset_name}}_configure"
+    - "{{stackset_name}}/ansible/roles/stackset_templates"
+    - "{{stackset_name}}/commands"
+    - "{{stackset_name}}/meta"
+
+- name: Copy the files
+  copy:
+    src: "{{item.src}}"
+    dest: "{{stackset_dir}}/{{stackset_name}}/{{item.dest}}"
+  with_items:
+    - { src: 'LICENSE.txt', dest: 'LICENSE.txt'}
+    - { src: 'DISCLAIMER.txt', dest: 'DISCLAIMER.txt'}
+    - { src: '__init__.py', dest: '__init__.py'}
+    - { src: 'meta/main.yml', dest: 'meta/main.yml'}
+    - { src: 'commands/__init__.py', dest: 'commands/__init__.py'}
+    - { src: 'ansible/configure.yml', dest: 'ansible/{{stackset_name}}_configure.yml'}
+    - { src: 'ansible/provision.yml', dest: 'ansible/{{stackset_name}}_provision.yml'}
+    - { src: 'ansible/roles/configure', dest: 'ansible/roles/{{stackset_name}}_configure'}
+    - { src: 'ansible/roles/provision', dest: 'ansible/roles/{{stackset_name}}_provision'}
+    - { src: 'ansible/roles/stackset_templates', dest: 'ansible/roles/stackset_templates'}
+
+- name: Copy the templates
+  template:
+    src: "{{item.src}}.j2"
+    dest: "{{stackset_dir}}/{{stackset_name}}/{{item.dest}}"
+  with_items:
+    - { src: 'README.md', dest: 'README.md'}
+    - { src: 'commands/command.py', dest: 'commands/{{stackset_name}}.py'}
+    - { src: 'ansible/role_specification.yml', dest: 'ansible/role_specification.yml'}

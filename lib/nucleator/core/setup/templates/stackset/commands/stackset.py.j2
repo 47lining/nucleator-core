@@ -1,0 +1,127 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from nucleator.cli.utils import ValidateCustomerAction
+from nucleator.cli.command import Command
+from nucleator.cli import properties
+from nucleator.cli import ansible
+
+import os, subprocess, re, hashlib
+
+class {{SS_name}}(Command):
+
+    name = "{{ss_name}}"
+
+    def parser_init(self, subparsers):
+        """
+        Initialize parsers for this command.
+        """
+        # add parser for builder command
+        parser = subparsers.add_parser('{{ss_name}}')
+        subparsers=parser.add_subparsers(dest="subcommand")
+
+        # provision subcommand
+        provision=subparsers.add_parser('provision', help="provision a new nucleator {{ss_name}} stackset")
+        provision.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
+        provision.add_argument("--cage", required=True, help="Name of cage from nucleator config")
+
+        # configure subcommand
+        configure=subparsers.add_parser('configure', help="configure provisioned nucleator {{ss_name}} stackset")
+        configure.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
+        configure.add_argument("--cage", required=True, help="Name of cage from nucleator config")
+
+        # delete subcommand
+        delete=subparsers.add_parser('delete', help="delete specified nucleator {{ss_name}} stackset")
+        delete.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
+        delete.add_argument("--cage", required=True, help="Name of cage from nucleator config")
+
+    def provision(self, **kwargs):
+        """
+        This command provisions a new {{ss_name}} instance in the indicated customer cage.
+        """
+        cli = Command.get_cli(kwargs)
+        cage = kwargs.get("cage", None)
+        customer = kwargs.get("customer", None)
+        if cage is None or customer is None:
+            raise ValueError("cage and customer must be specified")
+        extra_vars={
+            "cage_name": cage,
+            "customer_name": customer,
+            "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
+        }
+
+        extra_vars["cli_stackset_name"] = "{{ss_name}}"
+
+        extra_vars["{{ss_name}}_deleting"]=kwargs.get("{{ss_name}}_deleting", False)
+
+        command_list = []
+        command_list.append("account")
+        command_list.append("cage")
+        command_list.append("{{ss_name}}")
+
+        inventory_manager_rolename = "Nucleator{{SS_name}}Provisioner"
+
+        playbook = "{{ss_name}}_provision.yml"
+        if extra_vars["{{ss_name}}_deleting"]:
+            playbook = "{{ss_name}}_delete.yml"
+
+        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None), debug_credentials=kwargs.get("debug_credentials", None))
+
+        return cli.safe_playbook(self.get_command_playbook(playbook),
+                                 inventory_manager_rolename,
+                                 is_static=True, # dynamic inventory not required
+                                 **extra_vars
+        )
+
+    def configure(self, **kwargs):
+        """
+        This command configures a {{ss_name}} that has been provisioned
+        in the indicated customer cage.
+        """
+        cli = Command.get_cli(kwargs)
+        cage = kwargs.get("cage", None)
+        customer = kwargs.get("customer", None)
+        if cage is None or customer is None:
+            raise ValueError("cage and customer must be specified")
+        extra_vars={
+            "cage_name": cage,
+            "customer_name": customer,
+            "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
+        }
+
+        command_list = []
+        command_list.append("{{ss_name}}")
+
+        inventory_manager_rolename = "Nucleator{{SS_name}}InventoryManager"
+
+        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None), debug_credentials=kwargs.get("debug_credentials", None)) # pushes credentials into environment
+
+        return cli.safe_playbook(
+            self.get_command_playbook("{{ss_name}}_configure.yml"),
+            inventory_manager_rolename,
+            **extra_vars
+        )
+
+    def delete(self, **kwargs):
+        """
+        This command deletes the specified, previously provisioned {{ss_name}} from the indicated
+        customer cage.
+        """
+        kwargs["{{ss_name}}_deleting"]=True
+        return self.provision(**kwargs)
+
+# Create the singleton for auto-discovery
+command = {{SS_name}}()

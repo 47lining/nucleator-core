@@ -14,6 +14,8 @@
 from nucleator.cli import properties
 from nucleator.cli import utils
 from nucleator.cli.command import Command
+from nucleator.cli import ansible
+
 import utils.input_utils as INP
 import utils.generate_cert as GC
 import re, os, json, boto, sys, stat, yaml
@@ -403,6 +405,38 @@ class Setup(Command):
         self.validate_keys(properties.NUCLEATOR_CONFIG_DIR)
         return 0
 
+    def template_render(self, src_dir, template_name, dest_dir, **kwargs):
+        if template_name.endswith(".j2"):
+            outfilename = template_name.replace(".j2", "")
+        else:
+            outfilename = template_name + ".txt"
+
+        with open (src_dir+'/'+template_name, "r") as myfile:
+            data = myfile.read()
+        t = Template(data)
+        output = t.render(kwargs)
+        with open (dest_dir+'/'+outfilename, "w") as myfile:
+            myfile.write(output)
+
+    def stackset(self, **kwargs):
+        stackset_name = kwargs.get("name", None)
+        if not stackset_name:
+            print "Stackset name is required."
+            return 0
+        cli = Command.get_cli(kwargs)
+
+        extra_vars={
+            "verbosity": kwargs.get("verbosity", None),
+            "stackset_name": stackset_name,
+            "stackset_dir": os.getcwd()
+         }
+
+        return cli.safe_playbook(self.get_command_playbook("stackset_create.yml"),
+            is_static=True, # dynamic inventory not required
+            **extra_vars
+        )
+
+
     def parser_init(self, subparsers):
         """
         Initialize parsers for this command.
@@ -417,9 +451,14 @@ class Setup(Command):
 
         # show subcommand
         setup_subparsers.add_parser('show', help="show a siteconfig")
+
         # validate subcommand
         validater = setup_subparsers.add_parser('validate', help="validate a siteconfig")
         validater.add_argument("--siteconfig_dir", required=False, help="Siteconfig directory to check (Default ~/.nucleator/siteconfig)")
+
+        # stackset subcommand
+        creater=setup_subparsers.add_parser('stackset', help="create a stackset")
+        creater.add_argument("--name", required=True, help="create the stub of a stackset")
 
 # Create the singleton for auto-discovery
 command = Setup()

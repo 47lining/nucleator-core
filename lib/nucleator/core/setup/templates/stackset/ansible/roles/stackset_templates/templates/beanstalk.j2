@@ -1,0 +1,691 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Create an Elastic Beanstalk within a Nucleator Cage, to which applications can be deployed.  Create the Beanstalk and, optionally, a multi-AZ RDS Instance to persist its state.",
+    "Parameters": {
+        "CageName": {
+            "Description": "Name of the Cage for use in instance tagging",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "ApplicationName": {
+            "Description": "Name of the application to be hosted",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "EnvironmentName": {
+            "Description": "Name of the beanstalk environment",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255"
+        },
+        "VpcId": {
+            "Type": "String",
+            "Description": "ID of the Cage's Virtual Private Cloud, used to create a security group for the database instances."
+        },
+        "NatSecurityGroupId": {
+            "Type": "String",
+            "Description": "SecurityGroupId for NAT to the public subnet.  NAT Ingress rules will be added to cover traffic from database instances."
+        },
+        "BastionSecurityGroupId": {
+            "Type": "String",
+            "Description": "SecurityGroupId for bastion hosts.  SSH traffic from these hosts to beanstalk and database hosts will be permitted."
+        },
+        "PublicSubnet1Id": {
+            "Type": "String",
+            "Description": "Public Subnet 1 ID.  Public ELBs will be launched here."
+        },
+        "PublicSubnet2Id": {
+            "Type": "String",
+            "Description": "Public Subnet 2 ID.  Public ELBs will be launched here."
+        },
+        "PrivateSubnet1Id": {
+            "Type": "String",
+            "Description": "Private Subnet 1 ID.  Beanstalk instances and private ELBs will be launched here."
+        },
+        "PrivateSubnet2Id": {
+            "Type": "String",
+            "Description": "Private Subnet 1 ID.  Beanstalk instances and private ELBs will be launched here."
+        },
+        "DatabaseSubnetGroupId": {
+            "Type": "String",
+            "Description": "Database Subnet Group ID.  Database Instances will be launched here."
+        },
+        "KeypairName": {
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to all resulting instances",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "AllowedPattern": "[\\x20-\\x7E]*",
+            "ConstraintDescription": "can contain only ASCII characters."
+        },
+        "BeanstalkInstanceType": {
+            "Description": "Instance Type for Beanstalk Instances",
+            "Type": "String",
+            "Default": "{{default_ec2_instance_type}}",
+            "AllowedValues": {{ supported_ec2_instance_types|to_json }},
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        },
+        "BeanstalkAutoscaleMinSize": {
+            "Description": "Minimum size for Beanstalk Autoscaling",
+            "Type": "Number",
+            "Default": "1"
+        },
+        "BeanstalkAutoscaleMaxSize": {
+            "Description": "Maximum size for Beanstalk Autoscaling",
+            "Type": "Number",
+            "Default": "4"
+        },
+        "BeanstalkTierType": {
+            "Description": "The tier type of this beanstalk: Standard or SQS/HTTP",
+            "Type": "String",
+            "Default": "Standard"
+        },
+        "BeanstalkTierName": {
+            "Description": "The tier name of this beanstalk: Worker or WebServer",
+            "Type": "String",
+            "Default": "WebServer"
+        },
+        "BeanstalkTierVersion": {
+            "Description": "The tier version of this beanstalk",
+            "Type": "String",
+            "Default": "1.0"
+        },
+        "DatabaseInstanceType": {
+            "Description": "RDS EC2 instance type",
+            "Type": "String",
+            "Default": "{{default_rds_instance_type}}",
+            "AllowedValues": [
+                {{supported_rds_instance_types | to_json_fragment()}},
+                "None"
+            ],
+            "ConstraintDescription": "must be a valid RDS DB instance type, or \"None\"."
+        },
+        "DatabaseMultiAZ": {
+            "Description": "true/false. Will the database be multi-availability-zone",
+            "Type": "String",
+            "Default": "true"
+        },
+        "DatabaseStorage": {
+            "Default": "5",
+            "Type": "Number",
+            "Description": "Storage Size for Database (GB)",
+            "MinValue": "5",
+            "MaxValue": "3072"
+        },
+        "DatabaseName": {
+            "Default": "nucleator",
+            "Type": "String",
+            "Description": "Name of initial database",
+            "MinLength": "1",
+            "MaxLength": "16",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "DatabaseUser": {
+            "Default": "nucleatoradmin",
+            "Type": "String",
+            "Description": "Test database admin account name",
+            "MinLength": "1",
+            "MaxLength": "16",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "DatabasePassword": {
+            "Default": "DefaultPassword",
+            "NoEcho": "true",
+            "Type": "String",
+            "Description": "Database admin account password",
+            "MinLength": "8",
+            "MaxLength": "41",
+            "AllowedPattern": "[a-zA-Z0-9]*",
+            "ConstraintDescription": "must contain only 8 to 41 alphanumeric characters."
+        },
+        "ServiceRole": {
+            "Type": "CommaDelimitedList",
+            "Description": "String including comma-separated list of Role name(s) to use to establish an Instance Profile to associate with the instance"
+        }
+    },
+    "Conditions" : {
+        "CreateDatabaseResources" : {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "DatabaseInstanceType"}, "None"]}]},
+        "CreateInstanceProfile" : {
+	    "Fn::Not" : [
+		{
+		    "Fn::Equals" : [
+			{
+			    "Fn::Join" : [ ",", { "Ref" : "ServiceRole" } ]
+			},
+			"None"
+		    ]
+		}
+	    ]
+	}
+    },
+    "Resources": {
+        "InstanceProfile" : {
+            "Type" : "AWS::IAM::InstanceProfile",
+            "Condition" : "CreateInstanceProfile",
+            "Properties" : {
+                "Path" : "/",
+                "Roles" : { "Ref": "ServiceRole" }
+            }
+        },
+        "BeanstalkSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security Group that includes all instances in the Elastic Beanstalk and RDS Database, used to provide access the NAT device.",
+                "VpcId": {
+                    "Ref": "VpcId"
+                },
+                "SecurityGroupIngress": [],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "security.beanstalk",
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    {
+                                        "Ref": "CageName"
+                                    },
+                                    "unresolvable"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "NucleatorGroup",
+                        "Value": "NucleatorBeanstalk"
+                    },
+        		    {{ nucleator_common_tags | to_json_fragment }}
+                ]
+            }
+        },
+        {{ beanstalk.cage_extension_resources | to_json_fragment }},
+        "BeanstalkNatSecurityGroupFtpIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "NatSecurityGroupId"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "21",
+                "ToPort": "21",
+                "SourceSecurityGroupId": {
+                    "Ref": "BeanstalkSecurityGroup"
+                }
+            }
+        },
+        "BeanstalkNatSecurityGroupHTTPIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "NatSecurityGroupId"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "80",
+                "ToPort": "80",
+                "SourceSecurityGroupId": {
+                    "Ref": "BeanstalkSecurityGroup"
+                }
+            }
+        },
+        "BeanstalkNatSecurityGroupHTTPSIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "NatSecurityGroupId"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "443",
+                "ToPort": "443",
+                "SourceSecurityGroupId": {
+                    "Ref": "BeanstalkSecurityGroup"
+                }
+            }
+        },
+        "BeanstalkApp": {
+            "Type": "AWS::ElasticBeanstalk::Application",
+            "DependsOn": "BeanstalkSecurityGroup",
+            "Properties": {
+                "ApplicationName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            "{{cage_name}}",
+                            "{{customer_name}}"
+                        ]
+                    ]
+		        },
+                "Description": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "Nucleator ",
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            " Application"
+                        ]
+                    ]
+                }
+            }
+        },
+        "SampleVersion": {
+	    "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
+	    "Properties": {
+		"ApplicationName": { "Ref": "BeanstalkApp" },
+		"Description": "Initial Version of Sample Application",
+		"SourceBundle": {
+                    "S3Bucket": {
+			"Fn::Join": [
+                            "-",
+                            [
+				"elasticbeanstalk-samples",
+				{
+                                    "Ref": "AWS::Region"
+				}
+                            ]
+			]
+                    },
+                    "S3Key": "{{sample_keyname}}"
+		}
+	    }
+        },
+        "{{configuration_template_name}}": {
+	    "Type": "AWS::ElasticBeanstalk::ConfigurationTemplate",
+	    "Properties": {
+		"ApplicationName": { "Ref": "BeanstalkApp" },
+		"Description": "{{configuration_template_description}}",
+		"SolutionStackName": "{{configuration_template_solution_stack_name}}",
+		"OptionSettings": [
+                     {
+            "Namespace": "aws:elasticbeanstalk:sqsd",
+            "OptionName": "InactivityTimeout",
+            "Value": "{{inactivity_timeout}}"
+                     },
+                     {
+            "Namespace": "aws:elasticbeanstalk:sqsd",
+            "OptionName": "VisibilityTimeout",
+            "Value": "{{visibility_timeout}}"
+                    },
+                    {
+			"Namespace": "aws:elasticbeanstalk:application:environment",
+			"OptionName": "DB_USERNAME",
+			"Value": { "Fn::If":  [ "CreateDatabaseResources", {"Ref" : "DatabaseUser"}, {"Ref" : "AWS::NoValue"}] }
+                    },
+                    {
+			"Namespace": "aws:elasticbeanstalk:application:environment",
+			"OptionName": "DB_PASSWORD",
+			"Value": { "Fn::If":  [ "CreateDatabaseResources", {"Ref" : "DatabasePassword"}, {"Ref" : "AWS::NoValue"}] }
+                    },
+                    {
+			"Namespace": "aws:elasticbeanstalk:application:environment",
+			"OptionName": "NUCLEATOR_CAGE_NAME",
+			"Value": {
+                            "Ref": "CageName"
+			}
+                    },
+                    {
+			"Namespace": "aws:elasticbeanstalk:application:environment",
+			"OptionName": "DB_CONNECTION_STRING",
+			"Value": { "Fn::If":  [ "CreateDatabaseResources", { "Fn::Join": [ "", [ "postgresql://", { "Ref": "DatabaseUser" }, ":", { "Ref": "DatabasePassword" }, "@", { "Fn::GetAtt": [ "Database", "Endpoint.Address" ] }, ":", { "Fn::GetAtt": [ "Database", "Endpoint.Port" ] }, "/", { "Ref": "DatabaseName" } ]  ] }, {"Ref" : "AWS::NoValue"}] }
+                    },
+                    {
+			"Namespace": "aws:autoscaling:launchconfiguration",
+			"OptionName": "InstanceType",
+			"Value": {
+                            "Ref": "BeanstalkInstanceType"
+			}
+                    },
+                    {
+			"Namespace": "aws:autoscaling:launchconfiguration",
+			"OptionName": "IamInstanceProfile",
+			"Value": { "Fn::If":  [ "CreateInstanceProfile", {"Ref" : "InstanceProfile"}, {"Ref" : "AWS::NoValue"}] }
+                    },
+                    {
+			"Namespace": "aws:autoscaling:launchconfiguration",
+			"OptionName": "SSHSourceRestriction",
+			"Value": {
+                            "Fn::Join": [
+				"",
+				[
+                                    "tcp,22,22,",
+                                    {
+					"Ref": "BastionSecurityGroupId"
+                                    }
+				]
+                            ]
+			}
+                    },
+                    {
+			"Namespace": "aws:autoscaling:launchconfiguration",
+			"OptionName": "SecurityGroups",
+			"Value": { "Fn::Join":
+                       [ ",", [ { "Ref": "BeanstalkSecurityGroup" }, { "Ref": "BastionSecurityGroupId" }] ]
+                     }
+                    },
+                    {
+			"Namespace": "aws:autoscaling:launchconfiguration",
+			"OptionName": "EC2KeyName",
+			"Value": {
+                            "Ref": "KeypairName"
+			}
+                    },
+                    {
+			"Namespace": "aws:autoscaling:asg",
+			"OptionName": "MinSize",
+			"Value": { "Ref": "BeanstalkAutoscaleMinSize" }
+                    },
+                    {
+			"Namespace": "aws:autoscaling:asg",
+			"OptionName": "MaxSize",
+			"Value": { "Ref": "BeanstalkAutoscaleMaxSize" }
+                    },
+                    {
+			"Namespace": "aws:ec2:vpc",
+			"OptionName": "VPCId",
+			"Value": {
+                            "Ref": "VpcId"
+			}
+                    },
+                    {
+			"Namespace": "aws:ec2:vpc",
+			"OptionName": "Subnets",
+			"Value": {
+			    "Fn::Join" : [
+				",",
+				[
+				    { "Ref": "PrivateSubnet1Id" },
+				    { "Ref": "PrivateSubnet2Id" }
+				]
+			    ]
+			}
+                    },
+                    {
+			"Namespace": "aws:ec2:vpc",
+			"OptionName": "ELBSubnets",
+			"Value": {
+			    "Fn::Join" : [
+				",",
+				[
+				    { "Ref": "PublicSubnet1Id" },
+				    { "Ref": "PublicSubnet2Id" }
+				]
+			    ]
+			} 
+		    },
+                    {
+			"Namespace": "aws:ec2:vpc",
+			"OptionName": "DBSubnets",
+			"Value": { "Fn::If":  [ "CreateDatabaseResources", {"Ref" : "DatabaseSubnetGroupId"}, {"Ref" : "AWS::NoValue"}] }
+                    }
+            {% if queue_url is defined %}
+            ,
+                {
+                    "Namespace": "aws:elasticbeanstalk:sqsd",
+                    "OptionName": "WorkerQueueURL",
+                    "Value": "{{ queue_url }}"
+                }
+            {% endif %}
+		]
+	    }
+        },
+        "BeanstalkEnv": {
+            "Type": "AWS::ElasticBeanstalk::Environment",
+            "Properties": {
+                "ApplicationName": {
+                    "Ref": "BeanstalkApp"
+                },
+                "EnvironmentName": { "Ref": "EnvironmentName" },
+                "Description": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "Nucleator-managed AWS Elastic Beanstalk Environment hosting ",
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            " Application"
+                        ]
+                    ]
+                },
+                "Tier" : {
+                  "Type" : { "Ref": "BeanstalkTierType" },
+                  "Name" : { "Ref": "BeanstalkTierName" },
+                  "Version" : { "Ref": "BeanstalkTierVersion" }
+                },
+                "TemplateName": { "Ref": "{{configuration_template_name}}" },
+                {% if beanstalk_cnameprefix is defined %}
+                    {{ beanstalk_cnameprefix }},
+                {% endif %}
+                "VersionLabel": { "Ref": "SampleVersion" }
+            }
+        },
+        {% if beanstalk_dnsrecord is defined %}
+            {{ beanstalk_dnsrecord }},
+        {% endif %}
+        "DatabaseSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Condition" : "CreateDatabaseResources",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VpcId"
+                },
+                "GroupDescription": "Allow BeanstalkSecurityGroup access to RDS DB",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "5432",
+                        "ToPort": "5432",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BeanstalkSecurityGroup"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "3306",
+                        "ToPort": "3306",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BeanstalkSecurityGroup"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BastionSecurityGroupId"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "security.db",
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    {
+                                        "Ref": "CageName"
+                                    },
+                                    "unresolvable"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "NucleatorGroup",
+                        "Value": "NucleatorBeanstalk"
+                    },
+                    {{ nucleator_common_tags | to_json_fragment }}
+                ]
+            }
+        },
+        "Database": {
+            "Type": "AWS::RDS::DBInstance",
+            "Condition" : "CreateDatabaseResources",
+            "Properties": {
+                "MultiAZ": {
+                    "Ref": "DatabaseMultiAZ"
+                },
+                "DBSubnetGroupName": {
+                    "Ref": "DatabaseSubnetGroupId"
+                },
+                "VPCSecurityGroups": [
+                    {
+                        "Ref": "DatabaseSecurityGroup"
+                    }
+                ],
+                "DBInstanceClass": {
+                    "Ref": "DatabaseInstanceType"
+                },
+                "DBInstanceIdentifier": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "db",
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            {
+                                "Ref": "CageName"
+                            },
+                            "{{customer_domain | replace(".", "-")}}"
+                        ]
+                    ]
+                },
+                "Port": "5432",
+                "AllocatedStorage": {
+                    "Ref": "DatabaseStorage"
+                },
+                "Engine": "postgres",
+                "EngineVersion": "9.5.2",
+                "LicenseModel": "postgresql-license",
+                "DBName": {
+                    "Ref": "DatabaseName"
+                },
+                "MasterUsername": {
+                    "Ref": "DatabaseUser"
+                },
+                "MasterUserPassword": {
+                    "Ref": "DatabasePassword"
+                },
+                "Tags": [
+                    {
+                        "Key": "Customer",
+                        "Value": "{{customer_name}}"
+                    },
+                    {
+                        "Key": "Cage",
+                        "Value": "{{cage_name}}"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "db",
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            {
+                                "Ref": "CageName"
+                            },
+                            "{{customer_domain | replace(".", "-")}}"
+                        ]
+                    ]
+                }
+                    },
+                    {
+                        "Key": "NucleatorGroup",
+                        "Value": "NucleatorBeanstalk"
+                    },
+                    {
+                        "Key": "NucleatorBeanstalkApplication",
+                        "Value": {
+                            "Ref": "ApplicationName"
+                        }
+                    },
+
+        		    {{ nucleator_common_tags | to_json_fragment }}
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "DatabaseEndpoint": {
+            "Description": "Endpoint for the Database",
+            "Condition" : "CreateDatabaseResources",
+            "Value": {
+                "Fn::GetAtt": [
+                    "Database",
+                    "Endpoint.Address"
+                ]
+            }
+        },
+        "DatabaseConnectionString": {
+            "Description": "Connection string for Database",
+            "Condition" : "CreateDatabaseResources",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "postgresql://",
+                        {
+                            "Ref": "DatabaseUser"
+                        },
+                        ":",
+                        {
+                            "Ref": "DatabasePassword"
+                        },
+                        "@",
+                        {
+                            "Fn::GetAtt": [
+                                "Database",
+                                "Endpoint.Address"
+                            ]
+                        },
+                        ":",
+                        {
+                            "Fn::GetAtt": [
+                                "Database",
+                                "Endpoint.Port"
+                            ]
+                        },
+                        "/",
+                        {
+                            "Ref": "DatabaseName"
+                        }
+                    ]
+                ]
+            }
+        },
+        {% if beanstalk_endpoint is defined %}
+            {{ beanstalk_endpoint }},
+        {% endif %}
+        "BeanstalkSecurityGroupId": {
+            "Description": "Id of security group that includes all beanstalk instances",
+            "Value": {
+                 "Ref": "BeanstalkSecurityGroup"
+            }
+        }
+    }
+}

@@ -1,0 +1,50 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  pre_tasks:
+  - name: estabish playbook args
+    set_fact:
+      aws_environment_with_rolenames: "{{aws_environment_with_rolenames}}"
+  roles:
+    - config
+    - siteconfig
+    - propagate_tags
+
+  vars:
+    cage_name: "{{cage_name}}"
+    customer_name: "{{customer_name}}"
+
+- hosts: tag_NucleatorCage_{{cage_name}}:&tag_NucleatorCustomer_{{customer_name}}
+  user: ec2-user
+  connection: local
+  gather_facts: False
+
+  roles:
+    - nucleatorgroups
+
+  tasks:
+    - name: generate ssh config
+      bastion_ssh_config:
+        dest: "{{nucleator_ssh_config_dir}}"
+        identity_file: "{{ nucleator_configuration_dir}}/{{ hostvars['localhost'].keypair_name }}.pem"
+        user: "ec2-user"
+        bastion_user: "ec2-user"
+
+- hosts: "MATCH_NUCLEATORCAGE__{{ cage_name }}"
+  roles:
+    - common

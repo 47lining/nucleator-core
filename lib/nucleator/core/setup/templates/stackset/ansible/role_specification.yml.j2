@@ -1,0 +1,347 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+role_specification:
+  - role_name: NucleatorBeanstalkServiceRunner
+    trust_policy:
+      Version: "2008-10-17"
+      Statement:
+        - Effect: Allow
+          Sid: NucleatorBeanstalkServiceRunnerTrustPolicy
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBeanstalkServiceAccessPolicy
+        policy_document:
+          Statement:
+            - Effect: Allow
+              Action:
+                - "dynamodb:PutItem"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "sqs:GetQueueAttributes"
+                - "sqs:SendMessage"
+                - "sqs:ReceiveMessage"
+                - "sqs:DeleteMessage"
+              Resource: arn:aws:sqs:*
+            - Effect: Allow
+              Action:
+                - "cloudwatch:PutMetricAlarm"
+                - "cloudwatch:PutMetricData"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:GetObject"
+                - "s3:CreateBucket"
+                - "s3:PutObject"
+                - "s3:GetBucketPolicy"
+                - "s3:PutObjectAcl"
+                - "s3:GetObjectAcl"
+                - "s3:PutBucketPolicy"
+                - "s3:DeleteObject"
+              Resource: arn:aws:s3:::*
+  - role_name: NucleatorBeanstalkProvisioner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBeanstalkProvisionerTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBeanstalkProvisionerAccessPolicy # Includes ability to provision beanstalks, do everything needed in the "beanstalk_provision" playbook...
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "cloudformation:CreateStack"
+                - "cloudformation:UpdateStack"
+                - "cloudformation:DescribeStacks"
+                - "cloudformation:DescribeStackEvents"
+                - "cloudformation:DescribeStackResource"
+                - "cloudformation:GetTemplate"
+                - "cloudformation:ListStackResources"
+              Resource: arn:aws:cloudformation:*
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:GetObject"
+                - "s3:CreateBucket"
+                - "s3:PutObject"
+                - "s3:GetBucketPolicy"
+                - "s3:PutObjectAcl"
+                - "s3:GetObjectAcl"
+                - "s3:PutBucketPolicy"
+                - "s3:DeleteObject"
+                - "s3:PutBucketLogging"
+                - "s3:GetBucketAcl"
+                - "s3:PutBucketAcl"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "ec2:DescribeKeyPairs"
+                - "ec2:DescribeAddresses"
+                - "ec2:CreateSecurityGroup"
+                - "ec2:DescribeSecurityGroups"
+                - "ec2:DescribeAccountAttributes"
+                - "ec2:CreateTags"
+                - "ec2:RevokeSecurityGroupEgress"
+                - "ec2:AuthorizeSecurityGroupEgress"
+                - "ec2:AuthorizeSecurityGroupIngress"
+                - "ec2:DescribeSubnets"
+                - "ec2:DescribeImages"
+                - "ec2:DescribeVpcs"
+                - "ec2:TerminateInstances"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "iam:CreateInstanceProfile"
+                - "iam:AddRoleToInstanceProfile"
+                - "iam:PassRole"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "elasticbeanstalk:CreateApplication"
+                - "elasticbeanstalk:DescribeApplications"
+                - "elasticbeanstalk:CreateApplicationVersion"
+                - "elasticbeanstalk:CreateConfigurationTemplate"
+                - "elasticbeanstalk:DescribeApplicationVersions"
+                - "elasticbeanstalk:CreateEnvironment"
+                - "elasticbeanstalk:DescribeEnvironments"
+                - "elasticbeanstalk:UpdateEnvironment"
+                - "elasticbeanstalk:DescribeEnvironmentResources"
+                - "elasticbeanstalk:DescribeConfigurationSettings"
+              Resource: arn:aws:elasticbeanstalk:*
+            - Effect: Allow
+              Action:
+                - "elasticloadbalancing:CreateLoadBalancer"
+                - "elasticloadbalancing:SetLoadBalancerPoliciesOfListener"
+                - "elasticloadbalancing:ConfigureHealthCheck"
+                - "elasticloadbalancing:ModifyLoadBalancerAttributes"
+                - "elasticloadbalancing:DescribeLoadBalancers"
+                - "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "autoscaling:CreateLaunchConfiguration"
+                - "autoscaling:CreateAutoScalingGroup"
+                - "autoscaling:UpdateAutoScalingGroup"
+                - "autoscaling:DescribeLaunchConfigurations"
+                - "autoscaling:DescribeAutoScalingGroups"
+                - "autoscaling:DescribeScalingActivities"
+                - "autoscaling:PutScalingPolicy"
+                - "autoscaling:SuspendProcesses"
+                - "autoscaling:ResumeProcesses"
+                - "autoscaling:DeleteTags"
+                - "autoscaling:CreateOrUpdateTags"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "cloudwatch:PutMetricAlarm"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "route53:ListHostedZones"
+                - "route53:ChangeResourceRecordSets"
+                - "route53:GetChange"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "rds:DescribeDBInstances"
+                - "rds:CreateDBInstance"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "sqs:CreateQueue"
+                - "sqs:SendMessage"
+                - "sqs:ReadMessage"
+                - "sqs:GetQueueAttributes"
+              Resource: arn:aws:sqs:*
+
+  - role_name: NucleatorBeanstalkInventoryManager
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBeanstalkInventoryManagerTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBeanstalkInventoryMangerAccessPolicy
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "ec2:DescribeInstances"
+                - "ec2:DescribeVolumes"
+                - "ec2:DescribeSnapshots"
+                - "ec2:CreateTags"
+                - "ec2:DescribeTags"
+              Resource: '*'
+  - role_name: NucleatorBeanstalkDeployer
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBeanstalkDeployerTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBeanstalkDeployerAccessPolicy
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "ec2:DescribeInstances"
+                - "ec2:TerminateInstances"
+                - "ec2:DescribeSecurityGroups"
+                - "ec2:DescribeSubnets"
+                - "ec2:DescribeVpcs"
+                - "ec2:DescribeImages"
+                - "ec2:DescribeKeyPairs"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "cloudformation:GetTemplate"
+                - "cloudformation:UpdateStack"
+                - "cloudformation:DescribeStacks"
+                - "cloudformation:DescribeStackEvents"
+                - "cloudformation:DescribeStackResource"
+                - "cloudformation:DescribeStackResources"
+                - "cloudformation:ListStackResources"
+              Resource: arn:aws:cloudformation:*
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:CreateBucket"
+                - "s3:PutObject"
+                - "s3:GetObject"
+                - "s3:GetObjectAcl"
+                - "s3:GetBucketPolicy"
+                - "s3:PutObjectAcl"
+                - "s3:DeleteObject"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "elasticbeanstalk:DescribeApplicationVersions"
+                - "elasticbeanstalk:CreateApplicationVersion"
+                - "elasticbeanstalk:UpdateEnvironment"
+                - "elasticbeanstalk:DescribeEnvironments"
+                - "elasticbeanstalk:DescribeEnvironmentResources"
+              Resource: arn:aws:elasticbeanstalk:*
+            - Effect: Allow
+              Action:
+                - "autoscaling:SuspendProcesses"
+                - "autoscaling:ResumeProcesses"
+                - "autoscaling:DescribeScalingActivities"
+                - "autoscaling:DescribeAutoScalingGroups"
+                - "autoscaling:DescribeLaunchConfigurations"
+                - "autoscaling:CreateOrUpdateTags"
+                - "autoscaling:DeleteTags"
+                - "autoscaling:DeletePolicy"
+                - "autoscaling:DeleteLaunchConfiguration"
+                - "autoscaling:UpdateAutoScalingGroup"
+                - "autoscaling:DeleteAutoScalingGroup"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "elasticloadbalancing:DescribeLoadBalancers"
+                - "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+              Resource: '*'
+  - role_name: NucleatorBeanstalkDeleter
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBeanstalkDeleterTrustPolicy
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBeanstalkDeleterAccessPolicy
+        policy_document:
+          Statement :
+            - Effect : Allow
+              Action:
+                - "cloudformation:DescribeStacks"
+                - "cloudformation:DeleteStack"
+                - "cloudformation:DescribeStackEvents"
+              Resource: arn:aws:cloudformation:*
+            - Effect: Allow
+              Action:
+                - "ec2:RevokeSecurityGroupEgress"
+                - "ec2:RevokeSecurityGroupIngress"
+                - "ec2:DeleteSecurityGroup"
+                - "ec2:DescribeSecurityGroups"
+                - "ec2:AuthorizeSecurityGroupEgress"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "route53:ListHostedZones"
+                - "route53:ChangeResourceRecordSets"
+                - "route53:GetChange"
+                - "route53:ListResourceRecordSets"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "elasticbeanstalk:TerminateEnvironment"
+                - "elasticbeanstalk:DeleteApplicationVersion"
+                - "elasticbeanstalk:DeleteConfigurationTemplate"
+                - "elasticbeanstalk:DeleteApplication"
+                - "elasticbeanstalk:DescribeEnvironments"
+                - "elasticbeanstalk:DescribeApplications"
+              Resource: arn:aws:elasticbeanstalk:*
+            - Effect: Allow
+              Action:
+                - "iam:RemoveRoleFromInstanceProfile"
+                - "iam:DeleteInstanceProfile"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:GetObject"
+                - "s3:DeleteObject"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "cloudwatch:DeleteAlarms"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "autoscaling:DeletePolicy"
+                - "autoscaling:DescribeAutoScalingGroups"
+                - "autoscaling:DeleteLaunchConfiguration"
+                - "autoscaling:UpdateAutoScalingGroup"
+                - "autoscaling:DescribeScalingActivities"
+                - "autoscaling:DeleteAutoScalingGroup"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "elasticloadbalancing:DeleteLoadBalancer"
+              Resource: arn:aws:elasticloadbalancing:*
+            - Effect: Allow
+              Action:
+                - "rds:DescribeDBInstances"
+                - "rds:DeleteDBInstance"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "sqs:DeleteQueue"
+              Resource: arn:aws:sqs:*

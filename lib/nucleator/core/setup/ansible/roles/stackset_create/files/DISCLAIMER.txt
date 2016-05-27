@@ -1,0 +1,7 @@
+Nucleator provides User with the technical capability of launching several 
+Amazon Web Services resources at User’s discretion. 47Lining shall not be 
+held liable for any costs incurred, whether incurred intentionally or 
+unintentionally, by User, including but not limited to costs associated with 
+deploying resources or any additional fees such as those related to data 
+egress. Users shall be solely responsible for monitoring their AWS usage 
+and paying for related costs.
