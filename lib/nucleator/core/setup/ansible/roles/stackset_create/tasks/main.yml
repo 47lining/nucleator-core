@@ -42,9 +42,12 @@
     - { src: 'commands/__init__.py', dest: 'commands/__init__.py'}
     - { src: 'ansible/configure.yml', dest: 'ansible/{{stackset_name}}_configure.yml'}
     - { src: 'ansible/provision.yml', dest: 'ansible/{{stackset_name}}_provision.yml'}
+    # These copy the dir into the dest dir - BUG
     - { src: 'ansible/roles/configure', dest: 'ansible/roles/{{stackset_name}}_configure'}
     - { src: 'ansible/roles/provision', dest: 'ansible/roles/{{stackset_name}}_provision'}
     - { src: 'ansible/roles/stackset_templates', dest: 'ansible/roles/stackset_templates'}
+    # The cloudformation template needs to be named for the stackset
+    # The stackset_templates/vars needs to be named for the stackset
 
 - name: Copy the templates
   template:

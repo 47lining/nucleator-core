@@ -20,7 +20,7 @@
 
 - name: Set credentials variable to desired role
   set_fact:
-    role_credentials: "{{item.NucleatorRedshiftProvisioner if redshift_deleting is not defined or not redshift_deleting|bool else item.NucleatorRedshiftDeleter}}"
+    role_credentials: "{{item.Nucleator{{stackset_name | capitalize}}Provisioner if {{stackset_name}}_deleting is not defined or not {{stackset_name}}_deleting|bool else item.Nucleator{{stackset_name | capitalize}}Deleter}}"
   with_items:
     - "{{aws_environment_with_rolenames}}"
   no_log: True
@@ -33,7 +33,7 @@
   connection: local
   cloudformation:
     stack_name="{{ stackset_stack_name }}"
-    state="{{'present' if redshift_deleting is not defined or not redshift_deleting|bool else 'absent'}}"
+    state="{{'present' if {{stackset_name}}_deleting is not defined or not {{stackset_name}}_deleting|bool else 'absent'}}"
     region="{{cage_names[cage_name]["region"]}}"
     disable_rollback=yes
     template="{{stackset_template}}"
