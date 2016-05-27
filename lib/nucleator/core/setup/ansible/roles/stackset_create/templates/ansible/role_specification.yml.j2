@@ -37,9 +37,11 @@ role_specification:
       Statement :
         - Effect : Allow
           Sid : Nucleator{{stackset_name | capitalize}}ProvisionerTrustPolicy
+{% raw %}
           Principal :
-            AWS : "arn:aws:iam::\{\{ aws_accounts[cage_names['build']['account']]['account_number'] \}\}:role/NucleatorAgent"
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
           Action : sts:AssumeRole
+{% endraw %}
     access_policies:
       - policy_name: Nucleator{{stackset_name | capitalize}}ProvisionerAccessPolicy
         policy_document:
@@ -60,8 +62,10 @@ role_specification:
         - Effect : Allow
           Sid : Nucleator{{stackset_name | capitalize}}DeleterTrustPolicy
           Principal :
-            AWS : "arn:aws:iam::\{\{ aws_accounts[cage_names['build']['account']]['account_number'] \}\}:role/NucleatorAgent"
+{% raw %}
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
           Action : sts:AssumeRole
+{% endraw %}
     access_policies:
       - policy_name: Nucleator{{stackset_name | capitalize}}DeleterAccessPolicy
         policy_document:
