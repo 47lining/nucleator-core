@@ -55,6 +55,7 @@ class Init(Command):
             raise ValueError("INTERNAL ERROR: cli should have been set by upstream code, but is not specified")
         extra_vars={
             "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
             "nucleator_dynamic_hosts_src": properties.DYNAMIC_HOSTS_SRC,
             "nucleator_dynamic_hosts_dest": properties.DYNAMIC_HOSTS_PATH,
         }

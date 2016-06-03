@@ -31,8 +31,6 @@ nucleator_configuration_dir: "~/.nucleator"
 
 nucleator_ssh_config_dir: "{{nucleator_configuration_dir}}/ssh-config"
 
-debug_credentials: False
-
 cloudformation_template_instantiation_dir: "{{nucleator_configuration_dir | osPathJoin('templates') }}"
 
 nucleator_common_tags:

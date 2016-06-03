@@ -69,6 +69,9 @@ class CliWithAnsibleLauncher(Cli):
         limit_stackset_instance=EXTRA_VARS.pop("limit_stackset_instance", None)
         list_hosts=EXTRA_VARS.pop("list_hosts", None)
 
+        debug_credentials = EXTRA_VARS['debug_credentials'] if 'debug_credentials' in EXTRA_VARS else False
+        EXTRA_VARS['debug_credentials'] = debug_credentials
+
         is_bootstrap=True if is_static == "Bootstrap" else False
         HOSTS=BOOTSTRAP_HOSTS_PATH if is_bootstrap else STATIC_HOSTS_PATH if is_static else DYNAMIC_HOSTS_PATH
 
@@ -166,7 +169,7 @@ class CliWithAnsibleLauncher(Cli):
 
         SANITIZED_COMMAND.extend(["--extra-vars", '{0}'.format(
             " ".join("%s=%s" % (key,pipes.quote(str(val)))
-                     for (key,val) in self.sanitize_dict(EXTRA_VARS).iteritems()))])
+                     for (key,val) in self.sanitize_dict(EXTRA_VARS, debug_credentials).iteritems()))])
         SANITIZED_COMMAND.extend(ANSIBLE_MODS)
     
         ANSIBLE_COMMAND.extend(["--extra-vars", '{0}'.format(
@@ -175,7 +178,7 @@ class CliWithAnsibleLauncher(Cli):
         ANSIBLE_COMMAND.extend(ANSIBLE_MODS)
 
         # say what we're going to do
-        sanitized_env = self.sanitize_dict(ANSIBLE_ENVIRONMENT)
+        sanitized_env = self.sanitize_dict(ANSIBLE_ENVIRONMENT, debug_credentials)
         ENV_STRING=" ".join("%s=%s" % (key,pipes.quote(str(val))) for (key,val) in sanitized_env.iteritems())
         CMD_STRING=" ".join(pipes.quote(s) for s in ANSIBLE_COMMAND)
 
@@ -223,20 +226,21 @@ class CliWithAnsibleLauncher(Cli):
         result=dict(stdout=playbook_out, stderr=playbook_err, rc=rc, fatal=FOUND_FATAL)
         return result
 
-    def sanitize_dict(self, input_dict):
+    def sanitize_dict(self, input_dict, debug_credentials):
         output_dict = input_dict.copy()
+
         for key, value in output_dict.items():
             if key == "aws_environment_with_rolenames":
                 if type(value) in (str, unicode):
                     value = json.loads(value)
-            if key.startswith("AWS_"):
+            if key.startswith("AWS_") and debug_credentials is False:
                 value = "(hidden)"
             elif type(value) == dict:
-                value = self.sanitize_dict(value)
+                value = self.sanitize_dict(value, debug_credentials)
             output_dict[key] = value
         return output_dict
 
-    def obtain_credentials(self, commands=None, account=None, cage=None, customer=None, verbosity=None):
+    def obtain_credentials(self, commands=None, account=None, cage=None, customer=None, verbosity=None, debug_credentials=False):
         write_info("Obtaining Temporary Credentials")
         # provide what we have, the playbook will generate any missing facts
         extra_vars={}
@@ -248,6 +252,7 @@ class CliWithAnsibleLauncher(Cli):
             extra_vars["customer_name"]=customer
 
         extra_vars["verbosity"]=verbosity
+        extra_vars["debug_credentials"]=debug_credentials
 
         global aws_environment_with_rolenames
         #aws_environment_with_rolenames = {}

@@ -21,6 +21,10 @@
 NUCLEATOR_CORE_REPO: "git+https://github.com/47lining/nucleator-core.git"
 NUCLEATOR_BRANCH_OR_TAG: "master"
 
+# Ignore errors on package manager updates
+# ( Sometimes RHEL updates are broken )
+NUCLEATOR_IGNORE_UPDATE_ERRORS: False
+
 #
 # Nucleator Cage CIDR Whitelist
 #
