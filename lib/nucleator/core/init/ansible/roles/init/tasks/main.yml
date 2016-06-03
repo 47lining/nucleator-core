@@ -24,6 +24,19 @@
 
 - name: Copy inventory structure from nucleator installation to nucleator config directory
   shell: "cp -n -R {{nucleator_dynamic_hosts_src}}/* {{nucleator_dynamic_hosts_dest}}/"
+  register: copy_result
+  ignore_errors: true
+
+- name: Test result if previous failed
+  file:
+    path: "{{nucleator_dynamic_hosts_dest}}/group_vars"
+    state: directory
+  when: copy_result.failed is defined
+  register: is_groupvars_present
+
+- name: Show message
+  debug: msg="The previous step got a failure, but only to avoid overwriting the inventory."
+  when: is_groupvars_present is defined and not is_groupvars_present.changed and not is_groupvars_present.skipped is defined
 
 - name: populate nucleator config dir with example config files
   copy:

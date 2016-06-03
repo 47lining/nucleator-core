@@ -11,17 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-try:
-    from __main__ import display
-except ImportError:
-    from ansible.utils.display import Display
-    display = Display()
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
+import os
+
 from ansible.plugins.action import ActionBase
+from ansible.utils.boolean import boolean
 
 import boto, os
 from boto import cloudtrail
-
-from ansible import utils
 
 class ActionModule(ActionBase):
 
