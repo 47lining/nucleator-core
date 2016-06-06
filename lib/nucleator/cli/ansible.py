@@ -350,4 +350,4 @@ class CliWithAnsibleLauncher(Cli):
 
         os.remove("/tmp/creds.conf")
 
-        return
+        return aws_environment_with_rolenames
