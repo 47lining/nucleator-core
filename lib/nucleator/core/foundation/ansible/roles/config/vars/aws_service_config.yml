@@ -174,22 +174,23 @@ map_aws_instance_type_to_architecture:
     Arch: "q64GPU"
 
 map_aws_region_plus_arch_to_public_bastion_ami:
+# Amazon Linux AMI 2016.03.2 was released on 2016-06-09
   us-east-1:
-    q64: ami-246ed34c # amzn-ami-pv-2014.09.1.x86_64-ebs
-    q64hvm: ami-b66ed3de
+    q64: ami-0188776c # PV EBS-Backed 64-bit
+    q64hvm: ami-a4827dc9 # HVM (SSD) EBS-Backed 64-bit
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   us-west-1:
-    q64: ami-7aba833f # amzn-ami-pv-2014.03.1.x86_64-ebs
-    q64hvm: ami-cb14f28f # amzn-ami-hvm-2015.03.0.x86_64-ebs
+    q64: ami-b87f05d8
+    q64hvm: ami-11790371
   us-west-2:
-    q64: ami-55a7ea65
-    q64hvm: ami-b5a7ea85
+    q64: ami-76798116
+    q64hvm: ami-f303fb93
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   eu-west-1:
-    q64: ami-9c7ad8eb
-    q64hvm: ami-6e7bd919
+    q64: ami-27920054
+    q64hvm: ami-c39604b0
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
 
