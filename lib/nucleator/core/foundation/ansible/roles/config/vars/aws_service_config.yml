@@ -197,20 +197,22 @@ map_aws_region_plus_arch_to_public_bastion_ami:
 map_aws_region_plus_arch_to_public_nat_ami:
   us-east-1:
     q64: ami-224dc94a # amzn-ami-vpc-nat-pv-2014.09.1.x86_64-ebs - ami-224dc94a
-    q64hvm: ami-184dc970 # amzn-ami-vpc-nat-hvm-2014.09.1.x86_64-gp2 - ami-184dc970
+    q64hvm: ami-8d8976e0 # Amazon Linux AMI 2016.03.2
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   us-west-1:
     q64: ami-67a54423 # amzn-ami-vpc-nat-pv-2015.03.0.x86_64-ebs
-    q64hvm: ami-7da94839 # amzn-ami-vpc-nat-hvm-2015.03.0.x86_64-gp2
+    q64hvm: ami-407f0520 # Amazon Linux AMI 2016.03.2
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
   us-west-2:
     q64: ami-030f4133 # amzn-ami-vpc-nat-pv-2014.09.1.x86_64-ebs - ami-030f4133
-    q64hvm: ami-290f4119 # amzn-ami-vpc-nat-hvm-2014.09.1.x86_64-gp2 - ami-290f4119
+    q64hvm: ami-cc01f9ac # Amazon Linux AMI 2016.03.2
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   eu-west-1:
     q64: ami-30913f47 # amzn-ami-vpc-nat-pv-2014.09.1.x86_64-ebs - ami-30913f47
-    q64hvm: ami-14913f63 # amzn-ami-vpc-nat-hvm-2014.09.1.x86_64-gp2 - ami-14913f63
+    q64hvm: ami-89ee7cfa # Amazon Linux AMI 2016.03.2
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
 
