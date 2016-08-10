@@ -45,7 +45,7 @@ class ActionModule(object):
 			try:
 				bucket = s3_conn.get_bucket(bucketName)
 			except Exception, e:
-				if(region is "us-east-1"):
+				if(region == "us-east-1"):
 					bucket1 = s3_conn.create_bucket(bucketName)
 					bucket2 = s3_conn.get_bucket(logging_bucket)
 					response = bucket1.enable_logging(bucket2, "ConfigBucket/")
