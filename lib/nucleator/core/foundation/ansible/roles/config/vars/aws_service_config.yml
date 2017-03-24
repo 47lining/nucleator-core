@@ -79,13 +79,33 @@ supported_ec2_instance_types:
 default_ec2_instance_type: t2.micro
 
 supported_rds_instance_types:
+  - "db.cr1.8xl"
   - "db.t1.micro"
+  - "db.t2.small"
   - "db.t2.micro"
   - "db.m1.small"
-  - "db.m3.medium"
+  - "db.t2.medium"
+  - "db.m1.medium"
+  - "db.t2.large"
+  - "db.m4.large"
   - "db.m3.large"
+  - "db.m3.medium"
+  - "db.m1.large"
+  - "db.r3.large"
+  - "db.m2.xlarge"
+  - "db.r3.xlarge"
+  - "db.m2.2xlarge"
+  - "db.m4.2xlarge"
   - "db.m3.xlarge"
+  - "db.m4.xlarge"
+  - "db.m1.xlarge"
+  - "db.m2.4xlarge"
   - "db.m3.2xlarge"
+  - "db.r3.2xlarge"
+  - "db.r3.4xlarge"
+  - "db.m4.10xlarge"
+  - "db.m4.4xlarge"
+  - "db.r3.8xlarge"
 
 default_rds_instance_type: db.t2.micro
 
