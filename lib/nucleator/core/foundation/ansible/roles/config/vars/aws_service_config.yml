@@ -118,6 +118,12 @@ map_aws_instance_type_to_architecture:
     Arch: "q64hvm"
   t2.medium:
     Arch: "q64hvm"
+  t2.large:
+    Arch: "q64hvm"
+  t2.xlarge:
+    Arch: "q64hvm"
+  t2.2xlarge:
+    Arch: "q64hvm"
   m1.small:
     Arch: "q64"
   m1.medium:
@@ -253,6 +259,26 @@ map_aws_region_plus_arch_to_worker_ami:
   eu-west-1:
     q64: ami-9c7ad8eb
     q64hvm: ami-6e7bd919
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+
+map_aws_region_plus_arch_to_ubuntu_ami:
+  us-east-1:
+    q64:    ami-1acdd90d # ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20161221
+    q64hvm: ami-9dcfdb8a # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20161221
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  us-west-1:
+    q64: ami-e2590882    # ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20161221
+    q64hvm: ami-b05203d0 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20161221
+  us-west-2:
+    q64: ami-48d16628    # ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20161221
+    q64hvm: ami-b2d463d2 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20161221
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  eu-west-1:
+    q64: ami-a983a3da    # ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20161221
+    q64hvm: ami-ca80a0b9 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20161221
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
 
