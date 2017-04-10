@@ -34,5 +34,5 @@
   when: debug_credentials
 
 - name: "publish instantiated templates to nucleator's s3 bucket for use by CloudFormation"
-  shell: aws s3 sync {{cloudformation_template_instantiation_dir | expanduser}}/{{customer_name}}  s3://{{ account_setup_stack['stack_outputs']['TemplateBucketName'] }}/{{customer_name}}
+  shell: aws s3 --region {{aws_accounts[account_name]['bootstrap_region']}} sync {{cloudformation_template_instantiation_dir | expanduser}}/{{customer_name}}  s3://{{ account_setup_stack['stack_outputs']['TemplateBucketName'] }}/{{customer_name}}
   environment: role_credentials
