@@ -35,8 +35,8 @@ class ActionModule(object):
 				env=template.template(self.runner.basedir, self.runner.environment, inject, convert_bare=True)
 				env = utils.safe_eval(env)
 
-			bucketName = "config-bucket-%s" % account_number
-			snsName = "config-topic-%s" % account_number
+			bucketName = "config-bucket-%s-%s" % (account_number, region)
+			snsName = "config-topic-%s-%s" % (account_number, region)
 			
 			s3_conn = s3.connect_to_region(region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
                     aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
