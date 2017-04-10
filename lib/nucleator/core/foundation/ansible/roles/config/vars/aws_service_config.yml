@@ -29,6 +29,7 @@ aws_environment: # TODO - move to role-specific environments.  This is the "defa
 
 supported_regions:
   - us-east-1
+  - us-east-2
   - us-west-1
   - us-west-2
   - eu-west-1
@@ -206,6 +207,11 @@ map_aws_region_plus_arch_to_public_bastion_ami:
     q64hvm: ami-a4827dc9 # HVM (SSD) EBS-Backed 64-bit
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
+  us-east-2:
+    q64: NOT SUPPORTED
+    q64hvm: ami-7bfcd81e # amzn-ami-hvm-2017.03.0.20170401-x86_64-gp2 HVM (SSD) EBS-Backed 64-bit
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
   us-west-1:
     q64: ami-b87f05d8
     q64hvm: ami-11790371
@@ -224,6 +230,11 @@ map_aws_region_plus_arch_to_public_nat_ami:
   us-east-1:
     q64: ami-224dc94a # amzn-ami-vpc-nat-pv-2014.09.1.x86_64-ebs - ami-224dc94a
     q64hvm: ami-8d8976e0 # Amazon Linux AMI 2016.03.2
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  us-east-2:
+    q64: NOT_SUPPORTED
+    q64hvm: ami-07fdd962 # amzn-ami-vpc-nat-hvm-2017.03.0.20170401-x86_64-ebs
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   us-west-1:
@@ -248,6 +259,11 @@ map_aws_region_plus_arch_to_worker_ami:
     q64hvm: ami-b66ed3de
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
+  us-east-2:
+    q64: NOT_SUPPORTED
+    q64hvm: ami-7bfcd81e # amzn-ami-hvm-2017.03.0.20170401-x86_64-gp2 HVM (SSD) EBS-Backed 64-bit
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
   us-west-1:
     q64: ami-7aba833f # amzn-ami-pv-2014.03.1.x86_64-ebs
     q64hvm: ami-cb14f28f # amzn-ami-hvm-2015.03.0.x86_64-ebs
@@ -266,6 +282,11 @@ map_aws_region_plus_arch_to_ubuntu_ami:
   us-east-1:
     q64:    ami-1acdd90d # ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20161221
     q64hvm: ami-9dcfdb8a # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20161221
+    q64Cluster: NOT_SUPPORTED
+    q64GPU: NOT_SUPPORTED
+  us-east-2:
+    q64:    NOT_SUPPORTED
+    q64hvm: ami-4dd2575b # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170330
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   us-west-1:

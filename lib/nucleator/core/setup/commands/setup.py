@@ -232,7 +232,7 @@ class Setup(Command):
                         secret_key = os.environ["SECRET_KEY"]
                     else:
                         secret_key = INP.ask_string("What is the secret key for account '"+account_name+"'")
-                    aws_regions = ['us-east-1', 'us-west-2', 'eu-west-1']
+                    aws_regions = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 'eu-west-1']
                     if do_validation:
                         conn = ec2.connection.EC2Connection(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
                         try:
