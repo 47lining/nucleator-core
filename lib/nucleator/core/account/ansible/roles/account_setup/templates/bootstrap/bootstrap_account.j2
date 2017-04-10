@@ -126,51 +126,30 @@
 		    "Version": "2012-10-17",
 		    "Statement": [
 			{
-			    "Sid": "AWSCloudTrailAclCheck20131101",
+			    "Sid": "AWSCloudTrailAclCheck20150319",
 			    "Effect": "Allow",
-			    "Principal": {
-				"AWS": [
-				    "arn:aws:iam::903692715234:root",
-				    "arn:aws:iam::859597730677:root",
-				    "arn:aws:iam::814480443879:root",
-				    "arn:aws:iam::216624486486:root",
-				    "arn:aws:iam::086441151436:root",
-				    "arn:aws:iam::388731089494:root",
-				    "arn:aws:iam::284668455005:root",
-				    "arn:aws:iam::113285607260:root",
-				    "arn:aws:iam::035351147821:root"
-				]
-			    },
+			    "Principal": {"Service": "cloudtrail.amazonaws.com"},
 			    "Action": "s3:GetBucketAcl",
 			    "Resource": "arn:aws:s3:::{{nucleator_cloudtrail_bucketname_specification}}"
 			},
 			{
-			    "Sid": "AWSCloudTrailWrite20131101",
+			    "Sid": "AWSCloudTrailWrite20150319",
 			    "Effect": "Allow",
-			    "Principal": {
-				"AWS": [
-				    "arn:aws:iam::903692715234:root",
-				    "arn:aws:iam::859597730677:root",
-				    "arn:aws:iam::814480443879:root",
-				    "arn:aws:iam::216624486486:root",
-				    "arn:aws:iam::086441151436:root",
-				    "arn:aws:iam::388731089494:root",
-				    "arn:aws:iam::284668455005:root",
-				    "arn:aws:iam::113285607260:root",
-				    "arn:aws:iam::035351147821:root"
+			    "Principal": {"Service": "cloudtrail.amazonaws.com"},
+			    "Action": "s3:PutObject",
+			    "Resource": {
+				"Fn::Join" : [
+				    "", [
+					"arn:aws:s3:::{{nucleator_cloudtrail_bucketname_specification}}/AWSLogs/",
+					{ "Ref" : "AWS::AccountId" },
+					"/*"
+				    ]
 				]
 			    },
-			    "Action": "s3:PutObject",
-			    "Resource": "arn:aws:s3:::{{nucleator_cloudtrail_bucketname_specification}}/*",
-			    "Condition": { 
-				"StringEquals": { 
-				    "s3:x-amz-acl": "bucket-owner-full-control" 
-				}
-			    }
+			    "Condition": {"StringEquals": {"s3:x-amz-acl": "bucket-owner-full-control"}}
 			}
 		    ]
-		} 
-
+		}
 	    }
 	},
 	"CloudTrailResource": {
