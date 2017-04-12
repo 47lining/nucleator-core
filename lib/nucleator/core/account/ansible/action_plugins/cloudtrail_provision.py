@@ -46,16 +46,19 @@ class ActionModule(object):
 
 				cloudtrail_name = "Cloudtrail-%s-%s" % (account_number, connect_region)
 
-				connection = cloudtrail.connect_to_region(connect_region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
-                    aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
-                    security_token=env.get("AWS_SECURITY_TOKEN"))
+                                try:
+                                    connection = cloudtrail.connect_to_region(connect_region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
+                                                                              aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
+                                                                              security_token=env.get("AWS_SECURITY_TOKEN"))
+                                except Exception, e:
+                                    raise Exception
 				
 				try:
-					result = connection.update_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
-					result = connection.start_logging(cloudtrail_name)
+                                    result = connection.update_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
+                                    result = connection.start_logging(cloudtrail_name)
 				except Exception, e:
-					result = connection.create_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
-					result = connection.start_logging(cloudtrail_name)
+                                    result = connection.create_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
+                                    result = connection.start_logging(cloudtrail_name)
 
 			return ReturnData(conn=conn,
                 comm_ok=True,
