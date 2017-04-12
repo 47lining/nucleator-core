@@ -30,13 +30,13 @@ class ActionModule(object):
 				env = utils.safe_eval(env)
 
 			if region == "us-east-1":
-                            other_regions = ["us-west-1" "us-west-2", "eu-west-1", "us-east-2"]
+                            other_regions = ["us-west-1", "us-west-2", "eu-west-1", "us-east-2"]
 			elif region == "us-east-2":
                             other_regions = ["us-east-1", "us-west-1", "us-west-2", "eu-west-1"]
 			elif region == "us-west-1":
                             other_regions = ["us-east-1", "us-east-2", "us-west-2", "eu-west-1"]
 			elif region == "us-west-2":
-                            other_regions = ["us-east-1", "us-east-2", "us-west-1" "eu-west-1"]
+                            other_regions = ["us-east-1", "us-east-2", "us-west-1", "eu-west-1"]
 			elif region == "eu-west-1":
                             other_regions = ["us-east-1", "us-east-2", "us-west-1", "us-west-2"]
                         else:
