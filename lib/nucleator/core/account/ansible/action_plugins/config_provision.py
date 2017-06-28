@@ -19,7 +19,7 @@ class ActionModule(ActionBase):
             task_vars = dict()
 
         result = super(ActionModule, self).run(tmp, task_vars)
-        
+
         try:
             args = {}
             args.update(self._task.args)
@@ -35,7 +35,7 @@ class ActionModule(ActionBase):
 
             bucketName = "config-bucket-%s" % account_number
             snsName = "config-topic-%s" % account_number
-            
+
             s3_conn = s3.connect_to_region(region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
                     aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
                     security_token=env.get("AWS_SECURITY_TOKEN"))
@@ -81,7 +81,7 @@ class ActionModule(ActionBase):
                     channel_name = item["name"]
 
             ConfigurationRecorder={
-                'name': recorder_name, 
+                'name': recorder_name,
                 'roleARN': "arn:aws:iam::%s:role/%s" % (account_number, role_name)
             }
 
