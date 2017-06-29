@@ -12,13 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import print_function
-try:
-    from __main__ import display
-except ImportError:
-    from ansible.utils.display import Display
-    display = Display()
-from ansible.plugins.action import ActionBase
 
+from ansible.plugins.action import ActionBase
 from ansible.parsing.splitter import parse_kv
 from ansible.template import template, safe_eval
 from ansible import utils
@@ -147,7 +142,7 @@ class ActionModule(ActionBase):
 
             # add a short delay to allow for eventual consistency
             if role_name == "NucleatorAgent" or role_name == "NucleatorBucketandqDistributorServiceRunner":
-                display("30 second delay to let roles catch up")
+                self._display.display("30 second delay to let roles catch up")
                 time.sleep(30)
                 '''
                 role = None

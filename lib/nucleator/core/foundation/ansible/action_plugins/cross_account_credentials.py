@@ -14,11 +14,7 @@
 
 # See for example ansible.plugins.action.add_host.py
 from __future__ import print_function
-try:
-    from __main__ import display
-except ImportError:
-    from ansible.utils.display import Display
-    display = Display()
+
 from ansible.parsing.splitter import parse_kv
 from ansible.template import template, safe_eval
 from ansible.plugins.action import ActionBase
@@ -67,7 +63,7 @@ class ActionModule(ActionBase):
             data.update(task_vars)
             # sys.stderr.write(str(self._task.environment)+"\n")
             # sys.stderr.flush()
-            # display.display(str(data))
+            # self._display.display(str(data))
 
             # TODO use nucleator facts instead
             source_role_name = data['nucleator_builder_role_name'] # TODO - RHS var here could have names in better alignment with current conventions
@@ -101,7 +97,7 @@ class ActionModule(ActionBase):
                     security_token=security_token
                 )
                 source_role = sts_connection.assume_role(role_arn='arn:aws:iam::{0}:role/{1}'.format(source_account_id, source_role_name), role_session_name='SourceRoleSession')
-                display.vv("Successfully assumed {0} role in account {1}".format(source_role_name, source_account_id))
+                self._display.vv("Successfully assumed {0} role in account {1}".format(source_role_name, source_account_id))
 
             except Exception as e:
                 result['failed']=True
@@ -111,7 +107,7 @@ class ActionModule(ActionBase):
             try:
                 sts_connection = STSConnection(aws_access_key_id=source_role.credentials.access_key, aws_secret_access_key=source_role.credentials.secret_key, security_token=source_role.credentials.session_token)
                 target_role = sts_connection.assume_role(role_arn='arn:aws:iam::{0}:role/{1}'.format(target_account_id, target_role_name), role_session_name='TargetRoleSession')
-                display.vv("Successfully assumed {0} role in account {1}".format(target_role_name, target_account_id))
+                self._display.vv("Successfully assumed {0} role in account {1}".format(target_role_name, target_account_id))
 
             except Exception as e:
                 # deal with failure gracefully

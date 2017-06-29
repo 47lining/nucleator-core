@@ -13,12 +13,6 @@
 # limitations under the License.
 
 import ansible
-try:
-    from __main__ import display
-except ImportError:
-    from ansible.utils.display import Display
-    display = Display()
-
 from ansible.parsing.splitter import parse_kv
 from ansible.template import template, safe_eval
 from ansible.plugins.action import ActionBase
@@ -237,9 +231,9 @@ class ActionModule(ActionBase):
                     else:
                         raise Exception("unknown encoding, failed: %s" % dest_result.result)
 
-            display.vv ("transfering {0}, {1}, {2}, {3}".format(conn, tmp, 'source', resultant))
+            self._display.vv ("transfering {0}, {1}, {2}, {3}".format(conn, tmp, 'source', resultant))
             xfered = self.runner._transfer_str(conn, tmp, 'source', resultant)
-            display.vv ("transfer successful!!")
+            self._display.vv ("transfer successful!!")
 
             # fix file permissions when the copy is done as a different user
 
@@ -253,7 +247,7 @@ class ActionModule(ActionBase):
                 self.runner._remote_chmod(conn, 'a+r', xfered, tmp)
 
             # run the copy module
-            display.vv ("running copy module")
+            self._display.vv ("running copy module")
             new_module_args = dict(
                src=xfered,
                dest=dest,
@@ -267,7 +261,7 @@ class ActionModule(ActionBase):
             return res
 
         else:
-            display.vv ("checksums match, using file module to fix up file parameters")
+            self._display.vv ("checksums match, using file module to fix up file parameters")
 
             # when running the file module based on the template data, we do
             # not want the source filename (the name of the template) to be used,
