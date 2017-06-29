@@ -17,7 +17,6 @@ __metaclass__ = type
 import os
 
 from ansible.plugins.action import ActionBase
-from ansible.utils.boolean import boolean
 
 import boto, os
 from boto import cloudtrail
