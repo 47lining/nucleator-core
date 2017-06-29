@@ -219,7 +219,7 @@ class Account(Command):
 
                 rolename_list = list(set(rolename_list))
                 extra_vars={
-                    "role_names": json.dumps(rolename_list),
+                    "aws_role_names": json.dumps(rolename_list),
                     "role_specification_varsfile": role_specification,
                     "customer_name": kwargs.get("customer", None),
                     "account_name": kwargs.get("account", None),

@@ -21,7 +21,7 @@
     set_fact:
       account_name: "{{account_name}}"
       customer_name: "{{customer_name}}"
-      role_names: "{{role_names}}" # contains list of role names
+      aws_role_names: "{{aws_role_names}}" # contains list of role names
       role_specification_varsfile: "{{role_specification_varsfile}}" # absolute path to role specification file
       cage_name: "bootstrap"
       nucleator_use_target_credentials: True
@@ -40,5 +40,5 @@
         access_policies: "{{item[0].access_policies}}"
       with_nested:
         - "{{role_specification}}"
-        - "{{role_names}}"
+        - "{{aws_role_names}}"
       when: item[0].role_name == item[1]
