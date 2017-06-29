@@ -1,10 +1,23 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+from __future__ import print_function
 import json
 import boto
 import yaml
 import os
 import time
 import traceback, sys
-
 from boto import configservice
 from boto import s3
 from boto import sns
@@ -42,7 +55,7 @@ class ActionModule(ActionBase):
 
             try:
                 bucket = s3_conn.get_bucket(bucketName)
-            except Exception, e:
+            except Exception as e:
                 if(region is "us-east-1"):
                     bucket1 = s3_conn.create_bucket(bucketName)
                     bucket2 = s3_conn.get_bucket(logging_bucket)
@@ -100,10 +113,10 @@ class ActionModule(ActionBase):
             result['msg']="Config Service Started"
             return result
 
-        except Exception, e:
+        except Exception as e:
             # deal with failure gracefully
             exc_type, exc_value, exc_traceback = sys.exc_info()
-            print "*** print_tb:"
+            print ("*** print_tb:")
             traceback.print_tb(exc_traceback, limit=1, file=sys.stderr)
 
             result['failed']=True

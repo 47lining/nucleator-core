@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import print_function
 from nucleator.cli import properties
 from nucleator.cli import utils
 import sys, os, argparse
@@ -30,14 +30,14 @@ class Cli(object):
         self.parser.add_argument("-v", "--verbosity", required=False, action="count", help="Increase output verbosity")
         self.parser.add_argument("--debug-credentials", required=False, action='store_true', help="Show credential output for debugging purposes")
         self.parser.add_argument("--no-debug-credentials", required=False, action='store_false', help="Dont show credential output")
-        
-        self.parser.add_argument("-p", "--preview", required=False, action="store_true", 
+
+        self.parser.add_argument("-p", "--preview", required=False, action="store_true",
                                  help="Display information about what a command will do, without actually executing the command.\n" +
                                       "The --preview flag should come before any subcommands on the command line.")
         self.parser.add_argument("-d", "--debug", required=False, action="store_true",
                                 help="Turn on debugging mode")
         self.subparsers = self.parser.add_subparsers(dest="command")
-        
+
     def core_path(self):
         """path to to core commands installed with Nucleator"""
         return properties.core_path()
@@ -50,11 +50,11 @@ class Cli(object):
         # too early to use self.parse()
         debug = "--debug" in sys.argv or "-d" in sys.argv
         if debug:
-            print ">>>IMPORT COMMANDS PATH: "+path
+            print (">>>IMPORT COMMANDS PATH: "+path)
 
         if not os.path.isdir(path):
             if debug:
-                print ">>>IMPORT PATH NOT A DIR: "+path
+                print (">>>IMPORT PATH NOT A DIR: "+path)
             # skip if path to import doesn't exist
             return
 
@@ -64,20 +64,20 @@ class Cli(object):
 
             self.command_paths.append(os.path.join(path,command_dir))
             if debug:
-                print ">>> IMPORT COMMAND_DIR: "+command_dir
+                print (">>> IMPORT COMMAND_DIR: "+command_dir)
             candidate_location = os.path.join(path, command_dir, "commands")
             if debug:
-                print ">>> IMPORT CANDIDATE LOCATION: "+candidate_location
+                print (">>> IMPORT CANDIDATE LOCATION: "+candidate_location)
             import_candidates = os.listdir(candidate_location) if os.path.isdir(candidate_location) else []
 
             # iterate through filtered import candidates
             for name in [n for n in import_candidates
                          if n.endswith('.py') and n != "__init__.py"]:
                 if debug:
-                    print ">>> IMPORT CANDIDATE NAME: "+name
+                    print (">>> IMPORT CANDIDATE NAME: "+name)
                 name = name.replace('.py', '')
                 if debug:
-                    print ">>> IMPORT "+"{0}.commands.{1}".format(command_dir, name)
+                    print (">>> IMPORT "+"{0}.commands.{1}".format(command_dir, name))
                 module = __import__(
                     "{0}.commands.{1}".format(command_dir, name),
                     fromlist=['']
@@ -90,7 +90,7 @@ class Cli(object):
 
     def parse(self):
         self.opts = vars(self.parser.parse_args())
-        self.opts["verbose"] = self.opts.get("verbosity", 0) > 0
+        self.opts["verbose"] = (self.opts.get("verbosity", 0) or 0) > 0
         self.opts["cli"] = self
         return self.opts
 
@@ -112,8 +112,8 @@ class Cli(object):
         utils.write (
             "{0}{1}".format(
                 json.dumps(
-                    {k:v for (k,v) in self.opts.iteritems() if k != "cli"},
-                    self.opts,
+                    {k:v for (k,v) in self.opts.items() if k != "cli"},
+                    # self.opts,
                     sort_keys=True,
                     indent=4, separators=(',', ': ')
                 ),

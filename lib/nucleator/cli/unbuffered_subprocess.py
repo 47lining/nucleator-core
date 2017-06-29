@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import print_function
 import threading, sys
 import subprocess as sp
 from subprocess import PIPE
@@ -28,8 +28,8 @@ class ThreadWorker(threading.Thread):
         try:
             retval = self.callable(*self.args, **self.kwargs)
             return retval
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
 
 class Worker(object):
 
@@ -63,7 +63,7 @@ class Popen(object):
         self.returncode=None
 
         self.child = sp.Popen(args, **kwargs)
-    
+
         self.stdout_worker = Worker()
         self.stdout_thread = ThreadWorker(self.stdout_worker.work, self.child.stdout)
 

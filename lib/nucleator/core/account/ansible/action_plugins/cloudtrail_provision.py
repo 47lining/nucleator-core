@@ -30,7 +30,7 @@ class ActionModule(ActionBase):
             task_vars = dict()
 
         result = super(ActionModule, self).run(tmp, task_vars)
-        
+
         try:
 
             args = {}
@@ -52,18 +52,18 @@ class ActionModule(ActionBase):
                 else:
                     other_regions = ["us-east-1", "us-west-2"]
 
-            for connect_region in other_regions:    
+            for connect_region in other_regions:
 
                 cloudtrail_name = "Cloudtrail-%s-%s" % (account_number, connect_region)
 
                 connection = cloudtrail.connect_to_region(connect_region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
                     aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
                     security_token=env.get("AWS_SECURITY_TOKEN"))
-                
+
                 try:
                     connection.update_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
                     connection.start_logging(cloudtrail_name)
-                except Exception, e:
+                except Exception as e:
                     connection.create_trail(cloudtrail_name, cloudtrail_bucket, include_global_service_events=False)
                     connection.start_logging(cloudtrail_name)
 
@@ -72,7 +72,7 @@ class ActionModule(ActionBase):
             result['msg']="Cloud Trail Service Started"
             return result
 
-        except Exception, e:
+        except Exception as e:
             # deal with failure gracefully
             result['failed']=True
             result['msg']=type(e).__name__ + ": " + str(e)

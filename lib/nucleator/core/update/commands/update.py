@@ -21,9 +21,9 @@ import os, subprocess, uuid
 import yaml
 
 class Update(Command):
-    
+
     name = "update"
-    
+
     def parser_init(self, subparsers):
         """
         Initialize parsers for this command.
@@ -35,10 +35,10 @@ class Update(Command):
         """
         The update command:
 
-          - Pulls and installs Nucleator Cage and Stackset modules to contrib dir in 
+          - Pulls and installs Nucleator Cage and Stackset modules to contrib dir in
             Nucleator configuration directory, as specified in manifest
 
-          - Recursively pulls dependent modules specified in module dependencies for 
+          - Recursively pulls dependent modules specified in module dependencies for
             each module in manifest
         """
         if kwargs.get("version"):
@@ -134,7 +134,7 @@ class Update(Command):
             update_out, update_err = update_process.communicate()
             update_rc = update_process.returncode
 
-        except Exception, e:
+        except Exception as e:
             utils.write_err("Exception while updating nucleator commands from specified sources:\n{0}".format(e), False)
             raise e
 
@@ -161,10 +161,10 @@ class Update(Command):
             )
             move_out, move_err = move_process.communicate()
             move_rc = move_process.returncode
-        except Exception, e:
+        except Exception as e:
             utils.write_err("Exception while moving updated nucleator commands into place:\n{0}".format(e), False)
             raise e
-                
+
         if update_rc != 0:
             utils.write_err("Received non-zero return code {0} while attempting to update from nucleator sources using command: {1}\n\ncaptured stderr:\n{2}\n\n exiting with return code 1...".format(update_rc, " ".join(update_command), update_err))
         elif move_rc !=0:
@@ -181,7 +181,7 @@ class Update(Command):
         utils.write("\nUpdating ansible roles specified in installed Nucleator Stacksets using ansible-galaxy.\n")
         cli=Command.get_cli(kwargs)
         cli.import_commands(os.path.join(properties.NUCLEATOR_CONFIG_DIR,"contrib"))
-        
+
         path_list = cli.ansible_path_list("roles", isdir=True)
         for roles_path in path_list:
             sources = os.path.join(roles_path, "roles.yml")
@@ -205,7 +205,7 @@ class Update(Command):
                     update_out, update_err = update_process.communicate()
                     update_rc = update_process.returncode
 
-                except Exception, e:
+                except Exception as e:
                     utils.write_err("Exception while updating ansible roles from specified sources:\n{0}".format(e), False)
                     raise e
 

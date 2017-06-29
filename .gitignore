@@ -2,6 +2,7 @@
 ########################
 /build/
 /dist/
+/test/
 /nucleator.egg-info/
 
 # Compiled source #

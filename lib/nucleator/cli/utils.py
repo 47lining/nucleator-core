@@ -31,7 +31,7 @@ def validate_cage(cage_name):
     return None if pattern.match(cage_name) else "cage can contain only lowercase alpha characters, numbers and dashes"
 
 class ValidateCustomerAction(argparse.Action):
-    
+
     def __call__(self,parser,namespace,values,option_string=None):
         error_msg = validate_customer(values)
         if error_msg:
@@ -66,13 +66,16 @@ def write_err(msg, exit=True):
         sys.exit(1)
 
 def write(msg, flush=True):
-    w_stdout(msg)
+    if (type(msg)== str):
+        w_stdout(msg)
+    else:
+        w_stdout(msg.decode())
     if flush:
         f_stdout()
 
 def get_var(key, default=None, clean=False):
     value = os.environ.get(key, default)
-    return (value.strip() if isinstance(value, basestring) and clean else value)
+    return (value.strip() if isinstance(value, str) and clean else value)
 
 def get_clean(key, default=None):
     return get_var(key, default, True)

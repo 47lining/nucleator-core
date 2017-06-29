@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import print_function
 import sys, os
 from glob import glob
 
@@ -23,8 +23,8 @@ from nucleator import __version__
 try:
     from setuptools import setup, find_packages
 except ImportError:
-    print "Nucleator requires setuptools in order to build. " \
-          "Install it using your package manager (usually python-setuptools) or via pip (pip install setuptools)."
+    print("Nucleator requires setuptools in order to build. " \
+          "Install it using your package manager (usually python-setuptools) or via pip (pip install setuptools).")
     sys.exit(1)
 
 coredir = os.path.join('lib','nucleator','core')
@@ -45,12 +45,12 @@ class custom_install(install):
         target = os.path.join(self.install_lib, "nucleator", "core", "foundation", "ansible", "dynamic_hosts", "ec2.py")
         resp, content = httplib2.Http().request(srcurl)
         cmdfile = open(target, "w")
-        cmdfile.write(content)
+        cmdfile.write(content.decode())
         cmdfile.close()
         os.system("chmod ugo+x %s" % target)
 
 
-        
+
 
 setup(name='nucleator',
       cmdclass={'install': custom_install},

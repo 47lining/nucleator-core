@@ -22,9 +22,9 @@ from distutils.version import StrictVersion
 import os, subprocess
 
 class Init(Command):
-    
+
     name = "init"
-    
+
     def parser_init(self, subparsers):
         """
         Initialize parsers for this command.
@@ -34,18 +34,18 @@ class Init(Command):
     def init(self, **kwargs):
         """
         This command initializes your nucleator configuration:
-        
-          - Initializes and populates a .nucleator configuration directory in user's home 
+
+          - Initializes and populates a .nucleator configuration directory in user's home
             directory with sample Customer, Account and Cage configs
 
-          - Places initial manifest of versioned nucleator Cage and Stackset Modules with 
+          - Places initial manifest of versioned nucleator Cage and Stackset Modules with
             repo sources in nucleator configuration directory
 
-          - Populates an initial rolespec directory with Role definitions required for use 
+          - Populates an initial rolespec directory with Role definitions required for use
             of nucleator modules
 
-          - Validates nucleator pre-requisites (ansible, aws) and provides installation 
-            instructions if missing 
+          - Validates nucleator pre-requisites (ansible, aws) and provides installation
+            instructions if missing
         """
 
         self.check_prerequisites()
@@ -163,7 +163,7 @@ class Init(Command):
                 "You can install it via:\n" \
                 "\tpip install httplib2"
             utils.write_err(msg, False)
-        
+
         # winrm
         utils.write("\nChecking winrm installation...\n")
         try:

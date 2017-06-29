@@ -53,7 +53,7 @@ class ActionModule(ActionBase):
                 data = {}
                 data.update(inject)
                 data.update(inject['hostvars'][host])
-    
+
                 # TODO use nucleator facts instead
                 if 'ec2_tag_NucleatorCustomer' in data:
                     customer_name = data['ec2_tag_NucleatorCustomer']
@@ -70,14 +70,14 @@ class ActionModule(ActionBase):
                     customers[customer_name]={}
                 if cage_name not in customers[customer_name]:
                     customers[customer_name][cage_name]=[]
-                
+
                 customers[customer_name][cage_name].append(host)
 
-        except Exception, e:
+        except Exception as e:
             result['failed']=True
             result['msg']=type(e).__name__ + ": " + str(e)
             return result
-        
+
         configs={}
         failed=False
         changed=False
@@ -93,7 +93,7 @@ class ActionModule(ActionBase):
                     comm_ok &= return_data.communicated_ok()
                     configs[cage_name]=return_data.result
 
-                except Exception, e:
+                except Exception as e:
                     result['failed']=True
                     result['msg']=type(e).__name__ + ": " + str(e)
                     return result
@@ -111,19 +111,19 @@ class ActionModule(ActionBase):
             if complex_args:
                 args.update(complex_args)
             args.update(parse_kv(module_args))
-    
+
             if not 'dest' in args:
                 raise ae("'dest' is a required argument.")
             if not 'identity_file' in args:
                 raise ae("'identity_file' is a required argument.")
-    
+
             dest = args.get('dest', None)
             identity_file = args.get('identity_file', None)
             default_user = args.get('user', 'ec2-user')
             bastion_user = args.get('bastion_user', args.get('user', 'ec2-user'))
 
             # Iterate though all hosts in the customer, cage pair
-    
+
             bastion_entries=[]
             entries=[]
             for host in customers[customer_name][cage_name]:
@@ -140,7 +140,7 @@ class ActionModule(ActionBase):
 
                 bastion_suffix = "{0}.{1}".format(cage_name,data['hostvars']['localhost']['customer_domain'])
                 configfile=os.path.join(dest, customer_name, cage_name)
-    
+
                 if short_name == "bastion":
                     bastion_user = user
                     bastion_entries += ssh_config_bastion_entry(
@@ -160,7 +160,7 @@ class ActionModule(ActionBase):
                         configfile,
                         bastion_user,
                         bastion_suffix)
-    
+
                 # host shortcut by "Group-Cage"
                 entries += ssh_config_entry(
                     "".join( (short_name, "-", cage_name) ),
@@ -171,7 +171,7 @@ class ActionModule(ActionBase):
                     configfile,
                     bastion_user,
                     bastion_suffix)
-    
+
                 # host shortcut by private_ip
                 entries += ssh_config_entry(
                     "".join( (short_name, "-", cage_name) ),
@@ -182,14 +182,14 @@ class ActionModule(ActionBase):
                     configfile,
                     bastion_user,
                     bastion_suffix)
-    
+
             config = ssh_config_header()
             config += SEPARATOR
             config += "".join(bastion_entries)
             config += SEPARATOR
             config += "".join(entries)
 
-        except Exception, e:
+        except Exception as e:
             result['failed']=True
             result['msg']=type(e).__name__ + ": " + str(e)
             return result
@@ -236,7 +236,7 @@ class ActionModule(ActionBase):
                         dest_contents = base64.b64decode(dest_contents)
                     else:
                         raise Exception("unknown encoding, failed: %s" % dest_result.result)
- 
+
             display.vv ("transfering {0}, {1}, {2}, {3}".format(conn, tmp, 'source', resultant))
             xfered = self.runner._transfer_str(conn, tmp, 'source', resultant)
             display.vv ("transfer successful!!")

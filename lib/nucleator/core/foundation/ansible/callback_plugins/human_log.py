@@ -4,8 +4,8 @@
 # Code originated here: https://gist.github.com/cliffano/9868180
 # There are, I believe, some tweaks by 47Lining
 #
+from __future__ import print_function
 import time, os
-
 from ansible.plugins.callback import CallbackBase
 
 __metaclass__ = type
@@ -22,16 +22,16 @@ FIELDS = [
     ]
 
 def human_log(res):
- 
+
     if type(res) == type(dict()):
      	for field in FIELDS:
-            if field in res.keys():         
+            if field in res.keys():
                 res_field = res[field]
                 if isinstance(res_field, list):
                     res_field = ' '.join(res_field)
-         
-                print '{0}{1}:{0}{2}'.format(os.linesep, field, res_field.encode('utf-8') if isinstance(res_field, basestring) else res_field)	
-		
+
+                print ('{0}{1}:{0}{2}'.format(os.linesep, field, res_field.encode('utf-8') if isinstance(res_field, basestring) else res_field))
+
 class CallbackModule(CallbackBase):
     CALLBACK_VERSION = 2.0
     CALLBACK_TYPE = 'aggregate'

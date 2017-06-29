@@ -13,12 +13,12 @@
 # limitations under the License.
 
 # See for example ansible.plugins.action.add_host.py
+from __future__ import print_function
 try:
     from __main__ import display
 except ImportError:
     from ansible.utils.display import Display
     display = Display()
-
 from ansible.parsing.splitter import parse_kv
 from ansible.template import template, safe_eval
 from ansible.plugins.action import ActionBase
@@ -68,19 +68,19 @@ class ActionModule(ActionBase):
             # sys.stderr.write(str(self._task.environment)+"\n")
             # sys.stderr.flush()
             # display.display(str(data))
-    
+
             # TODO use nucleator facts instead
             source_role_name = data['nucleator_builder_role_name'] # TODO - RHS var here could have names in better alignment with current conventions
             target_role_name = data['cage_builder_role_name'] # TODO - RHS var here could have names in better alignment with current conventions
 
-            print "Target Role Name: ", target_role_name
-            print "Source Role Name: ", source_role_name
+            print ("Target Role Name: ", target_role_name)
+            print ("Source Role Name: ", source_role_name)
 
             source_account_id = data['source_account_number']
             target_account_id = data['target_account_number']
 
-            print "Target Account Number: ", target_account_id
-            print "Source Account Number: ", source_account_id
+            print ("Target Account Number: ", target_account_id)
+            print ("Source Account Number: ", source_account_id)
 
             try:
                 envdict={}
@@ -103,7 +103,7 @@ class ActionModule(ActionBase):
                 source_role = sts_connection.assume_role(role_arn='arn:aws:iam::{0}:role/{1}'.format(source_account_id, source_role_name), role_session_name='SourceRoleSession')
                 display.vv("Successfully assumed {0} role in account {1}".format(source_role_name, source_account_id))
 
-            except Exception, e:
+            except Exception as e:
                 result['failed']=True
                 result['msg']=type(e).__name__ + ": Failed to obtain temporary credentials for role " + source_role_name + " in target account " + source_account_id + ", message: '" + str(e)
                 return result
@@ -112,21 +112,21 @@ class ActionModule(ActionBase):
                 sts_connection = STSConnection(aws_access_key_id=source_role.credentials.access_key, aws_secret_access_key=source_role.credentials.secret_key, security_token=source_role.credentials.session_token)
                 target_role = sts_connection.assume_role(role_arn='arn:aws:iam::{0}:role/{1}'.format(target_account_id, target_role_name), role_session_name='TargetRoleSession')
                 display.vv("Successfully assumed {0} role in account {1}".format(target_role_name, target_account_id))
-            
-            except Exception, e:
+
+            except Exception as e:
                 # deal with failure gracefully
                 result['failed']=True
                 result['msg']=type(e).__name__ + ": Failed to obtain temporary credentials for role " + target_role_name + " in target account " + target_account_id + ", message: '" + str(e)+ " Security_Token: " + source_role.credentials.session_token
                 return result
 
-        except Exception, e:
+        except Exception as e:
             # deal with failure gracefully
             result['failed']=True
             result['msg']=type(e).__name__ + ": " + str(e)
             return result
 
         # create a result dict and package up results
-        # return results 
+        # return results
         credentials = target_role.credentials
         bash_vars = "AWS_ACCESS_KEY_ID='{0}' AWS_SECRET_ACCESS_KEY='{1}' AWS_SECURITY_TOKEN='{2}'".format(credentials.access_key, credentials.secret_key, credentials.session_token)
         result['failed']=False

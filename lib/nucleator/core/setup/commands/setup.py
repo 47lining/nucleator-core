@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function
 from nucleator.cli import properties
 from nucleator.cli import utils
 from nucleator.cli.command import Command
-import utils.input_utils as INP
-import utils.generate_cert as GC
+from .utils import input_utils as INP
+from .utils import generate_cert as GC
 import re, os, json, boto, sys, stat, yaml
 from boto import ec2
 from jinja2 import Template
@@ -110,7 +111,7 @@ class Setup(Command):
             if cust == 'main':
                 continue
             cages = []
-            # print "Customer: "+cust
+            # print ("Customer: "+cust)
             customer = { 'name': cust, 'cages': [] }
             listing = os.listdir(siteconfig_home)
             for files in listing:
@@ -118,7 +119,7 @@ class Setup(Command):
                 if m and m.group(1) == cust:
                     cages.append(m.group(2))
             for c in cages:
-                # print "\tCage: "+c
+                # print ("\tCage: "+c)
                 customer['cages'].append(c)
             siteconfig['customers'].append(customer)
         return siteconfig
@@ -187,10 +188,10 @@ class Setup(Command):
         while True:
             customer_name = None
             if first_cust:
-                customer_name = INP.ask_string("Please enter a customer name", 'quickstart', 
+                customer_name = INP.ask_string("Please enter a customer name", 'quickstart',
                 help_msg="The name which will be used to group cages and stackets")
             else:
-                customer_name = INP.ask_string("Please enter another customer name or press Enter if you are done", '', 
+                customer_name = INP.ask_string("Please enter another customer name or press Enter if you are done", '',
                 help_msg="The name which will be used to group cages and stackets")
             if customer_name is None or len(customer_name)==0:
                 break
@@ -200,13 +201,13 @@ class Setup(Command):
                     continue
             error_msg = utils.validate_customer(customer_name)
             if error_msg:
-                print error_msg
+                print (error_msg)
                 continue
             first_cust = False
-            domain = INP.ask_string("What is the domain you will be using? ", customer_name+".com", 
+            domain = INP.ask_string("What is the domain you will be using? ", customer_name+".com",
                 help_msg="The top level domain which will provide the address for your applications.")
             customer = { 'name': customer_name, 'domain': domain, 'cages': [], 'accounts': [] }
-            print "OK, first let's do some accounts..."
+            print ("OK, first let's do some accounts...")
             first_account = True
             while True:
                 account_name = None
@@ -220,7 +221,7 @@ class Setup(Command):
                     break
                 error_msg = utils.validate_account(account_name)
                 if error_msg:
-                    print error_msg
+                    print (error_msg)
                     continue
                 first_account = False
                 while True:
@@ -245,7 +246,7 @@ class Setup(Command):
                             print ("OK, that looks good.")
                             break
                         except boto.exception.EC2ResponseError as err:
-                            print "AWS doesn't recognize your access and/or secret key"
+                            print ("AWS doesn't recognize your access and/or secret key")
                     else:
                         break
                 aws_number = INP.ask_number("What is the AWS account number for account '"+account_name+"'? ")
@@ -254,7 +255,7 @@ class Setup(Command):
                 customer['accounts'].append({ 'name': account_name, 'access_key': access_key,
                      'secret_key': secret_key, 'default_region': default_region, 'aws_number': aws_number,
                      'aws_regions': aws_regions})
-            print "Now, the cages to provision and configure..."
+            print ("Now, the cages to provision and configure...")
             accounts = []
             for acct in customer['accounts']:
                 accounts.append(acct['name'])
@@ -273,12 +274,12 @@ class Setup(Command):
                         continue
                 error_msg = utils.validate_cage(cage_name)
                 if error_msg:
-                    print error_msg
+                    print (error_msg)
                     continue
                 first_cage = False
                 account_name = INP.multiple_choice("Which account will own this cage? ", accounts, 1)
                 this_account = self.find_account(account_name, customer['accounts'])
-                default_region_number = self.find_region_default_for(account_name, customer['accounts'], 
+                default_region_number = self.find_region_default_for(account_name, customer['accounts'],
                     this_account['aws_regions'])
                 region = INP.multiple_choice("Which region? ", aws_regions, default_region_number+1)
                 owner = INP.ask_string("Who is the owner of this cage", 'exampleUser')
@@ -302,7 +303,7 @@ class Setup(Command):
                     i = 1
                     for zone in zone_list:
                         if zone.state == 'available':
-                            # print "For "+reg+", adding "+str(zone.name)
+                            # print ("For "+reg+", adding "+str(zone.name))
                             az_list.append("AZ"+str(i)+": "+zone.name)
                             i = i + 1
                     region_map.append({ 'name': reg, 'az_list': az_list})
@@ -310,7 +311,7 @@ class Setup(Command):
 
             new_siteconfig['customers'].append(customer)
 
-        # print json.dumps(new_siteconfig, sort_keys=True, indent=4, separators=(',', ': '))
+        # print (json.dumps(new_siteconfig, sort_keys=True, indent=4, separators=(',', ': ')))
         self.write_files(new_siteconfig, siteconfig_home, templates_home)
 
         return 0
@@ -321,7 +322,7 @@ class Setup(Command):
         """
         siteconfig_home = os.path.join(properties.NUCLEATOR_CONFIG_DIR, 'siteconfig')
         siteconfig = self.load_siteconfig(siteconfig_home)
-        print json.dumps(siteconfig, sort_keys=True, indent=4, separators=(',', ': '))
+        print (json.dumps(siteconfig, sort_keys=True, indent=4, separators=(',', ': ')))
         return 0
 
     def validate_keys(self, home_dir):
@@ -329,12 +330,12 @@ class Setup(Command):
         # For each entry in sources.yml, is there a host in distkeys.yml?
         sources = None
         if not os.path.isfile(os.path.join(home_dir, "sources.yml")):
-            print "There is no definition file 'sources.yml' in "+home_dir
+            print ("There is no definition file 'sources.yml' in "+home_dir)
         else:
             sources = yaml.load(open(os.path.join(home_dir, "sources.yml")))
         distkeys = None
         if not os.path.isfile(os.path.join(home_dir, "distkeys.yml")):
-            print "There is no definition file 'distkeys.yml' in "+home_dir
+            print ("There is no definition file 'distkeys.yml' in "+home_dir)
         else:
             distkeys = yaml.load(open(os.path.join(home_dir, "distkeys.yml")))
         if sources and distkeys:
@@ -347,42 +348,42 @@ class Setup(Command):
                         is_found = True
                         break
                 if not is_found:
-                    print "No entry in distkeys for "+src['name']+" ("+src['src']+"), should be public."
+                    print ("No entry in distkeys for "+src['name']+" ("+src['src']+"), should be public.")
                 else:
-                    print src['name']+" has distkey."
+                    print (src['name']+" has distkey.")
         # For each entry in distkeys.yml, does the key file exist?
         if distkeys:
             for key in distkeys['distribution_keys']:
                 # hostname, ssh_config_host, private_keyfile
                 if not os.path.isfile(os.path.join(home_dir, "distkeys", key['private_keyfile'])):
-                    print "There is no key file '"+key['private_keyfile']+"' in "+home_dir+"/distkeys"
+                    print ("There is no key file '"+key['private_keyfile']+"' in "+home_dir+"/distkeys")
                 else:
-                    print key['hostname']+" keyfile exists..."
+                    print (key['hostname']+" keyfile exists...")
 
     def validate_cages(self, siteconfig_home, customer):
         # Read the customer.yml
         # For each cage, see if there's a customer-cage.yml, but not much to check in it.
-        print "Checking cages for customer "+customer['name']
+        print ("Checking cages for customer "+customer['name'])
         customer_yaml = yaml.load(open(os.path.join(siteconfig_home, customer['name']+".yml"), 'r'))
         for cage in customer['cages']:
             if cage not in customer_yaml['cage_names']:
-                print "There is no definition for cage "+cage+" in the "+customer['name']+".yml file"
+                print ("There is no definition for cage "+cage+" in the "+customer['name']+".yml file")
             if not os.path.isfile(os.path.join(siteconfig_home, customer['name']+"-"+cage+".yml")):
-                print "There is no definition file for customer "+customer['name']+", cage "+cage
+                print ("There is no definition file for customer "+customer['name']+", cage "+cage)
             if 'aws_accounts' not in customer_yaml:
-                print "You need to define accounts in 'aws_accounts' in "+customer['name']+".yml"
+                print ("You need to define accounts in 'aws_accounts' in "+customer['name']+".yml")
             else:
                 if 'region' not in customer_yaml['cage_names'][cage]:
-                    print "You should define the region for cage "+cage
+                    print ("You should define the region for cage "+cage)
                 if 'owner' not in customer_yaml['cage_names'][cage]:
-                    print "You should define the owner for cage "+cage
+                    print ("You should define the owner for cage "+cage)
                 if 'account' not in customer_yaml['cage_names'][cage]:
-                    print "You need to define the account for cage "+cage
+                    print ("You need to define the account for cage "+cage)
                 else:
                     if customer_yaml['cage_names'][cage]['account'] not in customer_yaml['aws_accounts']:
-                        print "The account "+customer_yaml['cage_names'][cage]['account']+" for cage "+cage+" needs to be included in 'aws_accounts'"
+                        print ("The account "+customer_yaml['cage_names'][cage]['account']+" for cage "+cage+" needs to be included in 'aws_accounts'")
                     else:
-                        print "Cage "+cage+" looks good."
+                        print ("Cage "+cage+" looks good.")
 
     def validate(self, **kwargs):
         """
@@ -391,15 +392,15 @@ class Setup(Command):
         siteconfig_home = kwargs.get("siteconfig_dir", None)
         if siteconfig_home:
             if not os.path.isdir(siteconfig_home):
-                print "Directory doesn't exist: "+siteconfig_home
+                print ("Directory doesn't exist: "+siteconfig_home)
                 return 0
         else:
             siteconfig_home = os.path.join(properties.NUCLEATOR_CONFIG_DIR, 'siteconfig')
         siteconfig = self.load_siteconfig(siteconfig_home)
-        print "Validation Step 1: Are the Cages in your yml files all described?"
+        print ("Validation Step 1: Are the Cages in your yml files all described?")
         for customer in siteconfig['customers']:
             self.validate_cages(siteconfig_home, customer)
-        print "Validation Step 2: Check your distkeys.yml for existence of all the keys"
+        print ("Validation Step 2: Check your distkeys.yml for existence of all the keys")
         self.validate_keys(properties.NUCLEATOR_CONFIG_DIR)
         return 0
 

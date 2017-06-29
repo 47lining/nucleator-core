@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import print_function
 from nucleator.cli.cli import Cli
 from nucleator.cli import unbuffered_subprocess as usp
-from properties import *
-from utils import *
+from .properties import *
+from .utils import *
 
 import os, shlex, pipes, uuid, time, subprocess, re
 
@@ -31,7 +31,7 @@ class CliWithAnsibleLauncher(Cli):
     def ansible_path_list(self, subpath, isdir=False):
 
         return [ref.get_command_ansible_path(subpath, isdir)
-                for name,ref in self.commands.iteritems()
+                for name,ref in self.commands.items()
                 if ref.get_command_ansible_path(subpath, isdir) is not None]
 
     def safe_playbook(self, playbook_absolute_path, inventory_manager_rolename=None, is_static=False, **extra_vars):
@@ -40,17 +40,17 @@ class CliWithAnsibleLauncher(Cli):
 
         try:
             results=self.launch_playbook(playbook_absolute_path, inventory_manager_rolename, is_static, **extra_vars)
-        except Exception, e:
+        except Exception as e:
             write_err("Caught exception during execution of playbook {0}: {1}\nExiting...".format(playbook_absolute_path, e))
         return results
-    
-    def launch_playbook(self, 
+
+    def launch_playbook(self,
         playbook_absolute_path,
         inventory_manager_rolename = None,
         is_static=False,
         **EXTRA_VARS):
         """ Launch ansible playbook at specified path """
-        
+
         global aws_environment_with_rolenames
 
         EXTRA_VARS["aws_environment_with_rolenames"] = aws_environment_with_rolenames
@@ -58,11 +58,11 @@ class CliWithAnsibleLauncher(Cli):
         if not inventory_manager_rolename is None:
 
             aws_environment_with_rolenames = json.loads(aws_environment_with_rolenames)
-                
+
             os.environ["AWS_ACCESS_KEY_ID"] = aws_environment_with_rolenames[inventory_manager_rolename]["AWS_ACCESS_KEY_ID"]
             os.environ["AWS_SECRET_ACCESS_KEY"] = aws_environment_with_rolenames[inventory_manager_rolename]["AWS_SECRET_ACCESS_KEY"]
             os.environ["AWS_SECURITY_TOKEN"] = aws_environment_with_rolenames[inventory_manager_rolename]["AWS_SECURITY_TOKEN"]
-        
+
         cage_name=EXTRA_VARS['cage_name'] if 'cage_name' in EXTRA_VARS else "bootstrap"
         customer_name=EXTRA_VARS['customer_name'] if 'customer_name' in EXTRA_VARS else ""
         limit_stackset=EXTRA_VARS.pop("limit_stackset", None)
@@ -100,10 +100,10 @@ class CliWithAnsibleLauncher(Cli):
 
         if limit_group != "":
             EXTRA_OPTS.extend( [ "--limit", limit_group, ] )
-      
+
         if list_hosts and not is_static:
             EXTRA_OPTS.extend( [ "--list-hosts" ] )
-      
+
         if EXTRA_VARS['verbosity'] > 0:
             EXTRA_OPTS.extend(
                 [
@@ -111,7 +111,7 @@ class CliWithAnsibleLauncher(Cli):
                     "-" + ("v" * EXTRA_VARS['verbosity']),
                 ]
             )
-            
+
         ANSIBLE_SSH_ARGS=[
             "-F", os.path.join(NUCLEATOR_CONFIG_DIR, "ssh-config", customer_name, cage_name),
             "-o", "UserKnownHostsFile=/dev/null",
@@ -123,12 +123,12 @@ class CliWithAnsibleLauncher(Cli):
             "-o", "ServerAliveInterval=15",
             "-o", "ServerAliveCountMax=20",
         ]
-    
+
         # obtain temporary credentials in the target account using the source account
         # (sets and exports AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SECURITY_TOKEN)
-    
+
         os.environ["PYTHONUNBUFFERED"]="1"
-    
+
         ANSIBLE_ENVIRONMENT={
             "PYTHONUNBUFFERED": "1",
             "ANSIBLE_COW_SELECTION": "bethany-sheep",
@@ -152,14 +152,14 @@ class CliWithAnsibleLauncher(Cli):
             "AWS_SECURITY_TOKEN": get_clean("AWS_SECURITY_TOKEN")
         }
 
-        #print "TESTING: ", ANSIBLE_ENVIRONMENT
-        #print "TEST: ", os.environ.get("PYTHONUNBUFFERED")
+        #print("TESTING: ", ANSIBLE_ENVIRONMENT)
+        #print("TEST: ", os.environ.get("PYTHONUNBUFFERED"))
 
         # filter empty values from environment
-        ANSIBLE_ENVIRONMENT=dict((k,v) for (k,v) in ANSIBLE_ENVIRONMENT.iteritems() if v is not None)
-        
+        ANSIBLE_ENVIRONMENT=dict((k,v) for (k,v) in ANSIBLE_ENVIRONMENT.items() if v is not None)
+
         ANSIBLE_MODS=[]
-    
+
         ANSIBLE_COMMAND = ["ansible-playbook"]
         ANSIBLE_COMMAND.extend(REQUIRED_OPTS)
         ANSIBLE_COMMAND.extend(EXTRA_OPTS)
@@ -169,28 +169,28 @@ class CliWithAnsibleLauncher(Cli):
 
         SANITIZED_COMMAND.extend(["--extra-vars", '{0}'.format(
             " ".join("%s=%s" % (key,pipes.quote(str(val)))
-                     for (key,val) in self.sanitize_dict(EXTRA_VARS, debug_credentials).iteritems()))])
+                     for (key,val) in self.sanitize_dict(EXTRA_VARS, debug_credentials).items()))])
         SANITIZED_COMMAND.extend(ANSIBLE_MODS)
-    
+
         ANSIBLE_COMMAND.extend(["--extra-vars", '{0}'.format(
             " ".join("%s=%s" % (key,pipes.quote(str(val)))
-                     for (key,val) in EXTRA_VARS.iteritems()))])
+                     for (key,val) in EXTRA_VARS.items()))])
         ANSIBLE_COMMAND.extend(ANSIBLE_MODS)
 
         # say what we're going to do
         sanitized_env = self.sanitize_dict(ANSIBLE_ENVIRONMENT, debug_credentials)
-        ENV_STRING=" ".join("%s=%s" % (key,pipes.quote(str(val))) for (key,val) in sanitized_env.iteritems())
+        ENV_STRING=" ".join("%s=%s" % (key,pipes.quote(str(val))) for (key,val) in sanitized_env.items())
         CMD_STRING=" ".join(pipes.quote(s) for s in ANSIBLE_COMMAND)
 
         SANITIZED_STRING = " ".join(pipes.quote(s) for s in SANITIZED_COMMAND)
         write("{0} {1}\n".format(ENV_STRING, SANITIZED_STRING))
-    
-    
+
+
         TEE_FILE_UUID=uuid.uuid4()
         TEE_FILE=os.path.join(os.path.sep, "tmp", "-".join([str(TEE_FILE_UUID), "output.txt"]))
-    
+
         START=time.time()
-        
+
         # then do it
         playbook = usp.Popen(
             ANSIBLE_COMMAND,
@@ -210,19 +210,19 @@ class CliWithAnsibleLauncher(Cli):
         )
         fatal_out, fatal_err = fatal.communicate(playbook_out)
         FOUND_FATAL=True if fatal.returncode==0 else False
-    
+
         END=time.time()
         ELAPSED=END-START
-    
+
         write("\nScript Execution Time: {0:.2f} Seconds\n".format(ELAPSED))
-    
+
         if rc !=0:
             write_err("Non-zero return code from playbook.\n\ncaptured stderr:\n{0}\n\n exiting with return code 1...".format(playbook_err))
         elif FOUND_FATAL:
             write_err("Found 'FATAL' or 'ERROR' in output, exiting with return code 1...")
         else:
             write("SUCCESS - successfully ran playbook {0}\n\n".format(os.path.basename(playbook_absolute_path)))
-    
+
         result=dict(stdout=playbook_out, stderr=playbook_err, rc=rc, fatal=FOUND_FATAL)
         return result
 
@@ -231,7 +231,7 @@ class CliWithAnsibleLauncher(Cli):
 
         for key, value in output_dict.items():
             if key == "aws_environment_with_rolenames":
-                if type(value) in (str, unicode):
+                if type(value) is str:
                     value = json.loads(value)
             if key.startswith("AWS_") and debug_credentials is False:
                 value = "(hidden)"
@@ -260,58 +260,58 @@ class CliWithAnsibleLauncher(Cli):
         cli=self
 
         role_list = []
-        
+
         for command in commands:
-            
+
             #Runs through the list of all role specification files if the command matches the commandname specified
             for command_name, command_ref in [
-                    (n, r) for (n, r) in cli.commands.iteritems()
+                    (n, r) for (n, r) in cli.commands.items()
                     if r.get_command_ansible_path("role_specification.yml") and (n == command)
             ]:
-                
+
                 file=command_ref.get_command_ansible_path("role_specification.yml")
 
                 stream = open(file, 'r')
                 roles = yaml.load(stream)
-            
+
                 #Runs for each role in the role specifiation file
                 for roles in roles['role_specification']:
 
                     rolename = roles['role_name']
-                    
+
                     #Makes sure the role has a trust policy
                     if roles['trust_policy'] is None:
-                        print "No trust policy for role: ", rolename
+                        print("No trust policy for role: ", rolename)
                         continue
                     trust_policy_statement = roles['trust_policy']['Statement']
-                    
+
                     #Makes sure the role has an AWS trust policy
                     for statement in trust_policy_statement:
                         try:
                             trust_policy_principal = statement['Principal']
-                            
+
                             trust_policy_aws =  trust_policy_principal['AWS']
-                            
+
                             role_list.append(rolename)
 
-                        except Exception, e:
-                            print "No AWS policy in statement for role: ", rolename
+                        except Exception as e:
+                            print("No AWS policy in statement for role: ", rolename)
 
         #Sends the target and source role name to the playbook for every aws trust policy
         for item in role_list:
 
-            print "Getting credentials for role: ", item
-             
+            print ("Getting credentials for role: ", item)
+
             extra_vars["rolename"]=item
 
             aws_environment_with_rolenames[item] = {}
-             
+
             playbook=self.safe_playbook(
                 self.get_nucleator_command("foundation").get_command_playbook("nucleator_credentials.yml"),
                 is_static=True,
                 **extra_vars
             )
-            
+
             #filter=subprocess.Popen(
             #    ["grep", "-A", "1", "^NUCLEATOR_TEMPORARY_CREDENTIALS$"],
             #    stdin=subprocess.PIPE,
@@ -320,20 +320,20 @@ class CliWithAnsibleLauncher(Cli):
             #)
             #filter_out, filter_err = filter.communicate(playbook['stdout'])
             #found=True if filter.returncode==0 else False
-        
+
             #if not found:
             #    write_err("Unable to find temporary credentials, Exiting...")
-        
+
             # HMMMmmmmm.  We only get stdout from the playbook, and need to rip out env variables to set from that.
-            # What's the best way?  Seems like reverting to shell behavior isn't it.  Shouldn't we be 
+            # What's the best way?  Seems like reverting to shell behavior isn't it.  Shouldn't we be
             # parsing, splitting, then using os.environ[]
-        
+
             #assignments=shlex.split(filter_out.split(os.linesep)[1])
 
             with open("/tmp/creds.conf", "r") as content_file:
                 content = content_file.read()
             assignments = shlex.split(content)
-            
+
             p = re.compile('([^=]+)=(.*)')
             for assignment in assignments:
                 sides=p.match(assignment)
@@ -345,7 +345,7 @@ class CliWithAnsibleLauncher(Cli):
                     aws_environment_with_rolenames[item][key]=value
                     #os.environ[key]=value
                 write_info('Temporary Credentials: {0} = {1}'.format(key, value))
-        
+
         aws_environment_with_rolenames = json.dumps(aws_environment_with_rolenames)
 
         os.remove("/tmp/creds.conf")

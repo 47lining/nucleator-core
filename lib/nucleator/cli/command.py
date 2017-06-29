@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import print_function
 import os
 import inspect
 import webbrowser
@@ -20,7 +20,7 @@ class Command(object):
     """
     An abstract base class that demonstrates the interface a command must implement.
     """
-    
+
     # All commands must have a name attribute
     name = "command name"
 
@@ -29,11 +29,11 @@ class Command(object):
         Initialize the command by adding appropriate sub-parsers to the root command sub-parsers.
         """
         pass
-    
+
     def execute(self, **kwargs):
         """
-        Execute the command using the data dictionary parsed from the command line. Because 
-        command / subcommand is a common pattern, this base implementation first looks for the 
+        Execute the command using the data dictionary parsed from the command line. Because
+        command / subcommand is a common pattern, this base implementation first looks for the
         presence of 'subcommand' in the input, and if found will automatically dispatch to
         a method on the instance matching the name of the subcommand.  If no subcommand is
         present in the input, this base implementation looks for the presence of a 'command'
@@ -57,18 +57,18 @@ class Command(object):
             # running the command. By convention, we use the callable's docstring as the string to
             # display on the command line output.
             doc = getattr(method, "__doc__", "There is no preview information available for this command.")
-            print doc
-            
-            # If the command supports cost estimation we print out the URL to the cost estimate in 
+            print (doc)
+
+            # If the command supports cost estimation we print out the URL to the cost estimate in
             # the AWS cost estimation tool. By convention we look for a <directive>_cost_est method
             # on the command and call it if it exists.
             est_method = getattr(self, "%s_cost_est" % directive, None)
             if est_method is not None:
                 url = est_method()
-                print
-                print "An AWS cost estimate for the resources created by this command can be accessed at:"
-                print url
-                print
+                print("\n")
+                print("An AWS cost estimate for the resources created by this command can be accessed at:")
+                print (url)
+                print("\n")
                 #webbrowser.open(url.strip())
             return
 

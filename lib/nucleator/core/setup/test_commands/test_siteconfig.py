@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function
 import os, sys
 sys.path.insert(0,'..')
 import commands.setup as SC
@@ -25,29 +26,29 @@ GC.generate_cert("47lining-build", "build", "47lining.com", "../templates", ".",
 
 # has = SC.command.setup_hascustomer(setup, '47lining')
 # if not has:
-# 	print "Siteconfig missing 47lining"
+# 	print ("Siteconfig missing 47lining")
 # has = SC.command.setup_customer_hascage(setup, '47lining', 'build')
 # if not has:
-# 	print "Siteconfig missing 47lining.build"
+# 	print ("Siteconfig missing 47lining.build")
 # has = SC.command.setup_customer_hascage(setup, '47lining', 'BOGUS')
 # if has:
-# 	print "Siteconfig found 47lining.BOGUS"
+# 	print ("Siteconfig found 47lining.BOGUS")
 # has = SC.command.setup_hascustomer(setup, 'BOGUS')
 # if has:
-# 	print "Siteconfig found bogus customer"
+# 	print ("Siteconfig found bogus customer")
 
 # val = utils.validate_customer("customer_name")
 # if val:
-# 	print val
+# 	print (val)
 
 # val = utils.validate_customer("47lining")
 # if val:
-# 	print val
+# 	print (val)
 
 # val = utils.validate_account("47lining")
 # if val:
-# 	print val
+# 	print (val)
 
 # val = utils.validate_cage("47lining")
 # if val:
-# 	print val
+# 	print (val)

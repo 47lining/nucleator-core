@@ -34,11 +34,11 @@
 
     - name: Create IAM Roles for each specified role name
       environment: "{{aws_environment}}"
-      iam_role: 
+      iam_role:
         role_name: "{{item[0].role_name}}"
         trust_policy: "{{item[0].trust_policy}}"
         access_policies: "{{item[0].access_policies}}"
-      with_nested: 
+      with_nested:
         - "{{role_specification}}"
         - "{{role_names}}"
-      when: "'{{item[0].role_name}}' == '{{item[1]}}'"
+      when: item[0].role_name == item[1]

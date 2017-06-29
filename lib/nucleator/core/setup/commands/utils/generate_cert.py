@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function
 import os, shlex
 from jinja2 import Template
 from subprocess import Popen, PIPE
@@ -36,24 +37,24 @@ def generate_cert(file_name, cage_name, customer_domain, templates_home, sitecon
     with open (siteconfig_home+'/openssl.cfg', "w") as myfile:
         myfile.write(output)
 
-    print "Generating key and x509 cert"
+    print ("Generating key and x509 cert")
     # openssl x509 -req -days 365 -in $cert_name.csr -signkey $keypair_name -out $cert_name.crt
     cmd = "openssl req -x509 -newkey rsa:2048 -keyout "+file_name+".pem -out "+file_name+".509 -days 365 -config openssl.cfg"
     Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE, stdin=PIPE).wait()
 
     if not os.path.isfile(file_name+".509"):
-        print "Something went wrong in the openssl request x509 step..."
-        print "Try running this command: '"+cmd+"'"
+        print ("Something went wrong in the openssl request x509 step...")
+        print ("Try running this command: '"+cmd+"'")
         return
 
-    print "Converting to pkcs12"
+    print ("Converting to pkcs12")
     # openssl pkcs12 -export -in $cert_name.crt -inkey $keypair_name -out $cert_name.p12 -name $cert_name-cert -CAfile ca.crt -caname root -password pass:$keystore_password
     cmd = "openssl pkcs12 -export -in "+file_name+".509 -inkey "+file_name+".pem -out "+file_name+".crt -name "+file_name+"-cert -CAfile ca.crt -caname root -password pass:"+pkcs12_bundle_password+" -passin pass:"+pkcs12_bundle_password
     Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE, stdin=PIPE).wait()
 
     if not os.path.isfile(file_name+".crt"):
-        print "Something went wrong in the openssl pkcs12 export step..."
-        print "Try running this command: '"+cmd+"'"
+        print ("Something went wrong in the openssl pkcs12 export step...")
+        print ("Try running this command: '"+cmd+"'")
     else:
         # clean up temp files
         if not debug:

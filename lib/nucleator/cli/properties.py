@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-from utils import get_clean
+from .utils import get_clean
 
 def core_path():
     return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "core"))
