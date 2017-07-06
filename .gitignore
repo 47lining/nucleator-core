@@ -1,8 +1,9 @@
 # setuptools artifacts #
 ########################
 /build/
+/.cache/
 /dist/
-/test/
+/test/resources/
 /nucleator.egg-info/
 
 # Compiled source #
