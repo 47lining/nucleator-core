@@ -16,6 +16,12 @@ class MockConnectionObject(object):
 
 def test_build_customers():
     # bsc = ActionModule(task, connection, play_context, loader, templar, shared_loader_obj)
+    # Task arguments
+    # dest: "{{nucleator_ssh_config_dir}}"
+    # identity_file: "{{ nucleator_configuration_dir}}/{{ keypair_name }}.pem"
+    # user: "ec2-user"
+    # bastion_user: "ec2-user"
+
     bsc = ActionModule(None, None, None, None, None, None)
     task_vars = {
         "ansible_play_hosts_all": [u'bastion.build.test4.47lining.com', u'nat.build.test4.47lining.com'],
