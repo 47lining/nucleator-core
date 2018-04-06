@@ -47,4 +47,5 @@
     mode=0755
   with_fileglob:
     - "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/templates/*"
+    - "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/templates/.*"
 
