@@ -49,3 +49,8 @@
     - "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/templates/*"
     - "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/templates/.*"
 
+- name: mirror files dir to instantiation dir so contents are synced to s3
+  copy:
+    src: "{{nucleator_configuration_dir}}/contrib/{{target_stackset}}/ansible/roles/{{templates_role_name}}/templates/files"
+    dest: "{{ cloudformation_template_instantiation_dir | expanduser }}/{{ customer_name }}/{{ cage_name }}/stackset/{{ stackset_name }}"
+

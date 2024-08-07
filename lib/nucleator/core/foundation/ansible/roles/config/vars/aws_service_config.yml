@@ -255,26 +255,28 @@ map_aws_region_plus_arch_to_public_nat_ami:
 
 map_aws_region_plus_arch_to_worker_ami:
   us-east-1:
-    q64: ami-246ed34c # amzn-ami-pv-2014.09.1.x86_64-ebs
-    q64hvm: ami-b66ed3de
+    q64: NOT_SUPPORTED # Deprecated
+    q64hvm: ami-03972092c42e8c0ca # amazon/amzn2-ami-kernel-5.10-hvm-2.0.20240719.0-x86_64-gp2
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   us-east-2:
-    q64: NOT_SUPPORTED
-    q64hvm: ami-7bfcd81e # amzn-ami-hvm-2017.03.0.20170401-x86_64-gp2 HVM (SSD) EBS-Backed 64-bit
+    q64: NOT SUPPORTED
+    q64hvm: ami-0a31f06d64a91614b # amazon/amzn2-ami-kernel-5.10-hvm-2.0.20240719.0-x86_64-gp2
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   us-west-1:
-    q64: ami-7aba833f # amzn-ami-pv-2014.03.1.x86_64-ebs
-    q64hvm: ami-cb14f28f # amzn-ami-hvm-2015.03.0.x86_64-ebs
+    q64: NOT_SUPPORTED # Deprecated
+    q64hvm: ami-11790371
+    q64hvm: ami-08e2ed24aa233a8cb # amazon/amzn2-ami-kernel-5.10-hvm-2.0.20240719.0-x86_64-gp2
   us-west-2:
-    q64: ami-55a7ea65 # amzn-ami-pv-2014.09.1.x86_64-ebs
-    q64hvm: ami-b5a7ea85
+    q64: NOT_SUPPORTED # Deprecated
+    q64hvm: ami-0648742c7600c103f # amazon/amzn2-ami-kernel-5.10-hvm-2.0.20240719.0-x86_64-gp2
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
   eu-west-1:
-    q64: ami-9c7ad8eb
-    q64hvm: ami-6e7bd919
+    q64: NOT_SUPPORTED # Deprecated
+    q64hvm: ami-c39604b0
+    q64hvm: ami-068d1303a1458fb15 # amazon/amzn2-ami-kernel-5.10-hvm-2.0.20240719.0-x86_64-gp2
     q64Cluster: NOT_SUPPORTED
     q64GPU: NOT_SUPPORTED
 
